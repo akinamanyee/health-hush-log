@@ -1,6 +1,12 @@
 # PRD — 健康紀錄簿 (Health Logbook)
 
-**Version 1** · restored 2026-09-16 as the single source of truth for scope.
+**Version 1.1** · 2026-09-16 23:08 HKT · the single source of truth for scope.
+
+Version 1.1 records what the build delivered beyond Version 1's wording: the photo-reading
+path also covers the blood-pressure monitor screen, not only the Tanita display; the CSV
+export carries a grade column alongside the readings; and the health summary receives grade
+labels only. How this is built: [ARCHITECTURE.md](ARCHITECTURE.md) · why:
+[DECISIONS.md](DECISIONS.md) · history: [CHANGELOG.md](CHANGELOG.md).
 
 ## NORTHSTAR
 Make self-tracked health numbers as trustworthy and readable as a clinic report, without a single byte of medical data leaving the user's device.

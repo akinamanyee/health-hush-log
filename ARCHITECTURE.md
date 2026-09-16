@@ -1,0 +1,105 @@
+# Architecture — 健康紀錄簿
+
+Describes how the code is actually built. The code is the SSOT for behaviour; this file
+describes it. Last reconciled against the code: **2026-09-16 23:08 HKT**.
+
+## Shape in one paragraph
+
+A single-page, sign-in-free TanStack Start app. Every health reading is created, graded,
+stored, exported and erased **inside the browser**. There is no database and no user table.
+Two stateless server functions exist for one reason only: to hold the AI credential
+server-side. Grading is pure local computation over bundled reference tables.
+
+## Stack
+
+- TanStack Start v1 (React 19, Vite 7), file-based routes in `src/routes`
+- Tailwind CSS v4 via `src/styles.css` (design tokens in `@theme`, `glass-card` utility)
+- `sonner` for notices, `recharts` for trend lines, `lucide-react` icons
+- AI SDK (`ai` + `@ai-sdk/openai`) pointed at the managed AI gateway
+- Storage: `localStorage` only
+
+## Modules
+
+| Concern | Home |
+| --- | --- |
+| Module definitions (id, title, fields, units, min/max, route, storage key) | `src/lib/health/modules.ts` |
+| Reference tables + leaflet text | `src/lib/health/charts.ts` |
+| The one grading entry point | `src/lib/health/grade.ts` |
+| Storage envelope, hydration gate, AI usage counter, clear-all | `src/lib/health/store.ts` |
+| Re-check date, `.ics`, Google Calendar link | `src/lib/health/calendar.ts` |
+| CSV export | `src/lib/health/csv.ts` |
+| Server-side AI (image read, summary) | `src/lib/health/ai.functions.ts` |
+| Gateway client + per-IP backstop | `src/lib/ai-gateway.server.ts` |
+| Shared record-and-review form | `src/components/health/RecordModule.tsx` |
+| Photo drop (client-side downscale), voice, grade badge | `src/components/health/{ImageDrop,VoiceButton,GradeBadge}.tsx` |
+| Dashboard, four module pages, summary page | `src/routes/*.tsx` |
+
+The four module routes (`/tanita`, `/blood-pressure`, `/grip`, `/sit-and-reach`) are thin
+wrappers that pass a `ModuleDef` into `RecordModule`; all record behaviour lives once.
+
+## Data flow
+
+```text
+photo ──▶ ImageDrop (downscale ≤1600px, JPEG)
+             │
+             ▼  data URL only
+       extractFromImage  (server fn, credential server-side, nothing stored)
+             │  strict zod values, nulls allowed
+voice ──▶ ─┐ ▼
+type  ──▶ ─┴ review form (RecordModule) ── user confirms ──▶ localStorage
+                     │
+                     ├─▶ gradeEntry()  ── deterministic tables ──▶ badges
+                     ├─▶ recheckDate() ──▶ .ics / Google Calendar link
+                     └─▶ exportAllToCsv() ──▶ 健康紀錄.csv (UTF-8 BOM)
+
+grade labels only ──▶ generateHealthSummary (server fn, leaflet-grounded) ──▶ text
+```
+
+## Single sources of truth in code
+
+- **Stored entries**: `readEntries()` / `useLocalData()` in `store.ts` are the only readers.
+  Nothing else parses `localStorage`; both honour the `{ v: 1, data }` envelope.
+- **Grades**: `gradeEntry(mod, values, profile)` in `grade.ts` is the only grader. Forms,
+  CSV and the summary all call it, so they cannot disagree.
+- **Field metadata**: `modules.ts` only — labels, units and limits are never retyped in a route.
+- **Reference numbers**: `charts.ts` only, and the same leaflet text is what grounds the AI.
+
+## Storage keys
+
+`hlb:profile`, `hlb:tanita`, `hlb:bp`, `hlb:grip`, `hlb:sitreach`, `hlb:ai-usage`.
+Every value is `{ v: 1, data }`; the version gate lets future shapes migrate instead of
+being misread. Reads happen after hydration to avoid SSR mismatch.
+
+## Access and privacy model
+
+There are no accounts, roles or server-side records, so there is nothing to authorise.
+The protection that matters is **what leaves the device**, enforced at the two call sites:
+
+- `extractFromImage` receives a downscaled image and a module id — nothing else.
+- `generateHealthSummary` receives grade **labels** only (`{ module, grades[] }`, capped).
+  No readings, dates, age or gender.
+- Both server functions are stateless: no logging of payloads, no persistence, `store: false`.
+- The AI credential is read inside the handler from the server environment; the browser
+  never receives it.
+
+## Grading rules encoded in `charts.ts` / `grade.ts`
+
+- Blood pressure: systolic and diastolic scored independently, **worse of the two** wins;
+  `140+/<90` is additionally flagged 單純收縮期高血壓 (unless crisis).
+- Grip and sit-and-reach: age-band × gender matrices; outside the bands the app returns
+  「無適用參考標準」 and still saves the raw number. No extrapolation, ever.
+- Body composition: Asian BMI cut-offs, gender-specific body-fat bands, visceral-fat bands.
+- Re-check interval by tier: normal 2 years, elevated 1 year, hypertensive 6 months,
+  crisis → 「即時就醫」 with no calendar entry.
+
+## AI usage limits
+
+Client counter (`hlb:ai-usage`, 20/day) plus a coarse in-memory per-IP backstop (200/day)
+in `ai-gateway.server.ts`. Both increment **after** a successful call, so failures never
+burn a user's quota. Best-effort by design: the app has no accounts to bind a quota to.
+
+## Known limits
+
+- Voice input only renders where the browser exposes Chinese speech recognition.
+- The per-IP backstop is in-memory and resets when the server instance recycles.
+- Clearing browser storage deletes the history; CSV export is the user's backup.
