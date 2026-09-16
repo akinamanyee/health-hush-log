@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowLeft, Trash2 } from "lucide-react";
+import { ArrowLeft, ShieldCheck, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import {
   Line,
@@ -24,34 +24,12 @@ import {
   type Profile,
 } from "@/lib/health/store";
 import { extractFromImage } from "@/lib/health/ai.functions";
-import { gradeAgainstNorms, gradeBloodPressure, isIsolatedSystolic, GRIP_NORMS, SIT_REACH_NORMS } from "@/lib/health/charts";
+import { gradeBloodPressure } from "@/lib/health/charts";
+import { gradeEntry } from "@/lib/health/grade";
 import { recheckDate, downloadIcs, googleCalendarUrl } from "@/lib/health/calendar";
 import { GradeBadge } from "./GradeBadge";
 import { ImageDrop } from "./ImageDrop";
 import { VoiceButton } from "./VoiceButton";
-
-function gradeLabel(mod: ModuleDef, values: Record<string, number>, profile: Profile) {
-  const sys = values["systolic"];
-  const dia = values["diastolic"];
-  if (mod.id === "bp" && sys != null && dia != null) {
-    const tier = gradeBloodPressure(sys, dia);
-    const iso = isIsolatedSystolic(sys, dia);
-    const tone = tier.id === "normal" ? "ok" : tier.id === "elevated" ? "warn" : tier.id === "crisis" ? "urgent" : "bad";
-    return { label: iso && tier.id !== "crisis" ? `${tier.label}・單純收縮期高血壓` : tier.label, description: tier.description, tone: tone as "ok" | "warn" | "bad" | "urgent", tier };
-  }
-  const first = mod.fields[0];
-  const v = first ? values[first.key] : undefined;
-  if ((mod.id === "grip" || mod.id === "sitreach") && first && v != null) {
-    if (profile.age == null || profile.gender == null) {
-      return { label: "請先於首頁填寫年齡及性別以評級", description: "", tone: "neutral" as const };
-    }
-    const table = mod.id === "grip" ? GRIP_NORMS : SIT_REACH_NORMS;
-    const g = gradeAgainstNorms(table, v, profile.age, profile.gender);
-    const tone = g === "良好" ? "ok" : g === "正常" ? "ok" : g === "偏弱" ? "warn" : "neutral";
-    return { label: g, description: "", tone: tone as "ok" | "warn" | "neutral" };
-  }
-  return null;
-}
 
 export function RecordModule({ mod }: { mod: ModuleDef }) {
   const { data: entries, save, hydrated } = useLocalData<HealthEntry[]>(mod.storageKey, []);
@@ -73,7 +51,7 @@ export function RecordModule({ mod }: { mod: ModuleDef }) {
     return out;
   }, [values, mod]);
 
-  const grade = gradeLabel(mod, numeric, profile);
+  const grades = gradeEntry(mod, numeric, profile);
 
   const onImage = async (dataUrl: string) => {
     if (getAiUsageToday() >= AI_DAILY_LIMIT) {
@@ -82,13 +60,14 @@ export function RecordModule({ mod }: { mod: ModuleDef }) {
     }
     setBusy(true);
     try {
-      bumpAiUsage();
       const res = await extract({ data: { image: dataUrl, module: mod.id as "tanita" | "bp" } });
       const filled: Record<string, string> = { ...values };
       for (const [k, v] of Object.entries(res.values)) {
         if (v != null) filled[k] = String(v);
       }
       setValues(filled);
+      // Only a successful read counts against the daily cap.
+      bumpAiUsage();
       toast.success("已讀取圖片，請核對數值後儲存。");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "讀取失敗，請手動輸入。");
@@ -186,11 +165,12 @@ export function RecordModule({ mod }: { mod: ModuleDef }) {
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
           {mod.fields.map((f) => (
             <div key={f.key}>
-              <label className="text-base font-medium">
+              <label htmlFor={`field-${f.key}`} className="text-base font-medium">
                 {f.label}
                 {f.unit && <span className="ml-1 text-muted-foreground">（{f.unit}）</span>}
               </label>
               <input
+                id={`field-${f.key}`}
                 type="number"
                 inputMode="decimal"
                 step={f.step ?? "any"}
@@ -206,10 +186,15 @@ export function RecordModule({ mod }: { mod: ModuleDef }) {
           ))}
         </div>
 
-        {grade && (
-          <div className="mt-5 flex flex-wrap items-center gap-3">
-            <GradeBadge label={grade.label} tone={grade.tone} />
-            {grade.description && <span className="text-base text-muted-foreground">{grade.description}</span>}
+        {grades.length > 0 && (
+          <div className="mt-5 space-y-2">
+            {grades.map((g) => (
+              <div key={g.metric ?? g.label} className="flex flex-wrap items-center gap-3">
+                {g.metric && <span className="text-base font-medium">{g.metric}</span>}
+                <GradeBadge label={g.label} tone={g.tone} />
+                {g.description && <span className="text-base text-muted-foreground">{g.description}</span>}
+              </div>
+            ))}
           </div>
         )}
 
@@ -314,6 +299,14 @@ export function RecordModule({ mod }: { mod: ModuleDef }) {
           </>
         )}
       </section>
+
+      <footer className="mt-8 space-y-2 text-center text-base text-muted-foreground">
+        <p className="inline-flex items-center gap-2">
+          <ShieldCheck className="size-5" />
+          資料只存在此裝置的瀏覽器內，不會上傳到任何伺服器。
+        </p>
+        <p>本應用程式內容僅供參考，不能取代醫生診斷。</p>
+      </footer>
     </div>
   );
 }

@@ -131,7 +131,7 @@ function Index() {
           </Link>
           <button
             type="button"
-            onClick={exportAllToCsv}
+            onClick={() => exportAllToCsv(profile)}
             className="inline-flex min-h-14 items-center gap-2 rounded-xl border border-border bg-card px-6 text-lg font-semibold hover:bg-secondary"
           >
             <Download className="size-5" /> 匯出 CSV

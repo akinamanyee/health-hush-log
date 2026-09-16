@@ -93,10 +93,35 @@ export function gradeAgainstNorms(table: NormTable, value: number, age: number, 
   return "正常";
 }
 
+// Body-composition bands. Deterministic, same status as the tables above.
+export type BandGrade = "過輕" | "偏低" | "正常" | "偏高" | "過高" | "無適用參考標準";
+
+// Asian BMI cut-offs.
+export function gradeBmi(bmi: number): BandGrade {
+  if (bmi < 18.5) return "過輕";
+  if (bmi < 23) return "正常";
+  if (bmi < 25) return "偏高";
+  return "過高";
+}
+
+export function gradeBodyFat(percent: number, gender: Gender): BandGrade {
+  const [low, high, veryHigh] = gender === "male" ? [11, 22, 27] : [21, 33, 39];
+  if (percent < low) return "偏低";
+  if (percent <= high) return "正常";
+  if (percent <= veryHigh) return "偏高";
+  return "過高";
+}
+
+export function gradeVisceralFat(level: number): BandGrade {
+  if (level <= 9) return "正常";
+  if (level <= 14) return "偏高";
+  return "過高";
+}
+
 // Bundled reference-leaflet text: the ONLY material the AI summary may use.
 export const REFERENCE_LEAFLET = `
 【血壓參考】正常：收縮壓低於120且舒張壓低於80。正常偏高：收縮壓120–139或舒張壓80–89。高血壓第一期：收縮壓140–159或舒張壓90–99。高血壓第二期：收縮壓160–179或舒張壓100–109。嚴重偏高：收縮壓180或以上，或舒張壓110或以上，應即時就醫。單純收縮期高血壓指收縮壓140或以上而舒張壓低於90，常見於年長人士。建議：少鹽飲食、規律運動、維持健康體重、按時量度。
-【體脂參考】體脂率過高與心血管疾病風險相關。內臟脂肪等級一般以10以下為健康範圍。維持肌肉量有助長者保持活動能力。
+【體脂參考】體脂率過高與心血管疾病風險相關。BMI（亞洲標準）：低於18.5屬過輕，18.5至22.9屬正常，23至24.9屬偏高，25或以上屬過高。體脂率：男性11%至22%屬正常，23%至27%屬偏高，超過27%屬過高；女性21%至33%屬正常，34%至39%屬偏高，超過39%屬過高。內臟脂肪等級9或以下屬健康範圍，10至14屬偏高，15或以上屬過高。維持肌肉量有助長者保持活動能力。
 【握力參考】握力是長者肌力與整體健康的重要指標，握力偏弱與活動能力下降相關。可透過握力球、阻力帶等簡單訓練改善。
 【柔軟度參考】坐位體前彎反映膕繩肌與下背柔軟度。規律伸展可改善柔軟度，減少跌倒與腰背痛風險。
 【一般建議】本應用程式所有內容僅供參考，不能取代醫生診斷。如讀數嚴重偏高或身體不適，請即時就醫。
