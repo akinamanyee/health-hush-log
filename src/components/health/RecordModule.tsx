@@ -165,11 +165,12 @@ export function RecordModule({ mod }: { mod: ModuleDef }) {
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
           {mod.fields.map((f) => (
             <div key={f.key}>
-              <label className="text-base font-medium">
+              <label htmlFor={`field-${f.key}`} className="text-base font-medium">
                 {f.label}
                 {f.unit && <span className="ml-1 text-muted-foreground">（{f.unit}）</span>}
               </label>
               <input
+                id={`field-${f.key}`}
                 type="number"
                 inputMode="decimal"
                 step={f.step ?? "any"}
