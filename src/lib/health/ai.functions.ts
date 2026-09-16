@@ -77,19 +77,16 @@ export const extractFromImage = createServerFn({ method: "POST" })
     }
   });
 
+// Grade labels only. No raw readings, no dates, no age, no gender ever leave the device.
 const SummaryInput = z.object({
-  entries: z
+  items: z
     .array(
       z.object({
-        module: z.string(),
-        date: z.string(),
-        grade: z.string(),
-        values: z.record(z.string(), z.number()),
+        module: z.string().max(20),
+        grades: z.array(z.string().max(40)).max(12),
       }),
     )
-    .max(60),
-  age: z.number().nullable(),
-  gender: z.enum(["male", "female"]).nullable(),
+    .max(8),
 });
 
 export const generateHealthSummary = createServerFn({ method: "POST" })
@@ -101,13 +98,9 @@ export const generateHealthSummary = createServerFn({ method: "POST" })
     if (!serverCapOk(ip)) throw new Error("今日生成次數已達上限，請明天再試。");
 
     const gateway = createGateway();
-    const records = data.entries
-      .map(
-        (e) =>
-          `${e.date}｜${e.module}｜評級：${e.grade}｜${Object.entries(e.values)
-            .map(([k, v]) => `${k}=${v}`)
-            .join("，")}`,
-      )
+    const records = data.items
+      .filter((i) => i.grades.length > 0)
+      .map((i) => `${i.module}｜近期評級（由新至舊）：${i.grades.join("、")}`)
       .join("\n");
 
     const result = streamText({
@@ -115,7 +108,7 @@ export const generateHealthSummary = createServerFn({ method: "POST" })
       messages: [
         {
           role: "user",
-          content: `你是一份健康紀錄的摘要助手。以下參考資料是你唯一可以使用的知識來源，絕對不可加入參考資料以外的醫學資訊、診斷或建議；如紀錄涉及資料以外的事項，請明確說明「此部分超出參考資料範圍」。\n\n【參考資料】\n${REFERENCE_LEAFLET}\n\n【使用者】年齡：${data.age ?? "未提供"}，性別：${data.gender === "male" ? "男" : data.gender === "female" ? "女" : "未提供"}\n\n【近期健康紀錄】\n${records || "（暫無紀錄）"}\n\n請用繁體中文寫一段約150–250字的溫和健康摘要：先總結各項評級，再按參考資料給予一般性建議，最後提醒這僅供參考、不能取代醫生診斷。語氣溫和，適合50歲以上讀者。`,
+          content: `你是一份健康紀錄的摘要助手。以下參考資料是你唯一可以使用的知識來源，絕對不可加入參考資料以外的醫學資訊、診斷或建議；如紀錄涉及資料以外的事項，請明確說明「此部分超出參考資料範圍」。你只會看到評級結果，不會看到具體數值，請不要猜測或編造任何數值。\n\n【參考資料】\n${REFERENCE_LEAFLET}\n\n【近期評級】\n${records || "（暫無紀錄）"}\n\n請用繁體中文寫一段約150–250字的溫和健康摘要：先總結各項評級，再按參考資料給予一般性建議，最後提醒這僅供參考、不能取代醫生診斷。語氣溫和，適合50歲以上讀者。`,
         },
       ],
       providerOptions: {
