@@ -1,20 +1,20 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowLeft, FileText, Loader2 } from "lucide-react";
+import { ArrowLeft, FileText, Loader2, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { MODULES } from "@/lib/health/modules";
 import {
   AI_DAILY_LIMIT,
   bumpAiUsage,
   getAiUsageToday,
+  readEntries,
   STORAGE_KEYS,
   useLocalData,
-  type HealthEntry,
   type Profile,
 } from "@/lib/health/store";
 import { generateHealthSummary } from "@/lib/health/ai.functions";
-import { gradeAgainstNorms, gradeBloodPressure, GRIP_NORMS, SIT_REACH_NORMS } from "@/lib/health/charts";
+import { gradeEntry } from "@/lib/health/grade";
 
 export const Route = createFileRoute("/summary")({
   head: () => ({
@@ -30,16 +30,6 @@ export const Route = createFileRoute("/summary")({
   component: Summary,
 });
 
-function readEntries(key: string): HealthEntry[] {
-  try {
-    const raw = window.localStorage.getItem(key);
-    if (!raw) return [];
-    return (JSON.parse(raw) as { v: number; data: HealthEntry[] }).data ?? [];
-  } catch {
-    return [];
-  }
-}
-
 function Summary() {
   const { data: profile } = useLocalData<Profile>(STORAGE_KEYS.profile, { age: null, gender: null });
   const run = useServerFn(generateHealthSummary);
@@ -53,28 +43,25 @@ function Summary() {
     }
     setBusy(true);
     try {
-      const entries = MODULES.flatMap((m) =>
-        readEntries(m.storageKey)
-          .slice(0, 15)
-          .map((e) => {
-            let grade = "—";
-            const sys = e.values["systolic"];
-            const dia = e.values["diastolic"];
-            const grip = e.values["grip"];
-            const dist = e.values["distance"];
-            if (m.id === "bp" && sys != null && dia != null) {
-              grade = gradeBloodPressure(sys, dia).label;
-            } else if (m.id === "grip" && grip != null && profile.age != null && profile.gender != null) {
-              grade = gradeAgainstNorms(GRIP_NORMS, grip, profile.age, profile.gender);
-            } else if (m.id === "sitreach" && dist != null && profile.age != null && profile.gender != null) {
-              grade = gradeAgainstNorms(SIT_REACH_NORMS, dist, profile.age, profile.gender);
-            }
-            return { module: m.title, date: e.date, grade, values: e.values };
-          }),
-      );
-      bumpAiUsage();
-      const res = await run({ data: { entries: entries.slice(0, 60), age: profile.age, gender: profile.gender } });
+      // Only grade labels are sent — readings, dates, age and gender stay on this device.
+      const items = MODULES.map((m) => ({
+        module: m.title,
+        grades: readEntries(m.storageKey)
+          .slice(0, 6)
+          .flatMap((e) =>
+            gradeEntry(m, e.values, profile).map((g) => (g.metric ? `${g.metric}：${g.label}` : g.label)),
+          )
+          .slice(0, 12),
+      })).filter((i) => i.grades.length > 0);
+
+      if (items.length === 0) {
+        toast.error("暫無紀錄可摘要，請先新增至少一筆紀錄。");
+        return;
+      }
+
+      const res = await run({ data: { items } });
       setSummary(res.summary);
+      bumpAiUsage();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "生成失敗，請稍後再試。");
     } finally {
@@ -89,7 +76,7 @@ function Summary() {
       </Link>
       <h1 className="mt-4 text-3xl font-bold sm:text-4xl">健康摘要</h1>
       <p className="mt-1 text-lg text-muted-foreground">
-        摘要只根據內置參考資料與您的紀錄生成，僅供參考，不能取代醫生診斷。
+        摘要只根據內置參考資料與您的評級生成，僅供參考，不能取代醫生診斷。
       </p>
 
       <section className="glass-card mt-8 rounded-3xl p-6 sm:p-8">
@@ -109,6 +96,14 @@ function Summary() {
           </article>
         )}
       </section>
+
+      <footer className="mt-8 space-y-2 text-center text-base text-muted-foreground">
+        <p className="inline-flex items-center gap-2">
+          <ShieldCheck className="size-5" />
+          只有評級名稱會用於生成摘要；您的讀數只存在此裝置。
+        </p>
+        <p>本應用程式內容僅供參考，不能取代醫生診斷。</p>
+      </footer>
     </div>
   );
 }
