@@ -70,7 +70,7 @@ export function gradeEntry(
       const visceral = values["visceralFat"];
       if (visceral != null) {
         const g = gradeVisceralFat(visceral);
-        out.push({ metric: "內臟脂肪", label: g, tone: bandTone(g) });
+        out.push({ metric: "內臟脂肪等級", label: g, tone: bandTone(g) });
       }
       return out;
     }

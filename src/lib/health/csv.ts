@@ -18,7 +18,9 @@ export function exportAllToCsv(profile: Profile) {
       for (const f of mod.fields) {
         const v = e.values[f.key];
         if (v == null) continue;
-        const grade = grades.find((g) => g.metric === f.label)?.label ?? single;
+        // A module-wide grade belongs to its primary field only — never repeated onto ungraded ones.
+        const isPrimary = f.key === mod.fields[0]?.key;
+        const grade = grades.find((g) => g.metric === f.label)?.label ?? (isPrimary ? single : "");
         rows.push([mod.title, e.date, f.label, String(v), f.unit, grade].map(cell).join(","));
       }
     }
