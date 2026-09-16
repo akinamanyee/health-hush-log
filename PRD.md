@@ -1,0 +1,38 @@
+# PRD — 健康紀錄簿 (Health Logbook)
+
+**Version 1** · restored 2026-09-16 as the single source of truth for scope.
+
+## NORTHSTAR
+Make self-tracked health numbers as trustworthy and readable as a clinic report, without a single byte of medical data leaving the user's device.
+
+## USER
+Traditional-Chinese-reading adults aged 50+ in Hong Kong and Taiwan who already own a Tanita body-composition scale, a home blood-pressure monitor, or attend community fitness checks — and who keep the results on paper, in photos, or nowhere at all.
+
+## PROBLEM
+Readings sit scattered across paper notes and phone photos, so nobody can tell whether a number is normal for their age and gender, or when the next check is due.
+
+## USER JOURNEY
+1. Opens the dashboard and sees four clearly labelled cards — 體脂組成、血壓、握力、坐位體前彎 — plus a standing 「資料只存在此裝置」 notice.
+2. Picks a module and records a reading three ways: drop a photo of the device screen for AI reading, speak the numbers, or type them.
+3. Reviews and confirms the extracted values in an editable form, then saves — the app grades the reading against bundled reference charts and shows the tier in plain Traditional Chinese.
+4. Takes the calculated re-check date (6 months / 1 year / 2 years by tier) into a calendar with a one-tap `.ics` download or Google Calendar link.
+5. Reads a plain-language health summary built strictly from the bundled reference leaflets, and exports the whole history as an Excel-friendly CSV.
+
+## SUCCESS
+In today's live demo: a Tanita screen photo is read into the form and confirmed; a blood pressure of 152/78 grades as 高血壓（第一期）・單純收縮期高血壓 with a 6-month re-check date; the `.ics` file downloads and opens in a calendar; the CSV opens in Excel with legible Traditional Chinese; the browser network tab shows no health readings leaving the device apart from the photo sent for reading; and no API key appears anywhere in the browser.
+
+## OUT OF SCOPE
+No accounts, login, or profiles. No cloud storage, sync, or sharing between devices. No medication, diet, or step tracking. No wearable integrations. No PDF reports. No English or Simplified Chinese interface. No push or email notifications. No AI diagnosis.
+
+## HARD CONSTRAINTS
+- Single-user and fully anonymous: no sign-in, no roles, no per-user records. Everything the app shows belongs to whoever holds the device.
+- All health data lives only in this browser's local storage. Nothing is written to any server or database, and a visible clear-all action erases it.
+- The AI credential is held server-side only, inside this app's own server layer (server functions on the managed AI gateway). The browser never receives or sees the key, and the server keeps nothing.
+- Only two things may reach the server: the photo being read, and the grade labels needed to write the summary. Raw readings, dates, age and gender never leave the device.
+- Grading is deterministic and comes from the bundled reference tables — never from AI. Where a chart does not cover the user, the app says 「無適用參考標準」 and still saves the raw number; it never extrapolates.
+- The AI summary may use the bundled reference leaflet text and nothing else; anything outside it must be declined out loud, and a failed generation must show a real error rather than invented advice.
+- Voice dictation uses the browser's own speech engine and only appears where Chinese recognition exists; no audio leaves the device.
+- A per-device daily AI cap keeps free-tier usage in check, backed by a coarse server-side limit.
+- Traditional Chinese throughout, including validation messages, grade labels and CSV headers.
+- Every screen carries 「僅供參考，不能取代醫生診斷」 and the local-only data notice.
+- Japanese-minimalist visual system: soft glassmorphism, muted earth tones, rounded corners, generous whitespace, and 50+ friendly type, contrast and touch targets.
