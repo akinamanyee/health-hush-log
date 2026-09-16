@@ -1,6 +1,11 @@
 # Product Roadmap — 健康紀錄簿
 
-Ordered so the product is genuinely usable at the end of every milestone. Each milestone is one slice of the magic, traceable to the PRD; the HOW lives in the per-milestone Implementation Plan.
+Ordered so the product is genuinely usable at the end of every milestone. Each milestone is one slice of the magic, traceable to the PRD; the HOW lives in the per-milestone build plan under [plan/](plan/).
+
+**Status (2026-09-16 23:08 HKT):** M1–M8 delivered and verified — build plan
+[plan/01-08-initial-build.md](plan/01-08-initial-build.md), followed by
+[plan/09-prd-reconciliation.md](plan/09-prd-reconciliation.md). New milestones slot in below,
+never replacing this sequence.
 
 ## M1 — A calm home worth returning to
 The Traditional Chinese, 50+ friendly shell: the Japanese-minimalist glass-and-earth-tone design system, the dashboard with four clearly labelled module cards (體脂、血壓、握力、坐位體前彎), the standing 「資料只存在此裝置」 privacy notice, and the 「僅供參考，不能取代醫生診斷」 disclaimer. Value: a visitor immediately understands what this is, trusts it, and can navigate without reading instructions.
