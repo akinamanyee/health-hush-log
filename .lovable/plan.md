@@ -1,58 +1,37 @@
-# Investigation — 健康紀錄簿 (local-first health & fitness logbook)
+# Product Roadmap — 健康紀錄簿
 
-## 0. State of the ground truth
+Ordered so the product is genuinely usable at the end of every milestone. Each milestone is one slice of the magic, traceable to the PRD; the HOW lives in the per-milestone Implementation Plan.
 
-`PRD.md` does not exist at the project root, and the codebase is an untouched TanStack Start template: `src/routes/index.tsx` is still the blank placeholder, there is no `src/routes/api/`, no Supabase integration folder, no AI packages installed, and no secrets wired. So the drafted Version 1 spec is the working spec, and **step one of the roadmap is to save the approved PRD as `PRD.md`** and treat it as the single source of truth from then on.
+## M1 — A calm home worth returning to
+The Traditional Chinese, 50+ friendly shell: the Japanese-minimalist glass-and-earth-tone design system, the dashboard with four clearly labelled module cards (體脂、血壓、握力、坐位體前彎), the standing 「資料只存在此裝置」 privacy notice, and the 「僅供參考，不能取代醫生診斷」 disclaimer. Value: a visitor immediately understands what this is, trusts it, and can navigate without reading instructions.
+Traces: USER · Visual Design System · HARD CONSTRAINTS (privacy, disclaimer).
 
-What the template already gives us and we should not re-invent: shadcn/Radix UI set, Tailwind v4 tokens in `src/styles.css`, `react-hook-form` + `zod`, `recharts` for trend charts, `sonner` for toasts, `date-fns`, TanStack Query, and a CSRF-protected server-function boundary in `src/start.ts`. Nothing new is needed for the UI layer.
+## M2 — 血壓紀錄: your first trustworthy logbook
+Blood-pressure entry by typing, instant grading against the reference chart (including the worse-of-two rule that surfaces isolated systolic hypertension), and local history with a trend view. Value: a real, working logbook for the most-watched metric of this audience — usable product from here on.
+Traces: USER JOURNEY 2–3 (manual input path) · Blood Pressure module · Data Portability (local history).
 
-## 1. The backend requirement does not survive contact with the platform
+## M3 — 複查日曆: never wonder when to re-check
+The re-check date computed from the tier (6 months / 1 year / 2 years; crisis-level readings show 「即時就醫」 instead), with a one-tap downloadable calendar file and a Google Calendar link. Value: the app turns a grade into an action, closing the loop on blood pressure.
+Traces: Calendar Synchronization · SUCCESS (the .ics moment).
 
-The spec asks for Edge Functions on an independent Supabase project holding a Google AI Studio key. Two facts: this project has no Supabase connection, and a Supabase project cannot be linked from here — only the user can do it in Project Settings → Connectors. Meanwhile the actual requirement behind that sentence is narrow: *the model call happens server-side and no key ever reaches the browser.*
+## M4 — 全部四個模組: every check, one book
+Grip strength and sit-and-reach join Tanita body composition as typed-entry modules with age- and gender-matched grading, honest 「無適用參考標準」 when a chart doesn't cover the user, and a trend history each. Value: all four readings live in one place with the same familiar flow.
+Traces: The Four Core Health Modules · HARD CONSTRAINTS (deterministic grading).
 
-Resolved: the AI proxy lives in this app's own server layer — a TanStack server function for image extraction and one for the grounded summary — calling a Gemini vision model through Lovable AI's managed gateway. The gateway credential is server-side only and never appears in client code, which satisfies the security requirement with strictly fewer moving parts than a second cloud project, and removes the free-tier quota and key-rotation burden entirely. No database is created; the functions are stateless and persist nothing. Health records still never leave the device except the single image the user chooses to have read.
+## M5 — 影相即記: readings from a photo
+Drag-and-drop a photo of the Tanita screen or monitor; the reading is read by the server-side AI and lands in an editable review form, confirmed before it saves — with honest Chinese errors and an empty-field fallback, never guesses. Includes the daily AI-usage cap message. Value: the signature moment — paper logbook habits with zero typing.
+Traces: Multimodal Input · Secure Backend Integration · SUCCESS · HARD CONSTRAINTS (key server-side, nothing persisted).
 
-## 2. Local-first, but SSR is on
+## M6 — 講出嚟都得: voice dictation
+A microphone button on the same forms where the browser supports Chinese dictation; spoken numbers land in the same review-and-confirm flow. Value: the fastest, most accessible input for the 50+ user who types slowly.
+Traces: Multimodal Input (microphone button) · capability-gated per investigation.
 
-Entries live in `localStorage` only. Reading it during render would hydration-mismatch, so all history reads happen after mount behind a hydration gate, with a skeleton on first paint. Storage shape: one versioned envelope (`{ v: 1, entries: {...} }`) per module, so a later field addition migrates instead of wiping. Quota is a non-issue for numeric rows; we never store uploaded images.
+## M7 — 帶得走的數據: CSV export
+One-click export of the full history in Excel-friendly Traditional Chinese CSV, plus the deliberate clear-all action. Value: true local-first ownership — data is portable and erasable by the user alone.
+Traces: Data Portability · HARD CONSTRAINTS (local-only, clear-all).
 
-## 3. OCR is the highest-risk step, and it must never write silently
+## M8 — 健康摘要: grounded advice, never invented
+The reporting section: a plain-language health summary generated strictly from the bundled reference leaflets, declining anything outside them, failing visibly rather than hallucinating. Value: the calm, safe voice that interprets the four modules without ever playing doctor.
+Traces: Grounded AI Advice · HARD CONSTRAINTS (grounding, disclaimer).
 
-Tanita screen photos vary in glare, crop, and locale. Resolved: the extraction function returns a strict validated schema (weight, body fat %, muscle mass, BMI, visceral fat, each nullable), the UI drops the values into an editable review form, and **saving always requires the user to confirm**. Fields the model couldn't read come back empty and are typed in, never guessed. A failed call shows the real error in Chinese, never a fake success or placeholder numbers. Images are downscaled in the browser before upload (long edge ~1600px, JPEG) to stay well inside request limits.
-
-## 4. Grading must be data, not code, and must admit when it doesn't know
-
-All four graders are deterministic table lookups in versioned JSON data files, with the reference source named on screen next to every grade:
-
-- **Blood pressure** — category tiers evaluated on systolic and diastolic independently, taking the worse of the two, which is exactly what makes isolated systolic hypertension (e.g. 152/78) fall out correctly rather than being averaged away.
-- **Grip strength / sit-and-reach** — age-band × gender matrices. If a user's age falls outside the published bands, the app shows 「無適用參考標準」 and still saves the raw number. Inventing an extrapolated grade would be the one unacceptable failure mode here.
-
-The AI is never allowed to grade. It reads pixels and speech into fields; the charts decide the tier.
-
-## 5. Re-check scheduling
-
-Tier → interval is a fixed table (normal → 2 years, elevated/high-normal → 1 year, hypertensive range → 6 months, crisis-level → 「即時就醫」 with no calendar entry, because scheduling a reminder for an emergency reading is wrong). The `.ics` file is generated in the browser from that date; the Google Calendar link is a plain template URL. No scheduler, no server, no notifications.
-
-## 6. Voice input is capability-gated
-
-Browser speech recognition covers Chinese well in Chromium but is absent in Firefox and unreliable in iOS Safari. Resolved: feature-detect and only render the microphone when the browser supports `zh-HK`/`zh-TW` recognition; elsewhere the field is simply typed. Dictation is parsed by a small number-extraction step, shown in the same review form as OCR, and confirmed before saving. No audio is uploaded or stored, so no transcription infrastructure appears.
-
-## 7. Grounded advice, and the cost guard
-
-The summary function receives the user's recent entries plus the bundled reference-leaflet text, and is instructed to answer only from that text and to decline anything outside it; output is validated against a small schema, and a non-conforming generation fails visibly instead of being faked. Every screen carries 「僅供參考，不能取代醫生診斷」.
-
-Because a paid model sits behind a public, sign-in-free page, a daily per-device cap on AI calls is included (client-side counter for the honest path, plus a coarse per-request cap in the server function as a backstop). Without accounts this is best-effort by definition, and that is the right trade rather than adding auth the product doesn't want.
-
-## 8. Details that would otherwise bite
-
-- CSV export writes a UTF-8 BOM, or Excel mangles Traditional Chinese headers.
-- Glassmorphism is applied to background and card surfaces only; text sits on solid-enough fills to hold contrast, since 50+ legibility outranks the effect. Base body text 18px, inputs and buttons at large touch sizes, numeric keypad hints on numeric fields.
-- Interface is Traditional Chinese throughout, including validation messages, grade labels, calendar event titles, and CSV headers.
-- A visible 「資料只存在此裝置」 notice plus a deliberate clear-all action, so local-only storage is understood rather than discovered when a browser is cleared.
-- Trend charts per module use the already-installed `recharts`; no new charting dependency.
-
-## 9. Recommended approach (committed)
-
-One public, sign-in-free Traditional Chinese dashboard on this app's own stack. Four modules with a shared record-and-review flow (photo → AI extract, mic → dictate, or type; always user-confirmed). Deterministic chart-based grading from versioned JSON tables with an explicit "no applicable standard" state. Local-storage history with BOM'd CSV export and client-generated `.ics` / Google Calendar links. Two stateless server functions — image extraction and leaflet-grounded summary — calling a Gemini vision model through the managed gateway with the credential server-side, plus a daily per-device usage cap. No database, no accounts, no Supabase project, no health data ever transmitted except the image the user chooses to send.
-
-**What I decided:** the AI runs through this app's own server functions on the managed gateway instead of a separate Supabase project with your Google AI Studio key (same "key never in the browser" guarantee, no second project to maintain), voice input only appears on browsers that actually support Chinese dictation, out-of-range ages show 「無適用參考標準」 rather than an extrapolated grade, crisis-level blood pressure gets an urgent-care message instead of a calendar reminder, and the AI-usage cap is best-effort per device because the app has no accounts.
+Each milestone ends with a live, usable product: M1 is a shell you can look at, M2 a working logbook, and every later step adds magic without breaking what's there.
