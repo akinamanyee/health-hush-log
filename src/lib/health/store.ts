@@ -85,6 +85,15 @@ export function sortEntries(entries: HealthEntry[]): HealthEntry[] {
   return [...entries].sort((a, b) => b.date.localeCompare(a.date) || b.createdAt - a.createdAt);
 }
 
+/**
+ * The one authoritative reader for stored entries outside React state.
+ * Goes through the same versioned envelope check as useLocalData — never re-parse
+ * localStorage anywhere else.
+ */
+export function readEntries(key: string): HealthEntry[] {
+  return sortEntries(readEnvelope<HealthEntry[]>(key, []));
+}
+
 // Best-effort daily AI usage cap (per device — the app has no accounts).
 export const AI_DAILY_LIMIT = 20;
 
