@@ -1,0 +1,58 @@
+// Calendar export: everything is generated client-side. No scheduler, no server.
+
+export function recheckDate(fromDate: string, months: number): Date {
+  const d = new Date(fromDate + "T00:00:00");
+  d.setMonth(d.getMonth() + months);
+  return d;
+}
+
+function pad(n: number) {
+  return String(n).padStart(2, "0");
+}
+
+function icsDate(d: Date): string {
+  return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}`;
+}
+
+export function buildIcs(date: Date, title: string, description: string): string {
+  const stamp = new Date()
+    .toISOString()
+    .replace(/[-:]/g, "")
+    .replace(/\.\d{3}/, "");
+  return [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//health-logbook//zh-HK//EN",
+    "BEGIN:VEVENT",
+    `UID:${crypto.randomUUID()}@health-logbook`,
+    `DTSTAMP:${stamp}`,
+    `DTSTART;VALUE=DATE:${icsDate(date)}`,
+    `SUMMARY:${title}`,
+    `DESCRIPTION:${description}`,
+    "END:VEVENT",
+    "END:VCALENDAR",
+  ].join("\r\n");
+}
+
+export function downloadIcs(date: Date, title: string, description: string) {
+  const blob = new Blob([buildIcs(date, title, description)], {
+    type: "text/calendar;charset=utf-8",
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "血壓複查提醒.ics";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+export function googleCalendarUrl(date: Date, title: string, description: string): string {
+  const day = icsDate(date);
+  const params = new URLSearchParams({
+    action: "TEMPLATE",
+    text: title,
+    dates: `${day}/${day}`,
+    details: description,
+  });
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+}
