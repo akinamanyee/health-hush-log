@@ -10,33 +10,102 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as BloodPressureRouteImport } from './routes/blood-pressure'
+import { Route as GripRouteImport } from './routes/grip'
+import { Route as SitAndReachRouteImport } from './routes/sit-and-reach'
+import { Route as SummaryRouteImport } from './routes/summary'
+import { Route as TanitaRouteImport } from './routes/tanita'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BloodPressureRoute = BloodPressureRouteImport.update({
+  id: '/blood-pressure',
+  path: '/blood-pressure',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GripRoute = GripRouteImport.update({
+  id: '/grip',
+  path: '/grip',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitAndReachRoute = SitAndReachRouteImport.update({
+  id: '/sit-and-reach',
+  path: '/sit-and-reach',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SummaryRoute = SummaryRouteImport.update({
+  id: '/summary',
+  path: '/summary',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TanitaRoute = TanitaRouteImport.update({
+  id: '/tanita',
+  path: '/tanita',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/blood-pressure': typeof BloodPressureRoute
+  '/grip': typeof GripRoute
+  '/sit-and-reach': typeof SitAndReachRoute
+  '/summary': typeof SummaryRoute
+  '/tanita': typeof TanitaRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/blood-pressure': typeof BloodPressureRoute
+  '/grip': typeof GripRoute
+  '/sit-and-reach': typeof SitAndReachRoute
+  '/summary': typeof SummaryRoute
+  '/tanita': typeof TanitaRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/blood-pressure': typeof BloodPressureRoute
+  '/grip': typeof GripRoute
+  '/sit-and-reach': typeof SitAndReachRoute
+  '/summary': typeof SummaryRoute
+  '/tanita': typeof TanitaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/blood-pressure'
+    | '/grip'
+    | '/sit-and-reach'
+    | '/summary'
+    | '/tanita'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/blood-pressure'
+    | '/grip'
+    | '/sit-and-reach'
+    | '/summary'
+    | '/tanita'
+  id:
+    | '__root__'
+    | '/'
+    | '/blood-pressure'
+    | '/grip'
+    | '/sit-and-reach'
+    | '/summary'
+    | '/tanita'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BloodPressureRoute: typeof BloodPressureRoute
+  GripRoute: typeof GripRoute
+  SitAndReachRoute: typeof SitAndReachRoute
+  SummaryRoute: typeof SummaryRoute
+  TanitaRoute: typeof TanitaRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +117,51 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/blood-pressure': {
+      id: '/blood-pressure'
+      path: '/blood-pressure'
+      fullPath: '/blood-pressure'
+      preLoaderRoute: typeof BloodPressureRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/grip': {
+      id: '/grip'
+      path: '/grip'
+      fullPath: '/grip'
+      preLoaderRoute: typeof GripRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sit-and-reach': {
+      id: '/sit-and-reach'
+      path: '/sit-and-reach'
+      fullPath: '/sit-and-reach'
+      preLoaderRoute: typeof SitAndReachRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/summary': {
+      id: '/summary'
+      path: '/summary'
+      fullPath: '/summary'
+      preLoaderRoute: typeof SummaryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tanita': {
+      id: '/tanita'
+      path: '/tanita'
+      fullPath: '/tanita'
+      preLoaderRoute: typeof TanitaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BloodPressureRoute: BloodPressureRoute,
+  GripRoute: GripRoute,
+  SitAndReachRoute: SitAndReachRoute,
+  SummaryRoute: SummaryRoute,
+  TanitaRoute: TanitaRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
