@@ -6,6 +6,16 @@ export function recheckDate(fromDate: string, months: number): Date {
   return d;
 }
 
+export function formatChineseDate(isoDate: string): string {
+  const d = new Date(`${isoDate}T00:00:00`);
+  if (Number.isNaN(d.getTime())) return isoDate;
+  return new Intl.DateTimeFormat("zh-HK", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  }).format(d);
+}
+
 function pad(n: number) {
   return String(n).padStart(2, "0");
 }

@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowLeft, FileText, Loader2, ShieldCheck } from "lucide-react";
+import { ArrowLeft, FileText, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { MODULES } from "@/lib/health/modules";
 import {
@@ -9,12 +9,11 @@ import {
   bumpAiUsage,
   getAiUsageToday,
   readEntries,
-  STORAGE_KEYS,
-  useLocalData,
-  type Profile,
 } from "@/lib/health/store";
 import { generateHealthSummary } from "@/lib/health/ai.functions";
 import { gradeEntry } from "@/lib/health/grade";
+import { Button } from "@/components/ui/button";
+import { PrivacyNotice } from "@/components/health/PrivacyNotice";
 
 export const Route = createFileRoute("/summary")({
   head: () => ({
@@ -31,7 +30,6 @@ export const Route = createFileRoute("/summary")({
 });
 
 function Summary() {
-  const { data: profile } = useLocalData<Profile>(STORAGE_KEYS.profile, { age: null, gender: null });
   const run = useServerFn(generateHealthSummary);
   const [summary, setSummary] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -43,13 +41,13 @@ function Summary() {
     }
     setBusy(true);
     try {
-      // Only grade labels are sent — readings, dates, age and gender stay on this device.
+      // Only grade labels are sent — readings and dates stay on this device.
       const items = MODULES.map((m) => ({
         module: m.title,
         grades: readEntries(m.storageKey)
           .slice(0, 6)
           .flatMap((e) =>
-            gradeEntry(m, e.values, profile).map((g) => (g.metric ? `${g.metric}：${g.label}` : g.label)),
+            gradeEntry(m, e.values).map((g) => (g.metric ? `${g.metric}：${g.label}` : g.label)),
           )
           .slice(0, 12),
       })).filter((i) => i.grades.length > 0);
@@ -80,15 +78,16 @@ function Summary() {
       </p>
 
       <section className="glass-card mt-8 rounded-3xl p-6 sm:p-8">
-        <button
+        <Button
           type="button"
           onClick={generate}
           disabled={busy}
-          className="inline-flex min-h-14 items-center gap-2 rounded-xl bg-primary px-6 text-lg font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-60"
+          size="lg"
+          className="min-h-14 rounded-xl px-6 text-lg font-semibold"
         >
           {busy ? <Loader2 className="size-5 animate-spin" /> : <FileText className="size-5" />}
           {busy ? "正在生成⋯" : "生成健康摘要"}
-        </button>
+        </Button>
 
         {summary && (
           <article className="mt-6 whitespace-pre-line rounded-2xl border border-border bg-card p-6 text-lg leading-relaxed">
@@ -97,12 +96,8 @@ function Summary() {
         )}
       </section>
 
-      <footer className="mt-8 space-y-2 text-center text-base text-muted-foreground">
-        <p className="inline-flex items-center gap-2">
-          <ShieldCheck className="size-5" />
-          只有評級名稱會用於生成摘要；您的讀數只存在此裝置。
-        </p>
-        <p>本應用程式內容僅供參考，不能取代醫生診斷。</p>
+      <footer className="mt-8">
+        <PrivacyNotice context="summary" />
       </footer>
     </div>
   );

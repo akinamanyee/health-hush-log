@@ -82,13 +82,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         name: "description",
         content:
-          "本地優先的健康紀錄簿：記錄體脂、血壓、握力與柔軟度，按官方參考標準評級，資料只存在您的裝置上。",
+          "本地優先的健康紀錄簿：記錄血壓、身體成份分析儀、手握力與坐地前伸測試讀數，資料只存在您的裝置上。",
       },
       { property: "og:title", content: "健康紀錄簿 — 本地優先健康日誌" },
       {
         property: "og:description",
         content:
-          "記錄體脂、血壓、握力與柔軟度，按官方參考標準評級，資料只存在您的裝置上。",
+          "記錄血壓、身體成份分析儀、手握力與坐地前伸測試讀數，資料只存在您的裝置上。",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -115,7 +115,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="zh-Hant-HK">
       <head>
         <HeadContent />
       </head>

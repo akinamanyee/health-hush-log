@@ -1,7 +1,7 @@
 # Architecture — 健康紀錄簿
 
 Describes how the code is actually built. The code is the SSOT for behaviour; this file
-describes it. Last reconciled against the code: **2026-09-16 23:08 HKT**.
+describes it. Last reconciled against the code: **2026-09-17 23:53 HKT**.
 
 ## Shape in one paragraph
 
@@ -14,7 +14,7 @@ server-side. Grading is pure local computation over bundled reference tables.
 
 - TanStack Start v1 (React 19, Vite 7), file-based routes in `src/routes`
 - Tailwind CSS v4 via `src/styles.css` (design tokens in `@theme`, `glass-card` utility)
-- `sonner` for notices, `recharts` for trend lines, `lucide-react` icons
+- `sonner` for notices, `recharts` for trend lines, `lucide-react` icons, the supplied cover image and user-supplied placeholder images
 - AI SDK (`ai` + `@ai-sdk/openai`) pointed at the managed AI gateway
 - Storage: `localStorage` only
 
@@ -32,7 +32,7 @@ server-side. Grading is pure local computation over bundled reference tables.
 | Gateway client + per-IP backstop | `src/lib/ai-gateway.server.ts` |
 | Shared record-and-review form | `src/components/health/RecordModule.tsx` |
 | Photo drop (client-side downscale), voice, grade badge | `src/components/health/{ImageDrop,VoiceButton,GradeBadge}.tsx` |
-| Dashboard, four module pages, summary page | `src/routes/*.tsx` |
+| Cover entrance, dashboard, four module pages, summary page | `src/routes/*.tsx` |
 
 The four module routes (`/tanita`, `/blood-pressure`, `/grip`, `/sit-and-reach`) are thin
 wrappers that pass a `ModuleDef` into `RecordModule`; all record behaviour lives once.
@@ -40,7 +40,7 @@ wrappers that pass a `ModuleDef` into `RecordModule`; all record behaviour lives
 ## Data flow
 
 ```text
-photo ──▶ ImageDrop (downscale ≤1600px, JPEG)
+camera/upload photo ──▶ ImageDrop (downscale ≤1600px, JPEG)
              │
              ▼  data URL only
        extractFromImage  (server fn, credential server-side, nothing stored)
@@ -59,16 +59,17 @@ grade labels only ──▶ generateHealthSummary (server fn, leaflet-grounded) 
 
 - **Stored entries**: `readEntries()` / `useLocalData()` in `store.ts` are the only readers.
   Nothing else parses `localStorage`; both honour the `{ v: 1, data }` envelope.
-- **Grades**: `gradeEntry(mod, values, profile)` in `grade.ts` is the only grader. Forms,
+- **Grades**: `gradeEntry(mod, values)` in `grade.ts` is the only grader. Forms,
   CSV and the summary all call it, so they cannot disagree.
 - **Field metadata**: `modules.ts` only — labels, units and limits are never retyped in a route.
 - **Reference numbers**: `charts.ts` only, and the same leaflet text is what grounds the AI.
 
 ## Storage keys
 
-`hlb:profile`, `hlb:tanita`, `hlb:bp`, `hlb:grip`, `hlb:sitreach`, `hlb:ai-usage`.
+`hlb:tanita`, `hlb:bp`, `hlb:grip`, `hlb:sitreach`, `hlb:ai-usage`.
 Every value is `{ v: 1, data }`; the version gate lets future shapes migrate instead of
-being misread. Reads happen after hydration to avoid SSR mismatch.
+being misread. Reads happen after hydration to avoid SSR mismatch. The old `hlb:profile`
+key is purged because the product no longer collects age or gender.
 
 ## Access and privacy model
 
@@ -77,7 +78,7 @@ The protection that matters is **what leaves the device**, enforced at the two c
 
 - `extractFromImage` receives a downscaled image and a module id — nothing else.
 - `generateHealthSummary` receives grade **labels** only (`{ module, grades[] }`, capped).
-  No readings, dates, age or gender.
+  No readings or dates; age and gender are not collected.
 - Both server functions are stateless: no logging of payloads, no persistence, `store: false`.
 - The AI credential is read inside the handler from the server environment; the browser
   never receives it.
@@ -86,9 +87,10 @@ The protection that matters is **what leaves the device**, enforced at the two c
 
 - Blood pressure: systolic and diastolic scored independently, **worse of the two** wins;
   `140+/<90` is additionally flagged 單純收縮期高血壓 (unless crisis).
-- Grip and sit-and-reach: age-band × gender matrices; outside the bands the app returns
+- Hand grip and sit-and-reach: because age and gender are not collected, the app returns
   「無適用參考標準」 and still saves the raw number. No extrapolation, ever.
-- Body composition: Asian BMI cut-offs, gender-specific body-fat bands, visceral-fat bands.
+- Body composition: Asian BMI cut-offs and visceral-fat bands still grade; body-fat percentage
+  returns 「無適用參考標準」 because the bundled bands require gender.
 - Re-check interval by tier: normal 2 years, elevated 1 year, hypertensive 6 months,
   crisis → 「即時就醫」 with no calendar entry.
 

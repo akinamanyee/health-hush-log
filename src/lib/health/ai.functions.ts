@@ -77,7 +77,7 @@ export const extractFromImage = createServerFn({ method: "POST" })
     }
   });
 
-// Grade labels only. No raw readings, no dates, no age, no gender ever leave the device.
+// Grade labels only. No raw readings or dates ever leave the device; age/gender are not collected.
 const SummaryInput = z.object({
   items: z
     .array(

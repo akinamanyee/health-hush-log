@@ -3,9 +3,9 @@
 Date: 2026-09-16 (HKT) · Status: accepted
 
 ## Decision
-All readings, the profile (age, gender) and the AI usage counter are stored in this
-browser's `localStorage` under a versioned `{ v: 1, data }` envelope. No database exists.
-A visible two-step clear-all action erases everything.
+All readings and the AI usage counter are stored in this browser's `localStorage` under a
+versioned `{ v: 1, data }` envelope. No database exists. A visible two-step clear-all action
+erases everything. Age and gender are not collected, and the legacy profile key is purged.
 
 ## Rejected
 - **A cloud database with accounts.** Rejected: the PRD forbids sensitive medical data
