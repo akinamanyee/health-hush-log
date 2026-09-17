@@ -4,6 +4,14 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-17 23:36 — Product roadmap update: front door, labels, dates and privacy wording
+- Updated the PRD to Version 1.2 with the approved direction: cover page, no age/gender
+  collection, full date/year on records, camera-or-upload photo entry, clearer privacy/data
+  wording, and final module names.
+- Added M9–M14 to `Product_Roadmap.md`, after the delivered M1–M8 sequence.
+- Why: the next product direction must live in the PRD and roadmap before any build work.
+  ([ADR 0015](adr/0015-front-door-no-profile-and-clearer-privacy.md))
+
 ## 2026-09-16 23:08 — Living docs established
 - Added `ARCHITECTURE.md`, `DECISIONS.md` with `adr/0001`–`0014`, this changelog, and the
   `plan/` folder with the build plans behind the work so far.
