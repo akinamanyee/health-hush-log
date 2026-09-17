@@ -2,13 +2,14 @@
 
 Ordered so the product is genuinely usable at the end of every milestone. Each milestone is one slice of the magic, traceable to the PRD; the HOW lives in the per-milestone build plan under [plan/](plan/).
 
-**Status (2026-09-16 23:08 HKT):** M1–M8 delivered and verified — build plan
+**Status (2026-09-17 23:36 HKT):** M1–M8 delivered and verified — build plan
 [plan/01-08-initial-build.md](plan/01-08-initial-build.md), followed by
-[plan/09-prd-reconciliation.md](plan/09-prd-reconciliation.md). New milestones slot in below,
-never replacing this sequence.
+[plan/09-prd-reconciliation.md](plan/09-prd-reconciliation.md). M9–M14 are the next approved
+product direction from the 2026-09-17 roadmap update; their implementation plans will be added
+one milestone at a time before build work starts.
 
 ## M1 — A calm home worth returning to
-The Traditional Chinese, 50+ friendly shell: the Japanese-minimalist glass-and-earth-tone design system, the dashboard with four clearly labelled module cards (體脂、血壓、握力、坐位體前彎), the standing 「資料只存在此裝置」 privacy notice, and the 「僅供參考，不能取代醫生診斷」 disclaimer. Value: a visitor immediately understands what this is, trusts it, and can navigate without reading instructions.
+The Traditional Chinese, 50+ friendly shell: the Japanese-minimalist glass-and-earth-tone design system, the dashboard with four clearly labelled module cards, the standing 「資料只存在此裝置」 privacy notice, and the 「僅供參考，不能取代醫生診斷」 disclaimer. Value: a visitor immediately understands what this is, trusts it, and can navigate without reading instructions.
 Traces: USER · Visual Design System · HARD CONSTRAINTS (privacy, disclaimer).
 
 ## M2 — 血壓紀錄: your first trustworthy logbook
@@ -38,5 +39,29 @@ Traces: Data Portability · HARD CONSTRAINTS (local-only, clear-all).
 ## M8 — 健康摘要: grounded advice, never invented
 The reporting section: a plain-language health summary generated strictly from the bundled reference leaflets, declining anything outside them, failing visibly rather than hallucinating. Value: the calm, safe voice that interprets the four modules without ever playing doctor.
 Traces: Grounded AI Advice · HARD CONSTRAINTS (grounding, disclaimer).
+
+## M9 — 封面入口: a calmer first impression
+The app opens with a dedicated cover page using the supplied image, the product name, the local-only privacy promise, and the medical disclaimer. Value: users understand the app before entering their health logbook, without reading a settings page.
+Traces: USER JOURNEY 1 · HARD CONSTRAINTS (privacy notice, disclaimer) · Visual Design System.
+
+## M10 — 四項清楚選擇: pick the check you need immediately
+After entering from the cover page, users see four large choices using the final wording: 血壓、身體成份分析儀、手握力、坐地前伸測試. The supplied icons pair directly with those Chinese labels. Value: the main path becomes obvious for older users and matches the real-world test names.
+Traces: USER JOURNEY 1–2 · USER · Traditional Chinese throughout.
+
+## M11 — 少一步記錄: no age or gender gate
+Recording no longer starts with age and gender. Each module lets the user record the reading directly, and where a reference chart cannot grade without age or gender, the app saves the number and states 「無適用參考標準」 instead of asking for profile details. Value: faster recording with no unnecessary personal information collected.
+Traces: OUT OF SCOPE (no profiles) · HARD CONSTRAINTS (anonymous, no per-user records, no extrapolation outside charts).
+
+## M12 — 日期清楚的紀錄簿: every saved reading shows its date and year
+Each saved record clearly displays the full recording date including year. Value: users can trust when a measurement happened, especially when comparing older readings or exporting history.
+Traces: USER JOURNEY 3–5 · SUCCESS (CSV history) · Data Portability.
+
+## M13 — 相機或相簿: easier photo entry
+Where photo reading is available, users can either take a photo with the device camera or upload an existing photo. The same review-before-save step remains in place. Value: the signature “photo to form” moment works naturally on phones and desktops.
+Traces: USER JOURNEY 2–3 · SUCCESS (screen photo read into form) · HARD CONSTRAINTS (only the photo being read may reach the server).
+
+## M14 — 私隱與資料使用更明確: trust stays visible
+The cover page, module pages, and reporting area carry plain Traditional Chinese privacy and data-usage wording: health records stay on this device, photos are sent only for reading, summaries receive grade labels only, and the content cannot replace a doctor’s diagnosis. Value: users know exactly what happens to their data at the moment they use the app.
+Traces: HARD CONSTRAINTS (local storage, server-only AI credential, allowed server data, disclaimer) · NORTHSTAR.
 
 Each milestone ends with a live, usable product: M1 is a shell you can look at, M2 a working logbook, and every later step adds magic without breaking what's there.

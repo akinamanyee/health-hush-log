@@ -3,7 +3,7 @@
 Date: 2026-09-16 (HKT) · Status: accepted
 
 ## Decision
-When age or gender falls outside a matrix (or the profile is incomplete), the app shows
+When age or gender is not collected, or a chart otherwise lacks enough coverage, the app shows
 「無適用參考標準」 and still saves the raw reading.
 
 ## Rejected
@@ -15,4 +15,4 @@ When age or gender falls outside a matrix (or the profile is incomplete), the ap
 Honest silence beats a confident wrong tier.
 
 ## Consequences
-Users without a filled-in profile see a prompt to add age and gender rather than a grade.
+Charts that previously depended on age or gender become conservative: no profile gate, no invented grade.
