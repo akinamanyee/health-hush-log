@@ -16,22 +16,22 @@ is built: [ARCHITECTURE.md](ARCHITECTURE.md) · why: [DECISIONS.md](DECISIONS.md
 Make self-tracked health numbers as trustworthy and readable as a clinic report, without a single byte of medical data leaving the user's device.
 
 ## USER
-Traditional-Chinese-reading adults aged 50+ in Hong Kong and Taiwan who already own a Tanita body-composition scale, a home blood-pressure monitor, or attend community fitness checks — and who keep the results on paper, in photos, or nowhere at all.
+Traditional-Chinese-reading adults aged 50+ in Hong Kong and Taiwan who already own a body-composition analyser, a home blood-pressure monitor, or attend community fitness checks — and who keep the results on paper, in photos, or nowhere at all.
 
 ## PROBLEM
-Readings sit scattered across paper notes and phone photos, so nobody can tell whether a number is normal for their age and gender, or when the next check is due.
+Readings sit scattered across paper notes and phone photos, so nobody can tell whether a number is in a safer reference range, or when the next check is due.
 
 ## USER JOURNEY
 1. Opens the cover page and sees the supplied image, the app name, the local-only privacy promise, the data-usage note, and 「僅供參考，不能取代醫生診斷」.
 2. Enters the dashboard and sees four clearly labelled choices — 血壓、身體成份分析儀、手握力、坐地前伸測試 — paired with the supplied icons.
 3. Picks a module and records a reading three ways: use the camera or upload a photo of the device screen for AI reading, speak the numbers, or type them.
-3. Reviews and confirms the extracted values in an editable form, then saves — the app grades the reading against bundled reference charts and shows the tier in plain Traditional Chinese.
-4. Sees the saved record with the full recording date including year.
-5. Takes the calculated re-check date (6 months / 1 year / 2 years by tier) into a calendar with a one-tap `.ics` download or Google Calendar link.
-6. Reads a plain-language health summary built strictly from the bundled reference leaflets, and exports the whole history as an Excel-friendly CSV.
+4. Reviews and confirms the extracted values in an editable form, then saves — the app grades the reading against bundled reference charts and shows the tier in plain Traditional Chinese.
+5. Sees the saved record with the full recording date including year.
+6. Takes the calculated re-check date (6 months / 1 year / 2 years by tier) into a calendar with a one-tap `.ics` download or Google Calendar link.
+7. Reads a plain-language health summary built strictly from the bundled reference leaflets, and exports the whole history as an Excel-friendly CSV.
 
 ## SUCCESS
-In today's live demo: the cover page leads into four choices labelled 血壓、身體成份分析儀、手握力、坐地前伸測試; a Tanita/body-composition screen photo or a blood-pressure monitor photo can be captured by camera or uploaded, read into the form and confirmed; a blood pressure of 152/78 grades as 高血壓（第一期）・單純收縮期高血壓 with a 6-month re-check date; every saved record shows the date with year; the `.ics` file downloads and opens in a calendar; the CSV opens in Excel with legible Traditional Chinese; the browser network tab shows no health readings leaving the device apart from the photo sent for reading; and no API key appears anywhere in the browser.
+In today's live demo: the cover page leads into four choices labelled 血壓、身體成份分析儀、手握力、坐地前伸測試; a body-composition analyser screen photo or a blood-pressure monitor photo can be captured by camera or uploaded, read into the form and confirmed; a blood pressure of 152/78 grades as 高血壓（第一期）・單純收縮期高血壓 with a 6-month re-check date; every saved record shows the date with year; the `.ics` file downloads and opens in a calendar; the CSV opens in Excel with legible Traditional Chinese; the browser network tab shows no health readings leaving the device apart from the photo sent for reading; and no API key appears anywhere in the browser.
 
 ## OUT OF SCOPE
 No accounts, login, or profiles. No cloud storage, sync, or sharing between devices. No medication, diet, or step tracking. No wearable integrations. No PDF reports. No English or Simplified Chinese interface. No push or email notifications. No AI diagnosis.
