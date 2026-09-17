@@ -1,12 +1,12 @@
 # 健康紀錄簿 — Health Logbook
 
-A local-first, Traditional Chinese health logbook for adults 50+: record 身體成份分析儀,
-血壓, 手握力 and 坐地前伸測試 readings by camera/uploaded photo, voice or typing; grade readings
+A local-first, Traditional Chinese health logbook for adults 50+: enter through a calm cover page,
+then record 血壓, 身體成份分析儀, 手握力 and 坐地前伸測試 readings by camera/uploaded photo, voice or typing; grade readings
 against bundled reference charts where applicable; get the next re-check date; export everything as CSV.
 
 Health data stays in the browser. There is no database and no account. The only things that
 reach a server are the photo being read and the grade labels used to write the summary. Age and
-gender are not collected in the next product direction.
+gender are not collected.
 
 ## The living docs
 

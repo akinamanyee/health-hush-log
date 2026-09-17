@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Mic, MicOff } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 // Voice dictation is capability-gated: the button only renders where the
 // browser supports Chinese speech recognition. No audio ever leaves the device.
@@ -48,18 +49,20 @@ export function VoiceButton({
   };
 
   return (
-    <button
+    <Button
       type="button"
       onClick={listening ? stop : start}
+      variant={listening ? "destructive" : "outline"}
+      size="lg"
       className={`inline-flex min-h-14 min-w-14 items-center justify-center gap-2 rounded-full border px-5 text-base font-medium transition-colors ${
         listening
-          ? "border-destructive bg-destructive text-destructive-foreground"
+          ? "border-destructive"
           : "border-border bg-card text-foreground hover:bg-secondary"
       }`}
       aria-pressed={listening}
     >
       {listening ? <MicOff className="size-6" /> : <Mic className="size-6" />}
       {listening ? "停止" : "語音輸入"}
-    </button>
+    </Button>
   );
 }

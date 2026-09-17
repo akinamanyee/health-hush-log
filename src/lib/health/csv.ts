@@ -1,5 +1,5 @@
 import { MODULES } from "./modules";
-import { readEntries, type Profile } from "./store";
+import { readEntries } from "./store";
 import { gradeEntry } from "./grade";
 
 // One-click CSV export. UTF-8 BOM is required or Excel mangles Traditional Chinese.
@@ -7,13 +7,13 @@ function cell(value: string): string {
   return `"${value.replace(/"/g, '""')}"`;
 }
 
-export function exportAllToCsv(profile: Profile) {
+export function exportAllToCsv() {
   const rows: string[] = [];
   rows.push(["模組", "日期", "項目", "數值", "單位", "評級"].map(cell).join(","));
 
   for (const mod of MODULES) {
     for (const e of readEntries(mod.storageKey)) {
-      const grades = gradeEntry(mod, e.values, profile);
+      const grades = gradeEntry(mod, e.values);
       const single = grades.length === 1 && !grades[0]?.metric ? (grades[0]?.label ?? "") : "";
       for (const f of mod.fields) {
         const v = e.values[f.key];

@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowLeft, ShieldCheck, Trash2 } from "lucide-react";
+import { ArrowLeft, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import {
   Line,
@@ -19,21 +19,20 @@ import {
   getAiUsageToday,
   bumpAiUsage,
   AI_DAILY_LIMIT,
-  STORAGE_KEYS,
   type HealthEntry,
-  type Profile,
 } from "@/lib/health/store";
 import { extractFromImage } from "@/lib/health/ai.functions";
 import { gradeBloodPressure } from "@/lib/health/charts";
 import { gradeEntry } from "@/lib/health/grade";
-import { recheckDate, downloadIcs, googleCalendarUrl } from "@/lib/health/calendar";
+import { formatChineseDate, recheckDate, downloadIcs, googleCalendarUrl } from "@/lib/health/calendar";
+import { Button } from "@/components/ui/button";
 import { GradeBadge } from "./GradeBadge";
 import { ImageDrop } from "./ImageDrop";
+import { PrivacyNotice } from "./PrivacyNotice";
 import { VoiceButton } from "./VoiceButton";
 
 export function RecordModule({ mod }: { mod: ModuleDef }) {
   const { data: entries, save, hydrated } = useLocalData<HealthEntry[]>(mod.storageKey, []);
-  const { data: profile } = useLocalData<Profile>(STORAGE_KEYS.profile, { age: null, gender: null });
   const extract = useServerFn(extractFromImage);
 
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
@@ -51,7 +50,7 @@ export function RecordModule({ mod }: { mod: ModuleDef }) {
     return out;
   }, [values, mod]);
 
-  const grades = gradeEntry(mod, numeric, profile);
+  const grades = gradeEntry(mod, numeric);
 
   const onImage = async (dataUrl: string) => {
     if (getAiUsageToday() >= AI_DAILY_LIMIT) {
@@ -112,9 +111,11 @@ export function RecordModule({ mod }: { mod: ModuleDef }) {
   const remove = (id: string) => save((prev) => prev.filter((e) => e.id !== id));
 
   const saved = savedId ? entries.find((e) => e.id === savedId) : undefined;
+  const savedSystolic = saved?.values["systolic"];
+  const savedDiastolic = saved?.values["diastolic"];
   const savedTier =
-    mod.id === "bp" && saved && saved.values["systolic"] != null && saved.values["diastolic"] != null
-      ? gradeBloodPressure(saved.values["systolic"]!, saved.values["diastolic"]!)
+    mod.id === "bp" && savedSystolic != null && savedDiastolic != null
+      ? gradeBloodPressure(savedSystolic, savedDiastolic)
       : undefined;
   const recheck =
     saved && savedTier && savedTier.recheckMonths !== "urgent"
@@ -126,7 +127,7 @@ export function RecordModule({ mod }: { mod: ModuleDef }) {
       [...entries]
         .sort((a, b) => a.date.localeCompare(b.date))
         .slice(-30)
-        .map((e) => ({ date: e.date.slice(5), ...e.values })),
+        .map((e) => ({ date: formatChineseDate(e.date), ...e.values })),
     [entries],
   );
 
@@ -142,8 +143,9 @@ export function RecordModule({ mod }: { mod: ModuleDef }) {
         <h2 className="text-xl font-semibold">新增紀錄</h2>
 
         <div className="mt-4">
-          <label className="text-base font-medium">日期</label>
+          <label htmlFor={`${mod.id}-date`} className="text-base font-medium">日期</label>
           <input
+            id={`${mod.id}-date`}
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
@@ -198,13 +200,14 @@ export function RecordModule({ mod }: { mod: ModuleDef }) {
           </div>
         )}
 
-        <button
+        <Button
           type="button"
           onClick={submit}
-          className="mt-6 min-h-14 w-full rounded-xl bg-primary px-6 text-lg font-semibold text-primary-foreground transition-colors hover:opacity-90"
+          size="lg"
+          className="mt-6 min-h-14 w-full rounded-xl text-lg font-semibold"
         >
           儲存紀錄
-        </button>
+        </Button>
       </section>
 
       {saved && mod.id === "bp" && savedTier && (
@@ -218,24 +221,32 @@ export function RecordModule({ mod }: { mod: ModuleDef }) {
             recheck && (
               <>
                 <p className="mt-3 text-lg">
-                  建議於 <strong>{recheck.toLocaleDateString("zh-HK")}</strong>（約 {savedTier.recheckMonths} 個月後）再次量度血壓。
+                  建議於 <strong>{formatChineseDate(recheck.toISOString().slice(0, 10))}</strong>（約 {savedTier.recheckMonths} 個月後）再次量度血壓。
                 </p>
                 <div className="mt-4 flex flex-wrap gap-3">
-                  <button
+                  <Button
                     type="button"
                     onClick={() => downloadIcs(recheck, "血壓複查提醒", "健康紀錄簿提醒您再次量度血壓。")}
-                    className="min-h-14 rounded-xl bg-primary px-6 text-lg font-semibold text-primary-foreground hover:opacity-90"
+                    size="lg"
+                    className="min-h-14 rounded-xl text-lg font-semibold"
                   >
                     下載行事曆提醒（.ics）
-                  </button>
-                  <a
-                    href={googleCalendarUrl(recheck, "血壓複查提醒", "健康紀錄簿提醒您再次量度血壓。")}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex min-h-14 items-center rounded-xl border border-border bg-card px-6 text-lg font-semibold hover:bg-secondary"
+                  </Button>
+                  <Button
+                    asChild
+                    type="button"
+                    variant="outline"
+                    size="lg"
+                    className="min-h-14 rounded-xl text-lg font-semibold"
                   >
-                    加入 Google 日曆
-                  </a>
+                    <a
+                      href={googleCalendarUrl(recheck, "血壓複查提醒", "健康紀錄簿提醒您再次量度血壓。")}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      加入 Google 日曆
+                    </a>
+                  </Button>
                 </div>
               </>
             )
@@ -277,7 +288,7 @@ export function RecordModule({ mod }: { mod: ModuleDef }) {
               {entries.map((e) => (
                 <li key={e.id} className="flex items-center justify-between gap-3 py-3">
                   <div>
-                    <div className="text-lg font-medium">{e.date}</div>
+                    <div className="text-lg font-medium">{formatChineseDate(e.date)}</div>
                     <div className="text-base text-muted-foreground">
                       {mod.fields
                         .filter((f) => e.values[f.key] != null)
@@ -285,14 +296,16 @@ export function RecordModule({ mod }: { mod: ModuleDef }) {
                         .join("・")}
                     </div>
                   </div>
-                  <button
+                  <Button
                     type="button"
                     onClick={() => remove(e.id)}
                     aria-label="刪除此紀錄"
-                    className="inline-flex min-h-12 min-w-12 items-center justify-center rounded-xl text-muted-foreground hover:bg-secondary hover:text-destructive"
+                    variant="ghost"
+                    size="icon"
+                    className="min-h-12 min-w-12 rounded-xl text-muted-foreground hover:bg-secondary hover:text-destructive"
                   >
                     <Trash2 className="size-5" />
-                  </button>
+                  </Button>
                 </li>
               ))}
             </ul>
@@ -300,12 +313,8 @@ export function RecordModule({ mod }: { mod: ModuleDef }) {
         )}
       </section>
 
-      <footer className="mt-8 space-y-2 text-center text-base text-muted-foreground">
-        <p className="inline-flex items-center gap-2">
-          <ShieldCheck className="size-5" />
-          資料只存在此裝置的瀏覽器內，不會上傳到任何伺服器。
-        </p>
-        <p>本應用程式內容僅供參考，不能取代醫生診斷。</p>
+      <footer className="mt-8">
+        <PrivacyNotice context="module" />
       </footer>
     </div>
   );

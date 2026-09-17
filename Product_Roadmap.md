@@ -2,11 +2,7 @@
 
 Ordered so the product is genuinely usable at the end of every milestone. Each milestone is one slice of the magic, traceable to the PRD; the HOW lives in the per-milestone build plan under [plan/](plan/).
 
-**Status (2026-09-17 23:36 HKT):** M1–M8 delivered and verified — build plan
-[plan/01-08-initial-build.md](plan/01-08-initial-build.md), followed by
-[plan/09-prd-reconciliation.md](plan/09-prd-reconciliation.md). M9–M14 are the next approved
-product direction from the 2026-09-17 roadmap update; their implementation plans will be added
-one milestone at a time before build work starts.
+**Status (2026-09-17 23:53 HKT):** M1–M14 delivered. M1–M8: [plan/01-08-initial-build.md](plan/01-08-initial-build.md), followed by [plan/09-prd-reconciliation.md](plan/09-prd-reconciliation.md). M9–M14: [plan/10-m09-cover-entrance.md](plan/10-m09-cover-entrance.md), [plan/11-m10-four-clear-choices.md](plan/11-m10-four-clear-choices.md), [plan/12-m11-no-profile-gate.md](plan/12-m11-no-profile-gate.md), [plan/13-m12-full-recording-date.md](plan/13-m12-full-recording-date.md), [plan/14-m13-camera-or-upload.md](plan/14-m13-camera-or-upload.md), [plan/15-m14-privacy-data-usage.md](plan/15-m14-privacy-data-usage.md).
 
 ## M1 — A calm home worth returning to
 The Traditional Chinese, 50+ friendly shell: the Japanese-minimalist glass-and-earth-tone design system, the dashboard with four clearly labelled module cards, the standing 「資料只存在此裝置」 privacy notice, and the 「僅供參考，不能取代醫生診斷」 disclaimer. Value: a visitor immediately understands what this is, trusts it, and can navigate without reading instructions.

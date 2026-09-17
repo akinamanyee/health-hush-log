@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from "react";
-import type { Gender } from "./charts";
 
 // Local-first: every entry lives only in this browser's localStorage.
 // Versioned envelope so future field additions migrate instead of wiping.
@@ -10,11 +9,6 @@ export interface HealthEntry {
   values: Record<string, number>;
   note?: string | undefined;
   createdAt: number;
-}
-
-export interface Profile {
-  age: number | null;
-  gender: Gender | null;
 }
 
 const VERSION = 1;
@@ -39,13 +33,14 @@ function writeEnvelope<T>(key: string, data: T) {
 }
 
 export const STORAGE_KEYS = {
-  profile: "hlb:profile",
   tanita: "hlb:tanita",
   bp: "hlb:bp",
   grip: "hlb:grip",
   sitreach: "hlb:sitreach",
   aiUsage: "hlb:ai-usage",
 } as const;
+
+const LEGACY_STORAGE_KEYS = ["hlb:profile"] as const;
 
 export function useLocalData<T>(key: string, fallback: T) {
   const [data, setData] = useState<T>(fallback);
@@ -112,4 +107,10 @@ export function bumpAiUsage(): number {
 
 export function clearAllHealthData() {
   Object.values(STORAGE_KEYS).forEach((k) => window.localStorage.removeItem(k));
+  LEGACY_STORAGE_KEYS.forEach((k) => window.localStorage.removeItem(k));
+}
+
+export function purgeLegacyProfileData() {
+  if (typeof window === "undefined") return;
+  LEGACY_STORAGE_KEYS.forEach((k) => window.localStorage.removeItem(k));
 }

@@ -4,6 +4,15 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-17 23:53 — Front-door build, no profile gate, icons and clearer privacy wording
+- Added the supplied 護心計劃 front page image as the first screen and paired the four dashboard choices with the uploaded placeholder images.
+- Removed age/gender collection from the live app and purge the legacy profile key; charts that need those details now show 「無適用參考標準」 while still saving the number.
+- Renamed the user-facing modules to 血壓、身體成份分析儀、手握力、坐地前伸測試.
+- Added camera-or-upload controls for photo reading, kept review-before-save, and made every saved record show a full date with year.
+- Replaced scattered notices with plain privacy/data-usage wording on the cover, dashboard, module pages and summary.
+- Added one small build plan for each M9–M14 milestone and linked them from the roadmap.
+- Why: implement the approved Version 1.2 roadmap update. ([ADR 0015](adr/0015-front-door-no-profile-and-clearer-privacy.md))
+
 ## 2026-09-17 23:36 — Product roadmap update: front door, labels, dates and privacy wording
 - Updated the PRD to Version 1.2 with the approved direction: cover page, no age/gender
   collection, full date/year on records, camera-or-upload photo entry, clearer privacy/data

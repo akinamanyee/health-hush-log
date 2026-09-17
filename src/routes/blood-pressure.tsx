@@ -6,7 +6,7 @@ export const Route = createFileRoute("/blood-pressure")({
   head: () => ({
     meta: [
       { title: "血壓紀錄 — 健康紀錄簿" },
-      { name: "description", content: "記錄收縮壓、舒張壓與脈搏，按參考標準評級並計算複查日期。" },
+      { name: "description", content: "拍攝、上載或手動記錄收縮壓、舒張壓與脈搏，按參考標準評級並計算複查日期。" },
       { property: "og:title", content: "血壓紀錄 — 健康紀錄簿" },
       { property: "og:description", content: "記錄血壓，按參考標準評級並計算複查日期。" },
       { property: "og:type", content: "website" },

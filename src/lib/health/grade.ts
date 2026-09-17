@@ -1,14 +1,9 @@
 import type { ModuleDef } from "./modules";
-import type { Profile } from "./store";
 import {
-  gradeAgainstNorms,
   gradeBloodPressure,
   gradeBmi,
-  gradeBodyFat,
   gradeVisceralFat,
   isIsolatedSystolic,
-  GRIP_NORMS,
-  SIT_REACH_NORMS,
   type BpTier,
 } from "./charts";
 
@@ -26,7 +21,6 @@ export interface GradeResult {
 export function gradeEntry(
   mod: ModuleDef,
   values: Record<string, number>,
-  profile: Profile,
 ): GradeResult[] {
   switch (mod.id) {
     case "bp": {
@@ -48,12 +42,7 @@ export function gradeEntry(
       const key = mod.id === "grip" ? "grip" : "distance";
       const v = values[key];
       if (v == null) return [];
-      if (profile.age == null || profile.gender == null) {
-        return [{ label: "請先於首頁填寫年齡及性別以評級", tone: "neutral" }];
-      }
-      const table = mod.id === "grip" ? GRIP_NORMS : SIT_REACH_NORMS;
-      const g = gradeAgainstNorms(table, v, profile.age, profile.gender);
-      return [{ label: g, tone: normTone(g) }];
+      return [{ label: "無適用參考標準", tone: "neutral" }];
     }
     case "tanita": {
       const out: GradeResult[] = [];
@@ -64,8 +53,7 @@ export function gradeEntry(
       }
       const fat = values["bodyFat"];
       if (fat != null) {
-        const g = profile.gender ? gradeBodyFat(fat, profile.gender) : "無適用參考標準";
-        out.push({ metric: "體脂率", label: g, tone: bandTone(g) });
+        out.push({ metric: "體脂率", label: "無適用參考標準", tone: "neutral" });
       }
       const visceral = values["visceralFat"];
       if (visceral != null) {
@@ -82,12 +70,6 @@ function bpTone(tier: BpTier): Tone {
   if (tier.id === "elevated") return "warn";
   if (tier.id === "crisis") return "urgent";
   return "bad";
-}
-
-function normTone(g: string): Tone {
-  if (g === "良好" || g === "正常") return "ok";
-  if (g === "偏弱") return "warn";
-  return "neutral";
 }
 
 function bandTone(g: string): Tone {
