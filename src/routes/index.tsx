@@ -36,8 +36,8 @@ function Index() {
       <main className="relative min-h-screen bg-background">
         <Dialog>
           <DialogTrigger asChild>
-            <Button variant="ghost" className="absolute right-4 top-4 z-10 min-h-12 rounded-full bg-card/90 px-4 text-primary shadow-sm backdrop-blur sm:right-6 sm:top-6">
-              <ShieldCheck className="size-5" /> 私隱與資料使用
+            <Button variant="ghost" className="absolute bottom-3 right-4 z-10 rounded-full px-3 py-1 text-xs text-muted-foreground/70 backdrop-blur-sm hover:text-muted-foreground sm:right-6">
+              <ShieldCheck className="size-3.5" /> 私隱與資料使用
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-xl rounded-2xl bg-card">
@@ -53,7 +53,7 @@ function Index() {
           alt="護心計劃，守護您的心腦血管健康"
           className="absolute inset-0 h-full w-full object-cover"
         />
-        <section className="relative flex min-h-screen w-full flex-col items-center justify-end pb-12">
+        <section className="relative flex min-h-screen w-full flex-col items-center justify-end pb-24">
           <Button
             type="button"
             onClick={() => void navigate({ to: "/logbook" })}
