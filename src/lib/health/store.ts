@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { todayIso } from "./dates";
 
 // Local-first: every entry lives only in this browser's localStorage.
 // Versioned envelope so future field additions migrate instead of wiping.
@@ -7,7 +8,6 @@ export interface HealthEntry {
   id: string;
   date: string; // ISO yyyy-mm-dd
   values: Record<string, number>;
-  note?: string | undefined;
   createdAt: number;
 }
 
@@ -66,12 +66,11 @@ export function useLocalData<T>(key: string, fallback: T) {
   return { data, save, hydrated };
 }
 
-export function makeEntry(values: Record<string, number>, date?: string, note?: string): HealthEntry {
+export function makeEntry(values: Record<string, number>, date?: string): HealthEntry {
   return {
     id: crypto.randomUUID(),
-    date: date ?? new Date().toISOString().slice(0, 10),
+    date: date ?? todayIso(),
     values,
-    note,
     createdAt: Date.now(),
   };
 }
@@ -94,12 +93,12 @@ export const AI_DAILY_LIMIT = 20;
 
 export function getAiUsageToday(): number {
   const data = readEnvelope<{ day: string; count: number }>(STORAGE_KEYS.aiUsage, { day: "", count: 0 });
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayIso();
   return data.day === today ? data.count : 0;
 }
 
 export function bumpAiUsage(): number {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayIso();
   const current = getAiUsageToday();
   writeEnvelope(STORAGE_KEYS.aiUsage, { day: today, count: current + 1 });
   return current + 1;

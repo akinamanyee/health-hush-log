@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Mic, MicOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { parseSpokenNumbers } from "@/lib/health/voice";
 
 // Voice dictation is capability-gated: the button only renders where the
 // browser supports Chinese speech recognition. No audio ever leaves the device.
@@ -33,7 +34,7 @@ export function VoiceButton({
     rec.maxAlternatives = 1;
     rec.onresult = (e: any) => {
       const transcript: string = e.results[0][0].transcript ?? "";
-      const nums = (transcript.match(/-?\d+(?:\.\d+)?/g) ?? []).map(Number);
+      const nums = parseSpokenNumbers(transcript);
       onNumbers(nums, transcript);
     };
     rec.onend = () => setListening(false);
