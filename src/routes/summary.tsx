@@ -12,11 +12,9 @@ import {
 } from "@/lib/health/store";
 import { generateRichSummary, type RichSummaryResult } from "@/lib/health/ai.functions";
 import { interpretCard, type CardInterpretation } from "@/lib/health/grade";
-import { gradeEntry } from "@/lib/health/grade";
 import { Button } from "@/components/ui/button";
 import { GradeBadge } from "@/components/health/GradeBadge";
 import { PrivacyNotice } from "@/components/health/PrivacyNotice";
-import type { Tone } from "@/lib/health/grade";
 
 export const Route = createFileRoute("/summary")({
   head: () => ({
@@ -41,21 +39,10 @@ const CARD_ICONS: Record<string, typeof Heart> = {
   "坐地前伸": StretchHorizontal,
 };
 
-function gradeTone(grade: string): Tone {
-  if (grade === "正常") return "ok";
-  if (grade === "偏高" || grade === "偏低" || grade === "過輕") return "warn";
-  if (grade === "過高") return "bad";
-  if (grade.includes("嚴重") || grade.includes("即時就醫")) return "urgent";
-  if (grade.includes("高血壓（第二期）")) return "bad";
-  if (grade.includes("高血壓（第一期）")) return "bad";
-  if (grade.includes("正常偏高") || grade.includes("正常高值")) return "warn";
-  if (grade === "無適用參考標準") return "neutral";
-  return "neutral";
-}
-
 function Summary() {
   const run = useServerFn(generateRichSummary);
   const [result, setResult] = useState<RichSummaryResult | null>(null);
+  const [cardMap, setCardMap] = useState<Map<string, CardInterpretation>>(new Map());
   const [busy, setBusy] = useState(false);
 
   const generate = async () => {
@@ -79,6 +66,7 @@ function Summary() {
         return;
       }
 
+      setCardMap(new Map(allCards.map((c) => [c.name, c])));
       const res = await run({ data: { cards: allCards } });
       setResult(res.result);
       bumpAiUsage();
@@ -118,13 +106,7 @@ function Summary() {
               <div className="mt-4 space-y-4">
                 {result.cards.map((card) => {
                   const Icon = CARD_ICONS[card.name] ?? Heart;
-                  const allCards: CardInterpretation[] = [];
-                  for (const m of MODULES) {
-                    const entries = readEntries(m.storageKey);
-                    if (entries.length === 0) continue;
-                    allCards.push(...interpretCard(m, entries[0]!.values));
-                  }
-                  const match = allCards.find((c) => c.name === card.name);
+                  const match = cardMap.get(card.name);
                   return (
                     <div key={card.name} className="rounded-2xl border border-border bg-card p-5">
                       <div className="flex items-start gap-3">
@@ -135,7 +117,7 @@ function Summary() {
                             {match && (
                               <>
                                 <span className="text-base text-muted-foreground">{match.value}</span>
-                                <GradeBadge label={match.grade} tone={gradeTone(match.grade)} />
+                                <GradeBadge label={match.grade} tone={match.tone} />
                               </>
                             )}
                           </div>

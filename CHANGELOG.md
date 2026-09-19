@@ -4,6 +4,15 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-19 — M18: Rich structured health summary with government-sourced tips
+- Replaced the free-text health summary with a structured report: each metric gets a plain-language interpretation card (value, grade badge, AI-written explanation), followed by 3–5 actionable health tips with clickable source links to Hong Kong government health articles.
+- Distilled 16 government articles into a bundled `TIPS_REFERENCE` constant (6 topic blocks covering cardiovascular disease, BMI, hypertension, visceral fat, diet and exercise); tips are pre-filtered by the user's grades before reaching the AI.
+- Added `interpretCard()` as the deterministic card-data builder for the summary; it calls `gradeEntry()` internally (SSOT — no duplicated grading logic) and returns structured data including tone.
+- Source URL validation filters out AI-hallucinated URLs against the known valid set from bundled articles.
+- The AI now receives formatted values alongside grade labels (no dates, age or gender); PRD and privacy notices updated to match.
+- Removed the old `generateHealthSummary` server function (replaced by `generateRichSummary`).
+- Updated ARCHITECTURE.md (data flow, SSOT docs) and Product_Roadmap.md (M18 entry).
+
 ## 2026-09-19 21:34 — Multi-photo UX: smarter toast and progress counter
 - The toast after each AI photo read no longer says "請核對數值後儲存" when more screens remain. For modules with optional fields (currently Tanita), the toast now shows how many of the module's fields are filled and suggests continuing if any remain empty.
 - A "已填 X / Y 項" progress counter appears above the save button once at least one field is filled, so the user can see at a glance how complete the record is across multiple photos.

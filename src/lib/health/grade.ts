@@ -11,6 +11,7 @@ export interface CardInterpretation {
   name: string;
   value: string;
   grade: string;
+  tone: Tone;
   range: string;
   action: string;
   note?: string;
@@ -92,14 +93,14 @@ export function interpretCard(
   mod: ModuleDef,
   values: Record<string, number>,
 ): CardInterpretation[] {
+  const grades = gradeEntry(mod, values);
+
   switch (mod.id) {
     case "bp": {
       const sys = values["systolic"];
       const dia = values["diastolic"];
-      if (sys == null || dia == null) return [];
+      if (sys == null || dia == null || grades.length === 0) return [];
       const tier = gradeBloodPressure(sys, dia);
-      const iso = isIsolatedSystolic(sys, dia) && tier.id !== "crisis";
-      const label = iso ? `${tier.label}・單純收縮期高血壓` : tier.label;
       const rangeMap: Record<string, string> = {
         normal: "收縮壓低於120且舒張壓低於80",
         elevated: "收縮壓120–139或舒張壓80–89",
@@ -119,16 +120,19 @@ export function interpretCard(
       return [{
         name: "血壓",
         value: `${sys}/${dia} mmHg${pulseStr}`,
-        grade: label,
+        grade: grades[0]!.label,
+        tone: grades[0]!.tone,
         range: rangeMap[tier.id] ?? "",
         action: actionMap[tier.id] ?? "",
       }];
     }
     case "tanita": {
       const cards: CardInterpretation[] = [];
+      const gradeByMetric = new Map(grades.map((g) => [g.metric, g]));
+
       const bmi = values["bmi"];
       if (bmi != null) {
-        const g = gradeBmi(bmi);
+        const g = gradeByMetric.get("BMI");
         const rangeMap: Record<string, string> = {
           "過輕": "BMI 低於18.5",
           "正常": "BMI 18.5至22.9",
@@ -138,17 +142,20 @@ export function interpretCard(
         cards.push({
           name: "BMI",
           value: `${bmi}`,
-          grade: g,
-          range: rangeMap[g] ?? "",
-          action: g === "正常" ? "繼續維持健康體重" : g === "過輕" ? "建議諮詢醫生或營養師" : "建議注意飲食及運動，必要時諮詢醫生",
+          grade: g?.label ?? "無適用參考標準",
+          tone: g?.tone ?? "neutral",
+          range: g ? (rangeMap[g.label] ?? "") : "",
+          action: g?.label === "正常" ? "繼續維持健康體重" : g?.label === "過輕" ? "建議諮詢醫生或營養師" : "建議注意飲食及運動，必要時諮詢醫生",
         });
       }
       const fat = values["bodyFat"];
       if (fat != null) {
+        const g = gradeByMetric.get("體脂率");
         cards.push({
           name: "體脂率",
           value: `${fat}%`,
-          grade: "無適用參考標準",
+          grade: g?.label ?? "無適用參考標準",
+          tone: g?.tone ?? "neutral",
           range: "需要年齡及性別才能對照標準",
           action: "請參考檢查機構提供的年齡性別對照表",
           note: "無適用參考標準（需要年齡及性別）",
@@ -156,7 +163,7 @@ export function interpretCard(
       }
       const visceral = values["visceralFat"];
       if (visceral != null) {
-        const g = gradeVisceralFat(visceral);
+        const g = gradeByMetric.get("內臟脂肪等級");
         const rangeMap: Record<string, string> = {
           "正常": "等級1至9屬健康範圍",
           "偏高": "等級10至14屬偏高",
@@ -165,9 +172,10 @@ export function interpretCard(
         cards.push({
           name: "內臟脂肪",
           value: `等級 ${visceral}`,
-          grade: g,
-          range: rangeMap[g] ?? "",
-          action: g === "正常" ? "繼續維持健康生活習慣" : "建議注意飲食及增加運動，減少腰腹脂肪",
+          grade: g?.label ?? "無適用參考標準",
+          tone: g?.tone ?? "neutral",
+          range: g ? (rangeMap[g.label] ?? "") : "",
+          action: g?.label === "正常" ? "繼續維持健康生活習慣" : "建議注意飲食及增加運動，減少腰腹脂肪",
         });
       }
       return cards;
@@ -178,7 +186,8 @@ export function interpretCard(
       return [{
         name: "手握力",
         value: `${v} 公斤`,
-        grade: "無適用參考標準",
+        grade: grades[0]?.label ?? "無適用參考標準",
+        tone: grades[0]?.tone ?? "neutral",
         range: "需要年齡及性別才能對照標準",
         action: "可透過握力球、阻力帶等訓練改善手握力",
         note: "無適用參考標準（需要年齡及性別）",
@@ -190,7 +199,8 @@ export function interpretCard(
       return [{
         name: "坐地前伸",
         value: `${v} 厘米`,
-        grade: "無適用參考標準",
+        grade: grades[0]?.label ?? "無適用參考標準",
+        tone: grades[0]?.tone ?? "neutral",
         range: "需要年齡及性別才能對照標準",
         action: "規律伸展可改善柔軟度，減少跌倒與腰背痛風險",
         note: "無適用參考標準（需要年齡及性別）",
