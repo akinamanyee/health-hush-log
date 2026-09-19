@@ -3,7 +3,7 @@
 **Version 1.4** · 2026-09-19 17:01 HKT · the single source of truth for scope.
 
 Version 1.4 states the privacy promise precisely (no health record is ever stored off the
-device; a photo or a grade label may leave it transiently on the user's own action), requires the
+device; a photo or readings with grade labels may leave it transiently on the user's own action), requires the
 AI summary to be checked for grounding after it is written and withheld if it fails, names one
 official source per grading table, records dates on the user's local calendar, accepts spoken
 Chinese numerals, and lets any past blood-pressure record produce a re-check reminder.
@@ -38,7 +38,7 @@ Readings sit scattered across paper notes and phone photos, so nobody can tell w
 7. Reads a plain-language health summary built strictly from the bundled reference leaflets, and exports the whole history as an Excel-friendly CSV.
 
 ## SUCCESS
-In today's live demo: the cover page leads into four choices labelled 血壓、身體成份分析儀、手握力、坐地前伸測試; a body-composition analyser screen photo or a blood-pressure monitor photo can be captured by camera or uploaded, read into the form and confirmed; a blood pressure of 152/78 grades as 高血壓（第一期）・單純收縮期高血壓 with a 6-month re-check date; every saved record shows the date with year; the `.ics` file downloads and opens in a calendar; the CSV opens in Excel with legible Traditional Chinese; the browser network tab shows no health readings leaving the device apart from the photo sent for reading; and no API key appears anywhere in the browser.
+In today's live demo: the cover page leads into four choices labelled 血壓、身體成份分析儀、手握力、坐地前伸測試; a body-composition analyser screen photo or a blood-pressure monitor photo can be captured by camera or uploaded, read into the form and confirmed; a blood pressure of 152/78 grades as 高血壓（第一期）・單純收縮期高血壓 with a 6-month re-check date; every saved record shows the date with year; the `.ics` file downloads and opens in a calendar; the CSV opens in Excel with legible Traditional Chinese; the browser network tab shows no health readings leaving the device apart from the photo sent for reading and the latest readings sent for the summary; and no API key appears anywhere in the browser.
 
 ## OUT OF SCOPE
 No accounts, login, or profiles. No cloud storage, sync, or sharing between devices. No medication, diet, or step tracking. No wearable integrations. No PDF reports. No English or Simplified Chinese interface. No push or email notifications. No AI diagnosis.
