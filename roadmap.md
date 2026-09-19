@@ -1,2 +1,1 @@
-- Produce PRD-to-code reconciliation report before any further fixes.
-- Finish M9–M14 build verification.
+- All roadmap milestones M1–M16 delivered; no open tasks.

@@ -2,7 +2,7 @@
 
 Ordered so the product is genuinely usable at the end of every milestone. Each milestone is one slice of the magic, traceable to the PRD; the HOW lives in the per-milestone build plan under [plan/](plan/).
 
-**Status (2026-09-19 15:56 HKT):** M1–M15 delivered. M1–M8: [plan/01-08-initial-build.md](plan/01-08-initial-build.md), followed by [plan/09-prd-reconciliation.md](plan/09-prd-reconciliation.md). M9–M14: [plan/10-m09-cover-entrance.md](plan/10-m09-cover-entrance.md), [plan/11-m10-four-clear-choices.md](plan/11-m10-four-clear-choices.md), [plan/12-m11-no-profile-gate.md](plan/12-m11-no-profile-gate.md), [plan/13-m12-full-recording-date.md](plan/13-m12-full-recording-date.md), [plan/14-m13-camera-or-upload.md](plan/14-m13-camera-or-upload.md), [plan/15-m14-privacy-data-usage.md](plan/15-m14-privacy-data-usage.md).
+**Status (2026-09-19 17:08 HKT):** M1–M16 delivered. M1–M8: [plan/01-08-initial-build.md](plan/01-08-initial-build.md), followed by [plan/09-prd-reconciliation.md](plan/09-prd-reconciliation.md). M9–M14: [plan/10-m09-cover-entrance.md](plan/10-m09-cover-entrance.md), [plan/11-m10-four-clear-choices.md](plan/11-m10-four-clear-choices.md), [plan/12-m11-no-profile-gate.md](plan/12-m11-no-profile-gate.md), [plan/13-m12-full-recording-date.md](plan/13-m12-full-recording-date.md), [plan/14-m13-camera-or-upload.md](plan/14-m13-camera-or-upload.md), [plan/15-m14-privacy-data-usage.md](plan/15-m14-privacy-data-usage.md). M15: [plan/16-m15-coherent-record-journey.md](plan/16-m15-coherent-record-journey.md). M16: [plan/17-m16-trustworthy-numbers-and-dates.md](plan/17-m16-trustworthy-numbers-and-dates.md).
 
 ## M1 — A calm home worth returning to
 The Traditional Chinese, 50+ friendly shell: the Japanese-minimalist glass-and-earth-tone design system, the dashboard with four clearly labelled module cards, the standing 「資料只存在此裝置」 privacy notice, and the 「僅供參考，不能取代醫生診斷」 disclaimer. Value: a visitor immediately understands what this is, trusts it, and can navigate without reading instructions.
@@ -63,5 +63,14 @@ Traces: HARD CONSTRAINTS (local storage, server-only AI credential, allowed serv
 ## M15 — 清楚而連貫的紀錄旅程: the grade and destination never disappear
 The four supplied replacement illustrations load without cropping; saved history displays its grade; every module offers camera or upload; record, summary and error pages return directly to 健康紀錄簿; and the clean cover opens privacy terms from a link. Value: the core journey remains understandable after the first save, not only before it.
 Traces: USER JOURNEY 1–5 · SUCCESS · HARD CONSTRAINTS (Traditional Chinese, notices, deterministic grading).
+
+## M16 — 可信的數字與日期: every claim holds up
+The summary is checked after it is written and withheld rather than shown if it contains a number
+outside the bundled reference material or drops the doctor reminder; each grading table names one
+official source; readings save under the device's own calendar day and re-check dates never slip
+past a month end; spoken Chinese numerals are understood; and any past blood-pressure record can
+produce its re-check reminder. Value: the logbook's numbers, grades and dates can be trusted
+without checking them by hand.
+Traces: HARD CONSTRAINTS (grounded AI, deterministic grading, no extrapolation) · Calendar Synchronization · Multimodal Input (voice) · NORTHSTAR.
 
 Each milestone ends with a live, usable product: M1 is a shell you can look at, M2 a working logbook, and every later step adds magic without breaking what's there.
