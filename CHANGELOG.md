@@ -4,6 +4,12 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-19 17:08 — Living docs reconciled and completed
+- Added the missing build plans for the last two milestones and recorded M16 in the roadmap, so every delivered milestone has its own small plan file.
+- Wrote the project's working constitution (the rules any AI assistant must follow: local-first, deterministic grading, no invented numbers, review before save, server-side credentials, Traditional Chinese, docs updated in the same pass) into AGENTS.md and linked it from the README.
+- Cleared the stale internal task list and noted the changelog's own archive rule in the README.
+- Timestamp fetched live (Sat, 19 Sep 2026 09:08:32 GMT → 2026-09-19 17:08 HKT), not guessed.
+
 ## 2026-09-19 17:01 — Truthful privacy wording, checked summaries, honest dates
 - Restated the NORTHSTAR as no health record stored off the device, matching the PRD's own transient photo-read and grade-label allowance.
 - The health summary is now checked after it is written: any number not in the bundled leaflet, or a missing medical reminder, triggers one strict retry and then a plain refusal instead of ungrounded advice.
