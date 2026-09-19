@@ -48,19 +48,19 @@ function Index() {
             <PrivacyNotice context="cover" />
           </DialogContent>
         </Dialog>
-        <section className="mx-auto flex min-h-screen w-full items-center justify-center px-4 py-5">
+        <img
+          src={frontPageAsset.url}
+          alt="護心計劃，守護您的心腦血管健康"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+        <section className="relative flex min-h-screen w-full flex-col items-center justify-end pb-12">
           <Button
             type="button"
-            variant="ghost"
             onClick={() => void navigate({ to: "/logbook" })}
-            className="relative h-[calc(100svh-2.5rem)] max-h-[1920px] w-auto max-w-full overflow-hidden rounded-[2rem] border border-border bg-card p-0 shadow-2xl hover:bg-card focus-visible:ring-4"
+            size="lg"
+            className="min-h-14 w-[min(80%,20rem)] rounded-xl px-8 text-lg font-semibold shadow-lg"
           >
-            <img
-              src={frontPageAsset.url}
-              alt="護心計劃，守護您的心腦血管健康"
-              className="h-full w-auto max-w-full object-contain"
-            />
-            <span className="sr-only">護心計劃，守護您的心腦血管健康，開始檢測，進入</span>
+            進入
           </Button>
         </section>
       </main>

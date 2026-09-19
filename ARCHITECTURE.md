@@ -1,7 +1,7 @@
 # Architecture — 健康紀錄簿
 
 Describes how the code is actually built. The code is the SSOT for behaviour; this file
-describes it. Last reconciled against the code: **2026-09-19 23:07 HKT**.
+describes it. Last reconciled against the code: **2026-09-19 23:37 HKT**.
 
 ## Shape in one paragraph
 
