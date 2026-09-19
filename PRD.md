@@ -1,7 +1,12 @@
 # PRD — 健康紀錄簿 (Health Logbook)
 
-**Version 1.3** · 2026-09-19 15:56 HKT · the single source of truth for scope.
+**Version 1.4** · 2026-09-19 17:01 HKT · the single source of truth for scope.
 
+Version 1.4 states the privacy promise precisely (no health record is ever stored off the
+device; a photo or a grade label may leave it transiently on the user's own action), requires the
+AI summary to be checked for grounding after it is written and withheld if it fails, names one
+official source per grading table, records dates on the user's local calendar, accepts spoken
+Chinese numerals, and lets any past blood-pressure record produce a re-check reminder.
 Version 1.3 keeps the cover visually clean: privacy and data-use terms open from a clear link,
 the health logbook has its own stable destination, all four modules offer photo entry, and saved
 history continues to show the deterministic grade. Version 1.2 added a cover page before the dashboard, age and

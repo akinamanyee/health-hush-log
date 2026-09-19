@@ -23,7 +23,9 @@ server-side. Grading is pure local computation over bundled reference tables.
 | Concern | Home |
 | --- | --- |
 | Module definitions (id, title, fields, units, min/max, route, storage key) | `src/lib/health/modules.ts` |
-| Reference tables + leaflet text | `src/lib/health/charts.ts` |
+| Reference tables + leaflet text (one named source per table) | `src/lib/health/charts.ts` |
+| Local calendar dates and clamped month arithmetic | `src/lib/health/dates.ts` |
+| Spoken-number parsing (Arabic + Chinese numerals) | `src/lib/health/voice.ts` |
 | The one grading entry point | `src/lib/health/grade.ts` |
 | Storage envelope, hydration gate, AI usage counter, clear-all | `src/lib/health/store.ts` |
 | Re-check date, `.ics`, Google Calendar link | `src/lib/health/calendar.ts` |
@@ -64,7 +66,7 @@ grade labels only ──▶ generateHealthSummary (server fn, leaflet-grounded) 
 - **Grades**: `gradeEntry(mod, values)` in `grade.ts` is the only grader. Forms,
   CSV and the summary all call it, so they cannot disagree.
 - **Field metadata**: `modules.ts` only — labels, units and limits are never retyped in a route.
-- **Reference numbers**: `charts.ts` only, and the same leaflet text is what grounds the AI.
+- **Reference numbers**: `charts.ts` only, and the same leaflet text both grounds the AI and is the allow-list the generated summary is checked against after generation (fails → one strict retry → withheld).
 
 ## Storage keys
 
