@@ -69,8 +69,8 @@ function Summary() {
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 pb-24 pt-8 sm:px-6">
-      <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground">
-        <ArrowLeft className="size-5" /> 返回主頁
+      <Link to="/logbook" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground">
+        <ArrowLeft className="size-5" /> 返回健康紀錄簿
       </Link>
       <h1 className="mt-4 text-3xl font-bold sm:text-4xl">健康摘要</h1>
       <p className="mt-1 text-lg text-muted-foreground">

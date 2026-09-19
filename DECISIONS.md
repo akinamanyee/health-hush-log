@@ -20,3 +20,4 @@ in the linked ADR file under `adr/`. This index never holds the argument itself.
 | 2026-09-16 | [0013](adr/0013-asian-bmi-cutoffs.md) | Body composition uses Asian BMI cut-offs |
 | 2026-09-16 | [0014](adr/0014-living-docs-structure.md) | Living docs split into PRD, Architecture, Decisions, Changelog, Roadmap and per-milestone plans |
 | 2026-09-17 | [0015](adr/0015-front-door-no-profile-and-clearer-privacy.md) | Next product direction adds a cover entrance, removes age/gender collection, renames modules, and clarifies privacy/data usage |
+| 2026-09-19 | [0016](adr/0016-stable-logbook-and-derived-history-grades.md) | Keep a stable logbook destination and derive saved-history grades from the single grader |

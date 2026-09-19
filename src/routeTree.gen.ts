@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BloodPressureRouteImport } from './routes/blood-pressure'
 import { Route as GripRouteImport } from './routes/grip'
+import { Route as LogbookRouteImport } from './routes/logbook'
 import { Route as SitAndReachRouteImport } from './routes/sit-and-reach'
 import { Route as SummaryRouteImport } from './routes/summary'
 import { Route as TanitaRouteImport } from './routes/tanita'
@@ -29,6 +30,11 @@ const BloodPressureRoute = BloodPressureRouteImport.update({
 const GripRoute = GripRouteImport.update({
   id: '/grip',
   path: '/grip',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LogbookRoute = LogbookRouteImport.update({
+  id: '/logbook',
+  path: '/logbook',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitAndReachRoute = SitAndReachRouteImport.update({
@@ -51,6 +57,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/blood-pressure': typeof BloodPressureRoute
   '/grip': typeof GripRoute
+  '/logbook': typeof LogbookRoute
   '/sit-and-reach': typeof SitAndReachRoute
   '/summary': typeof SummaryRoute
   '/tanita': typeof TanitaRoute
@@ -59,6 +66,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/blood-pressure': typeof BloodPressureRoute
   '/grip': typeof GripRoute
+  '/logbook': typeof LogbookRoute
   '/sit-and-reach': typeof SitAndReachRoute
   '/summary': typeof SummaryRoute
   '/tanita': typeof TanitaRoute
@@ -68,6 +76,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/blood-pressure': typeof BloodPressureRoute
   '/grip': typeof GripRoute
+  '/logbook': typeof LogbookRoute
   '/sit-and-reach': typeof SitAndReachRoute
   '/summary': typeof SummaryRoute
   '/tanita': typeof TanitaRoute
@@ -78,6 +87,7 @@ export interface FileRouteTypes {
     | '/'
     | '/blood-pressure'
     | '/grip'
+    | '/logbook'
     | '/sit-and-reach'
     | '/summary'
     | '/tanita'
@@ -86,6 +96,7 @@ export interface FileRouteTypes {
     | '/'
     | '/blood-pressure'
     | '/grip'
+    | '/logbook'
     | '/sit-and-reach'
     | '/summary'
     | '/tanita'
@@ -94,6 +105,7 @@ export interface FileRouteTypes {
     | '/'
     | '/blood-pressure'
     | '/grip'
+    | '/logbook'
     | '/sit-and-reach'
     | '/summary'
     | '/tanita'
@@ -103,6 +115,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BloodPressureRoute: typeof BloodPressureRoute
   GripRoute: typeof GripRoute
+  LogbookRoute: typeof LogbookRoute
   SitAndReachRoute: typeof SitAndReachRoute
   SummaryRoute: typeof SummaryRoute
   TanitaRoute: typeof TanitaRoute
@@ -129,6 +142,13 @@ declare module '@tanstack/react-router' {
       path: '/grip'
       fullPath: '/grip'
       preLoaderRoute: typeof GripRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/logbook': {
+      id: '/logbook'
+      path: '/logbook'
+      fullPath: '/logbook'
+      preLoaderRoute: typeof LogbookRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sit-and-reach': {
@@ -159,6 +179,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BloodPressureRoute: BloodPressureRoute,
   GripRoute: GripRoute,
+  LogbookRoute: LogbookRoute,
   SitAndReachRoute: SitAndReachRoute,
   SummaryRoute: SummaryRoute,
   TanitaRoute: TanitaRoute,

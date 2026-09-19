@@ -59,7 +59,7 @@ export function RecordModule({ mod }: { mod: ModuleDef }) {
     }
     setBusy(true);
     try {
-      const res = await extract({ data: { image: dataUrl, module: mod.id as "tanita" | "bp" } });
+      const res = await extract({ data: { image: dataUrl, module: mod.id } });
       const filled: Record<string, string> = { ...values };
       for (const [k, v] of Object.entries(res.values)) {
         if (v != null) filled[k] = String(v);
@@ -133,8 +133,8 @@ export function RecordModule({ mod }: { mod: ModuleDef }) {
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 pb-24 pt-8 sm:px-6">
-      <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground">
-        <ArrowLeft className="size-5" /> 返回主頁
+      <Link to="/logbook" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground">
+        <ArrowLeft className="size-5" /> 返回健康紀錄簿
       </Link>
       <h1 className="mt-4 text-3xl font-bold sm:text-4xl">{mod.title}</h1>
       <p className="mt-1 text-lg text-muted-foreground">{mod.subtitle}</p>
@@ -285,9 +285,11 @@ export function RecordModule({ mod }: { mod: ModuleDef }) {
               </div>
             )}
             <ul className="mt-4 divide-y divide-border">
-              {entries.map((e) => (
-                <li key={e.id} className="flex items-center justify-between gap-3 py-3">
-                  <div>
+              {entries.map((e) => {
+                const entryGrades = gradeEntry(mod, e.values);
+                return (
+                <li key={e.id} className="flex items-start justify-between gap-3 py-4">
+                  <div className="min-w-0">
                     <div className="text-lg font-medium">{formatChineseDate(e.date)}</div>
                     <div className="text-base text-muted-foreground">
                       {mod.fields
@@ -295,6 +297,16 @@ export function RecordModule({ mod }: { mod: ModuleDef }) {
                         .map((f) => `${f.label} ${e.values[f.key]}${f.unit}`)
                         .join("・")}
                     </div>
+                    {entryGrades.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {entryGrades.map((g) => (
+                          <span key={g.metric ?? g.label} className="inline-flex items-center gap-2">
+                            {g.metric && <span className="text-sm font-medium text-muted-foreground">{g.metric}</span>}
+                            <GradeBadge label={g.label} tone={g.tone} />
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   <Button
                     type="button"
@@ -307,7 +319,8 @@ export function RecordModule({ mod }: { mod: ModuleDef }) {
                     <Trash2 className="size-5" />
                   </Button>
                 </li>
-              ))}
+                );
+              })}
             </ul>
           </>
         )}
