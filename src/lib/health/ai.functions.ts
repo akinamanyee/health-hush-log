@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { streamText } from "ai";
 import { z } from "zod";
-import { REFERENCE_LEAFLET } from "./charts";
+import { REFERENCE_LEAFLET, TIPS_REFERENCE, type TipBlock } from "./charts";
 
 const ExtractInput = z.object({
   image: z.string().startsWith("data:image/"), // base64 data URL, real MIME type
@@ -107,34 +107,81 @@ export const extractFromImage = createServerFn({ method: "POST" })
     }
   });
 
-// Grade labels only. No raw readings or dates ever leave the device; age/gender are not collected.
-const SummaryInput = z.object({
-  items: z
-    .array(
-      z.object({
-        module: z.string().max(20),
-        grades: z.array(z.string().max(40)).max(12),
-      }),
-    )
-    .max(8),
+const RichSummaryInput = z.object({
+  cards: z.array(z.object({
+    name: z.string().max(20),
+    value: z.string().max(80),
+    grade: z.string().max(40),
+    range: z.string().max(120),
+    action: z.string().max(100),
+    note: z.string().max(100).optional(),
+  })).max(6),
 });
 
-/**
- * Grounding check, run AFTER generation — the prompt alone cannot guarantee it.
- * Every number in the summary must already exist in the bundled leaflet (the
- * only permitted knowledge source), and the medical disclaimer must be present.
- */
-function groundingFailure(text: string, allowedNumbers: Set<string>): string | null {
-  if (!text) return "空白摘要";
-  const numbers = text.match(/\d+(?:\.\d+)?/g) ?? [];
+const RichSummaryOutput = z.object({
+  cards: z.array(z.object({
+    name: z.string(),
+    interpretation: z.string(),
+  })),
+  tips: z.array(z.object({
+    tip: z.string(),
+    source: z.string(),
+    url: z.string(),
+  })),
+  disclaimer: z.string(),
+});
+
+export type RichSummaryResult = z.infer<typeof RichSummaryOutput>;
+
+function selectRelevantTips(cards: z.infer<typeof RichSummaryInput>["cards"]): TipBlock[] {
+  const topics = new Set<string>();
+  for (const card of cards) {
+    const g = card.grade;
+    const n = card.name;
+    if (n === "血壓" && g !== "正常") {
+      topics.add("心腦血管病、中風及預防");
+      topics.add("高血壓及預防");
+      topics.add("健康飲食（針對過重及高血壓）");
+    }
+    if (n === "BMI" && (g === "偏高" || g === "過高" || g === "過輕")) {
+      topics.add("BMI（體重管理）");
+      topics.add("健康飲食（針對過重及高血壓）");
+      topics.add("日常運動（針對預防過重）");
+    }
+    if (n === "內臟脂肪" && g !== "正常") {
+      topics.add("內臟脂肪問題與預防");
+      topics.add("心腦血管病、中風及預防");
+    }
+    if (n === "手握力" || n === "坐地前伸") {
+      topics.add("日常運動（針對預防過重）");
+    }
+  }
+  if (topics.size === 0) {
+    topics.add("健康飲食（針對過重及高血壓）");
+    topics.add("日常運動（針對預防過重）");
+  }
+  return TIPS_REFERENCE.filter((t) => topics.has(t.topic));
+}
+
+function richGroundingFailure(
+  output: RichSummaryResult,
+  allowedNumbers: Set<string>,
+): string | null {
+  const allText = [
+    ...output.cards.map((c) => c.interpretation),
+    ...output.tips.map((t) => t.tip),
+    output.disclaimer,
+  ].join(" ");
+  if (!allText) return "空白摘要";
+  const numbers = allText.match(/\d+(?:\.\d+)?/g) ?? [];
   const invented = numbers.filter((n) => !allowedNumbers.has(n));
   if (invented.length > 0) return `出現參考資料以外的數值：${invented.slice(0, 5).join("、")}`;
-  if (!text.includes("醫生")) return "缺少就醫提醒";
+  if (!output.disclaimer.includes("醫生")) return "缺少就醫提醒";
   return null;
 }
 
-export const generateHealthSummary = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => SummaryInput.parse(input))
+export const generateRichSummary = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => RichSummaryInput.parse(input))
   .handler(async ({ data }) => {
     const { createGateway, serverCapOk } = await import("@/lib/ai-gateway.server");
     const req = getRequest();
@@ -142,14 +189,42 @@ export const generateHealthSummary = createServerFn({ method: "POST" })
     if (!serverCapOk(ip)) throw new Error("今日生成次數已達上限，請明天再試。");
 
     const gateway = createGateway();
-    const records = data.items
-      .filter((i) => i.grades.length > 0)
-      .map((i) => `${i.module}｜近期評級（由新至舊）：${i.grades.join("、")}`)
-      .join("\n");
+    const relevantTips = selectRelevantTips(data.cards);
+    const tipsText = relevantTips
+      .map((t) => `【${t.topic}】\n${t.tips}\n來源：${t.sources.map((s) => s.title).join("、")}`)
+      .join("\n\n");
 
-    const allowedNumbers = new Set(REFERENCE_LEAFLET.match(/\d+(?:\.\d+)?/g) ?? []);
+    const cardsText = data.cards
+      .map((c) => `${c.name}：${c.value}（${c.grade}）\n範圍：${c.range}\n建議：${c.action}${c.note ? `\n備註：${c.note}` : ""}`)
+      .join("\n\n");
 
-    const basePrompt = `你是一份健康紀錄的摘要助手。以下參考資料是你唯一可以使用的知識來源，絕對不可加入參考資料以外的醫學資訊、診斷或建議；如紀錄涉及資料以外的事項，請明確說明「此部分超出參考資料範圍」。你只會看到評級結果，不會看到具體數值，請不要猜測或編造任何數值。\n\n【參考資料】\n${REFERENCE_LEAFLET}\n\n【近期評級】\n${records || "（暫無紀錄）"}\n\n請用繁體中文寫一段約150–250字的溫和健康摘要：先總結各項評級，再按參考資料給予一般性建議，最後提醒這僅供參考、不能取代醫生診斷（須出現「醫生」二字）。語氣溫和，適合50歲以上讀者。`;
+    const allowedNumbers = new Set([
+      ...(REFERENCE_LEAFLET.match(/\d+(?:\.\d+)?/g) ?? []),
+      ...(tipsText.match(/\d+(?:\.\d+)?/g) ?? []),
+      ...data.cards.flatMap((c) => [
+        ...(c.value.match(/\d+(?:\.\d+)?/g) ?? []),
+        ...(c.range.match(/\d+(?:\.\d+)?/g) ?? []),
+        ...(c.action.match(/\d+(?:\.\d+)?/g) ?? []),
+      ]),
+    ]);
+
+    const validUrls = new Set(relevantTips.flatMap((t) => t.sources.map((s) => s.url)));
+    const validSources = new Map(relevantTips.flatMap((t) => t.sources.map((s) => [s.title, s.url])));
+
+    const basePrompt = `你是一位健康紀錄的摘要助手，為50歲以上的繁體中文讀者撰寫易讀的健康報告。請用JSON格式回覆。
+
+第一部分：逐項解讀
+根據以下各項檢查結果，用溫和易懂的語言解釋每項數據代表甚麼意思、落在甚麼範圍、以及建議的跟進行動。每項約50至80字。
+
+${cardsText}
+
+第二部分：健康貼士
+根據以上結果的整體情況，從以下參考資料中挑選最相關的3至5個具體可行的健康建議。每個建議須：(1) 具體到可以明天就做，(2) 用一句話說完，(3) 標明來源的文章標題和網址。不可加入參考資料以外的建議。
+
+${tipsText}
+
+請用以下JSON格式回覆（不要輸出其他文字）：
+{"cards":[{"name":"項目名稱","interpretation":"解讀文字"}],"tips":[{"tip":"建議內容","source":"來源文章標題","url":"來源網址"}],"disclaimer":"提醒文字，須包含「醫生」二字"}`;
 
     const run = async (prompt: string) => {
       const result = streamText({
@@ -167,19 +242,47 @@ export const generateHealthSummary = createServerFn({ method: "POST" })
       return (await result.text).trim();
     };
 
+    const parseOutput = (text: string): RichSummaryResult => {
+      const raw = extractJson(text);
+      const parsed = RichSummaryOutput.parse(raw);
+      parsed.tips = parsed.tips.filter((t) => {
+        if (validSources.has(t.source)) {
+          t.url = validSources.get(t.source)!;
+          return true;
+        }
+        if (validUrls.has(t.url)) return true;
+        return false;
+      });
+      return parsed;
+    };
+
     let text = await run(basePrompt);
-    let failure = groundingFailure(text, allowedNumbers);
+    let output: RichSummaryResult;
+    try {
+      output = parseOutput(text);
+    } catch {
+      text = await run(
+        `${basePrompt}\n\n【重要】上一次回覆的JSON格式不正確。請嚴格按照指定的JSON格式回覆，不要加入任何其他文字。`,
+      );
+      output = parseOutput(text);
+    }
+
+    let failure = richGroundingFailure(output, allowedNumbers);
     if (failure) {
-      // One strict retry, then fail loudly — never show ungrounded advice.
       text = await run(
         `${basePrompt}\n\n【重要】上一次生成不合規（原因：${failure}）。請完全不要寫出任何參考資料沒有出現過的數字，並必須提醒不能取代醫生診斷。`,
       );
-      failure = groundingFailure(text, allowedNumbers);
+      try {
+        output = parseOutput(text);
+      } catch {
+        throw new Error("摘要格式不正確，請稍後再試。");
+      }
+      failure = richGroundingFailure(output, allowedNumbers);
     }
     if (failure) {
       throw new Error(`摘要未通過內容核對（${failure}），已停止顯示。請稍後再試或參考各項評級。`);
     }
 
-    return { ok: true as const, summary: text };
+    return { ok: true as const, result: output };
   });
 

@@ -15,12 +15,12 @@ module wording will use 血壓、身體成份分析儀、手握力、坐地前�
 capture or upload, and privacy/data-usage wording will be clearer at the points of use. Version
 1.1 records what the build delivered beyond Version 1's wording: the photo-reading path also
 covers the blood-pressure monitor screen, not only the Tanita display; the CSV export carries a
-grade column alongside the readings; and the health summary receives grade labels only. How this
+grade column alongside the readings; and the health summary receives the latest readings and grade labels. How this
 is built: [ARCHITECTURE.md](ARCHITECTURE.md) · why: [DECISIONS.md](DECISIONS.md) · history:
 [CHANGELOG.md](CHANGELOG.md) · roadmap: [Product_Roadmap.md](Product_Roadmap.md).
 
 ## NORTHSTAR
-Make self-tracked health numbers as trustworthy and readable as a clinic report, with no health record ever stored outside the user's own device. The only data that may leave the device is transient and user-initiated: a photo sent for one-off reading, and derived grade labels sent for a summary — neither is retained anywhere.
+Make self-tracked health numbers as trustworthy and readable as a clinic report, with no health record ever stored outside the user's own device. The only data that may leave the device is transient and user-initiated: a photo sent for one-off reading, and the latest readings with their derived grade labels sent for a summary — neither is retained anywhere.
 
 ## USER
 Traditional-Chinese-reading adults aged 50+ in Hong Kong and Taiwan who already own a body-composition analyser, a home blood-pressure monitor, or attend community fitness checks — and who keep the results on paper, in photos, or nowhere at all.
@@ -47,7 +47,7 @@ No accounts, login, or profiles. No cloud storage, sync, or sharing between devi
 - Single-user and fully anonymous: no sign-in, no roles, no per-user records. Everything the app shows belongs to whoever holds the device.
 - All health data lives only in this browser's local storage. Nothing is written to any server or database, and a visible clear-all action erases it.
 - The AI credential is held server-side only, inside this app's own server layer (server functions on the managed AI gateway). The browser never receives or sees the key, and the server keeps nothing.
-- Only two things may reach the server: the photo being read, and the grade labels needed to write the summary. Raw readings and dates never leave the device; age and gender are not collected.
+- Only two things may reach the server: the photo being read, and the latest readings with their grade labels needed to write the summary. Dates never leave the device; age and gender are not collected.
 - Grading is deterministic and comes from the bundled reference tables — never from AI. Where a chart does not cover the user, the app says 「無適用參考標準」 and still saves the raw number; it never extrapolates.
 - The AI summary may use the bundled reference leaflet text and nothing else; anything outside it must be declined out loud, and a failed generation must show a real error rather than invented advice.
 - Voice dictation uses the browser's own speech engine and only appears where Chinese recognition exists; no audio leaves the device.

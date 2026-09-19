@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowLeft, FileText, Loader2 } from "lucide-react";
+import { ArrowLeft, FileText, Loader2, ExternalLink, Heart, Activity, Scale, Eye, Hand, StretchHorizontal } from "lucide-react";
 import { toast } from "sonner";
 import { MODULES } from "@/lib/health/modules";
 import {
@@ -10,9 +10,10 @@ import {
   getAiUsageToday,
   readEntries,
 } from "@/lib/health/store";
-import { generateHealthSummary } from "@/lib/health/ai.functions";
-import { gradeEntry } from "@/lib/health/grade";
+import { generateRichSummary, type RichSummaryResult } from "@/lib/health/ai.functions";
+import { interpretCard, type CardInterpretation } from "@/lib/health/grade";
 import { Button } from "@/components/ui/button";
+import { GradeBadge } from "@/components/health/GradeBadge";
 import { PrivacyNotice } from "@/components/health/PrivacyNotice";
 
 export const Route = createFileRoute("/summary")({
@@ -29,9 +30,19 @@ export const Route = createFileRoute("/summary")({
   component: Summary,
 });
 
+const CARD_ICONS: Record<string, typeof Heart> = {
+  "血壓": Activity,
+  "BMI": Scale,
+  "體脂率": Eye,
+  "內臟脂肪": Eye,
+  "手握力": Hand,
+  "坐地前伸": StretchHorizontal,
+};
+
 function Summary() {
-  const run = useServerFn(generateHealthSummary);
-  const [summary, setSummary] = useState<string | null>(null);
+  const run = useServerFn(generateRichSummary);
+  const [result, setResult] = useState<RichSummaryResult | null>(null);
+  const [cardMap, setCardMap] = useState<Map<string, CardInterpretation>>(new Map());
   const [busy, setBusy] = useState(false);
 
   const generate = async () => {
@@ -41,24 +52,23 @@ function Summary() {
     }
     setBusy(true);
     try {
-      // Only grade labels are sent — readings and dates stay on this device.
-      const items = MODULES.map((m) => ({
-        module: m.title,
-        grades: readEntries(m.storageKey)
-          .slice(0, 6)
-          .flatMap((e) =>
-            gradeEntry(m, e.values).map((g) => (g.metric ? `${g.metric}：${g.label}` : g.label)),
-          )
-          .slice(0, 12),
-      })).filter((i) => i.grades.length > 0);
+      const allCards: CardInterpretation[] = [];
+      for (const m of MODULES) {
+        const entries = readEntries(m.storageKey);
+        if (entries.length === 0) continue;
+        const latest = entries[0]!;
+        const cards = interpretCard(m, latest.values);
+        allCards.push(...cards);
+      }
 
-      if (items.length === 0) {
+      if (allCards.length === 0) {
         toast.error("暫無紀錄可摘要，請先新增至少一筆紀錄。");
         return;
       }
 
-      const res = await run({ data: { items } });
-      setSummary(res.summary);
+      setCardMap(new Map(allCards.map((c) => [c.name, c])));
+      const res = await run({ data: { cards: allCards } });
+      setResult(res.result);
       bumpAiUsage();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "生成失敗，請稍後再試。");
@@ -74,7 +84,7 @@ function Summary() {
       </Link>
       <h1 className="mt-4 text-3xl font-bold sm:text-4xl">健康摘要</h1>
       <p className="mt-1 text-lg text-muted-foreground">
-        摘要只根據內置參考資料與您的評級生成，僅供參考，不能取代醫生診斷。
+        根據您的最新紀錄與內置參考資料生成，僅供參考，不能取代醫生診斷。
       </p>
 
       <section className="glass-card mt-8 rounded-3xl p-6 sm:p-8">
@@ -89,10 +99,63 @@ function Summary() {
           {busy ? "正在生成⋯" : "生成健康摘要"}
         </Button>
 
-        {summary && (
-          <article className="mt-6 whitespace-pre-line rounded-2xl border border-border bg-card p-6 text-lg leading-relaxed">
-            {summary}
-          </article>
+        {result && (
+          <div className="mt-8 space-y-8">
+            <div>
+              <h2 className="text-xl font-bold">您的健康檢查解讀</h2>
+              <div className="mt-4 space-y-4">
+                {result.cards.map((card) => {
+                  const Icon = CARD_ICONS[card.name] ?? Heart;
+                  const match = cardMap.get(card.name);
+                  return (
+                    <div key={card.name} className="rounded-2xl border border-border bg-card p-5">
+                      <div className="flex items-start gap-3">
+                        <Icon className="mt-0.5 size-6 shrink-0 text-accent" aria-hidden="true" />
+                        <div className="flex-1">
+                          <div className="flex flex-wrap items-center gap-3">
+                            <span className="text-lg font-semibold">{card.name}</span>
+                            {match && (
+                              <>
+                                <span className="text-base text-muted-foreground">{match.value}</span>
+                                <GradeBadge label={match.grade} tone={match.tone} />
+                              </>
+                            )}
+                          </div>
+                          <p className="mt-2 text-base leading-relaxed text-muted-foreground">
+                            {card.interpretation}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div>
+              <h2 className="text-xl font-bold">為您挑選的健康貼士</h2>
+              <ul className="mt-4 space-y-3">
+                {result.tips.map((tip, i) => (
+                  <li key={i} className="rounded-2xl border border-border bg-card p-4">
+                    <p className="text-base leading-relaxed">{tip.tip}</p>
+                    <a
+                      href={tip.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-1 inline-flex items-center gap-1 text-sm text-accent hover:underline"
+                    >
+                      {tip.source}
+                      <ExternalLink className="size-3.5" />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <p className="rounded-xl border border-border bg-muted/50 p-4 text-center text-base text-muted-foreground">
+              {result.disclaimer}
+            </p>
+          </div>
         )}
       </section>
 

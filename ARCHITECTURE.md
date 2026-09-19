@@ -1,7 +1,7 @@
 # Architecture — 健康紀錄簿
 
 Describes how the code is actually built. The code is the SSOT for behaviour; this file
-describes it. Last reconciled against the code: **2026-09-19 15:56 HKT**.
+describes it. Last reconciled against the code: **2026-09-19 HKT**.
 
 ## Shape in one paragraph
 
@@ -26,7 +26,7 @@ server-side. Grading is pure local computation over bundled reference tables.
 | Reference tables + leaflet text (one named source per table) | `src/lib/health/charts.ts` |
 | Local calendar dates and clamped month arithmetic | `src/lib/health/dates.ts` |
 | Spoken-number parsing (Arabic + Chinese numerals) | `src/lib/health/voice.ts` |
-| The one grading entry point | `src/lib/health/grade.ts` |
+| Grading entry point + card interpretation for summary | `src/lib/health/grade.ts` |
 | Storage envelope, hydration gate, AI usage counter, clear-all | `src/lib/health/store.ts` |
 | Re-check date, `.ics`, Google Calendar link | `src/lib/health/calendar.ts` |
 | CSV export | `src/lib/health/csv.ts` |
@@ -52,11 +52,16 @@ camera/upload photo ──▶ ImageDrop (downscale ≤1600px, JPEG)
 voice ──▶ ─┐ ▼
 type  ──▶ ─┴ review form (RecordModule) ── user confirms ──▶ localStorage
                      │
+                     │  Multi-photo merge: each photo overwrites only non-null
+                     │  AI values, preserving earlier reads. A progress counter
+                     │  and context-aware toast guide the user through the flow.
+                     │
                      ├─▶ gradeEntry()  ── deterministic tables ──▶ badges
                      ├─▶ recheckDate() ──▶ .ics / Google Calendar link
                      └─▶ exportAllToCsv() ──▶ 健康紀錄.csv (UTF-8 BOM)
 
-grade labels only ──▶ generateHealthSummary (server fn, leaflet-grounded) ──▶ text
+latest readings + grades ──▶ generateRichSummary (server fn, leaflet-grounded)
+                                ──▶ structured JSON (per-card interpretation, tips with sources, disclaimer)
 ```
 
 ## Single sources of truth in code
@@ -64,7 +69,8 @@ grade labels only ──▶ generateHealthSummary (server fn, leaflet-grounded) 
 - **Stored entries**: `readEntries()` / `useLocalData()` in `store.ts` are the only readers.
   Nothing else parses `localStorage`; both honour the `{ v: 1, data }` envelope.
 - **Grades**: `gradeEntry(mod, values)` in `grade.ts` is the only grader. Forms,
-  CSV and the summary all call it, so they cannot disagree.
+  CSV and the summary all call it, so they cannot disagree. `interpretCard()` calls
+  `gradeEntry()` internally and layers on range/action/value for the rich summary.
 - **Field metadata**: `modules.ts` only — labels, units and limits are never retyped in a route.
 - **Reference numbers**: `charts.ts` only, and the same leaflet text both grounds the AI and is the allow-list the generated summary is checked against after generation (fails → one strict retry → withheld).
 
@@ -81,8 +87,9 @@ There are no accounts, roles or server-side records, so there is nothing to auth
 The protection that matters is **what leaves the device**, enforced at the two call sites:
 
 - `extractFromImage` receives a downscaled image and a module id — nothing else.
-- `generateHealthSummary` receives grade **labels** only (`{ module, grades[] }`, capped).
-  No readings or dates; age and gender are not collected.
+- `generateRichSummary` receives the latest readings with their grade labels
+  (`{ name, value, grade, range, action }[]`, capped at 6 cards).
+  No dates; age and gender are not collected.
 - Both server functions are stateless: no logging of payloads, no persistence, `store: false`.
 - The AI credential is read inside the handler from the server environment; the browser
   never receives it.
