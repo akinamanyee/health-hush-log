@@ -68,7 +68,17 @@ export function RecordModule({ mod }: { mod: ModuleDef }) {
       setValues(filled);
       // Only a successful read counts against the daily cap.
       bumpAiUsage();
-      toast.success("已讀取圖片，請核對數值後儲存。");
+      const hasOptional = mod.fields.some((f) => f.optional);
+      if (hasOptional) {
+        const filledCount = mod.fields.filter((f) => filled[f.key] != null && filled[f.key] !== "").length;
+        const total = mod.fields.length;
+        const msg = filledCount >= total
+          ? `已讀取圖片（全部 ${total} 項已填）。請核對數值後儲存。`
+          : `已讀取圖片（已填 ${filledCount} / ${total} 項）。可繼續拍攝下一個畫面，或核對後儲存。`;
+        toast.success(msg);
+      } else {
+        toast.success("已讀取圖片，請核對數值後儲存。");
+      }
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "讀取失敗，請手動輸入。");
     } finally {
@@ -252,6 +262,18 @@ export function RecordModule({ mod }: { mod: ModuleDef }) {
             ))}
           </div>
         )}
+
+        {mod.fields.some((f) => f.optional) && (() => {
+          const filledCount = mod.fields.filter((f) => {
+            const raw = values[f.key];
+            return raw != null && raw !== "";
+          }).length;
+          return filledCount > 0 ? (
+            <p className="mt-5 text-center text-base text-muted-foreground">
+              已填 {filledCount} / {mod.fields.length} 項
+            </p>
+          ) : null;
+        })()}
 
         <Button
           type="button"
