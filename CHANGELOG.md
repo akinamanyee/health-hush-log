@@ -4,6 +4,13 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-19 — M17: Complete Tanita body composition data (21 fields)
+- Expanded the Tanita module from 5 to 21 fields to capture every metric the 身體組成分析儀 displays across its 6 screens: body fat mass, muscle ratio, body water (% and kg), BMR (kcal and kJ), and segmental fat % and muscle mass for trunk, arms and legs.
+- All 16 new fields are optional — a record is valid with just the original 5. The form groups related fields under Chinese headings; segmental groups (部位脂肪率, 部位肌肉量) are collapsed by default to keep the form approachable.
+- AI photo extraction schema and prompt updated to read all 21 values; fields not visible on the photographed screen return null. Multi-photo merge preserves earlier values.
+- Added body water and BMR reference text to the bundled leaflet for grounded health summaries.
+- No changes to grading (new fields have no universal chart without age/gender), storage format, CSV export, or voice input.
+
 ## 2026-09-19 17:08 — Living docs reconciled and completed
 - Added the missing build plans for the last two milestones and recorded M16 in the roadmap, so every delivered milestone has its own small plan file.
 - Wrote the project's working constitution (the rules any AI assistant must follow: local-first, deterministic grading, no invented numbers, review before save, server-side credentials, Traditional Chinese, docs updated in the same pass) into AGENTS.md and linked it from the README.

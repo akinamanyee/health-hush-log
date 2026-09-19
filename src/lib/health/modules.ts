@@ -7,6 +7,8 @@ export interface FieldDef {
   min: number;
   max: number;
   step?: string;
+  optional?: boolean;
+  group?: string;
 }
 
 export interface ModuleDef {
@@ -33,6 +35,22 @@ export const MODULES: ModuleDef[] = [
       { key: "muscleMass", label: "肌肉量", unit: "公斤", min: 5, max: 120, step: "0.1" },
       { key: "bmi", label: "BMI", unit: "", min: 10, max: 60, step: "0.1" },
       { key: "visceralFat", label: "內臟脂肪等級", unit: "", min: 1, max: 59, step: "1" },
+      { key: "fatMass", label: "體脂量", unit: "公斤", min: 0.1, max: 200, step: "0.1", optional: true, group: "體脂" },
+      { key: "muscleRatio", label: "肌肉比率", unit: "%", min: 1, max: 80, step: "0.1", optional: true, group: "肌肉" },
+      { key: "bodyWaterPct", label: "身體水分率", unit: "%", min: 10, max: 80, step: "0.1", optional: true, group: "身體水分" },
+      { key: "bodyWaterKg", label: "身體水分量", unit: "公斤", min: 5, max: 200, step: "0.1", optional: true, group: "身體水分" },
+      { key: "bmrKcal", label: "基礎代謝率", unit: "kcal", min: 500, max: 5000, step: "1", optional: true, group: "基礎代謝" },
+      { key: "bmrKj", label: "基礎代謝率", unit: "kJ", min: 2000, max: 21000, step: "1", optional: true, group: "基礎代謝" },
+      { key: "fatTrunk", label: "軀幹脂肪率", unit: "%", min: 1, max: 70, step: "0.1", optional: true, group: "部位脂肪率" },
+      { key: "fatArmR", label: "右臂脂肪率", unit: "%", min: 1, max: 70, step: "0.1", optional: true, group: "部位脂肪率" },
+      { key: "fatArmL", label: "左臂脂肪率", unit: "%", min: 1, max: 70, step: "0.1", optional: true, group: "部位脂肪率" },
+      { key: "fatLegR", label: "右腿脂肪率", unit: "%", min: 1, max: 70, step: "0.1", optional: true, group: "部位脂肪率" },
+      { key: "fatLegL", label: "左腿脂肪率", unit: "%", min: 1, max: 70, step: "0.1", optional: true, group: "部位脂肪率" },
+      { key: "muscleTrunk", label: "軀幹肌肉量", unit: "公斤", min: 1, max: 60, step: "0.1", optional: true, group: "部位肌肉量" },
+      { key: "muscleArmR", label: "右臂肌肉量", unit: "公斤", min: 0.1, max: 15, step: "0.1", optional: true, group: "部位肌肉量" },
+      { key: "muscleArmL", label: "左臂肌肉量", unit: "公斤", min: 0.1, max: 15, step: "0.1", optional: true, group: "部位肌肉量" },
+      { key: "muscleLegR", label: "右腿肌肉量", unit: "公斤", min: 0.5, max: 30, step: "0.1", optional: true, group: "部位肌肉量" },
+      { key: "muscleLegL", label: "左腿肌肉量", unit: "公斤", min: 0.5, max: 30, step: "0.1", optional: true, group: "部位肌肉量" },
     ],
   },
   {
