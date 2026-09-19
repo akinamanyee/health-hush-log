@@ -1,8 +1,10 @@
 # PRD — 健康紀錄簿 (Health Logbook)
 
-**Version 1.2** · 2026-09-17 23:36 HKT · the single source of truth for scope.
+**Version 1.3** · 2026-09-19 15:56 HKT · the single source of truth for scope.
 
-Version 1.2 adds the next product direction: a cover page will precede the dashboard, age and
+Version 1.3 keeps the cover visually clean: privacy and data-use terms open from a clear link,
+the health logbook has its own stable destination, all four modules offer photo entry, and saved
+history continues to show the deterministic grade. Version 1.2 added a cover page before the dashboard, age and
 gender will no longer be collected, every saved record will show its full date and year, the
 module wording will use 血壓、身體成份分析儀、手握力、坐地前伸測試, photo entry will offer camera
 capture or upload, and privacy/data-usage wording will be clearer at the points of use. Version
@@ -22,11 +24,11 @@ Traditional-Chinese-reading adults aged 50+ in Hong Kong and Taiwan who already 
 Readings sit scattered across paper notes and phone photos, so nobody can tell whether a number is in a safer reference range, or when the next check is due.
 
 ## USER JOURNEY
-1. Opens the cover page and sees the supplied image, the app name, the local-only privacy promise, the data-usage note, and 「僅供參考，不能取代醫生診斷」.
+1. Opens the supplied cover image without terms underneath it; a visible 「私隱與資料使用」 link opens the local-only promise, data-use note, and 「僅供參考，不能取代醫生診斷」.
 2. Enters the dashboard and sees four clearly labelled choices — 血壓、身體成份分析儀、手握力、坐地前伸測試 — paired with the supplied icons.
 3. Picks a module and records a reading three ways: use the camera or upload a photo of the device screen for AI reading, speak the numbers, or type them.
 4. Reviews and confirms the extracted values in an editable form, then saves — the app grades the reading against bundled reference charts and shows the tier in plain Traditional Chinese.
-5. Sees the saved record with the full recording date including year.
+5. Sees the saved record with the full recording date including year and the same deterministic grade, and can return directly to 「健康紀錄簿」 without replaying the cover.
 6. Takes the calculated re-check date (6 months / 1 year / 2 years by tier) into a calendar with a one-tap `.ics` download or Google Calendar link.
 7. Reads a plain-language health summary built strictly from the bundled reference leaflets, and exports the whole history as an Excel-friendly CSV.
 
@@ -47,4 +49,4 @@ No accounts, login, or profiles. No cloud storage, sync, or sharing between devi
 - A per-device daily AI cap keeps free-tier usage in check, backed by a coarse server-side limit.
 - Traditional Chinese throughout, including validation messages, grade labels and CSV headers.
 - Every screen carries 「僅供參考，不能取代醫生診斷」 and the local-only data notice.
-- Japanese-minimalist visual system: soft glassmorphism, muted earth tones, rounded corners, generous whitespace, and 50+ friendly type, contrast and touch targets.
+- Japanese-minimalist visual system aligned with the supplied cover: mint background, navy headings and actions, teal accents, restrained coral attention states, near-white surfaces, rounded corners, generous whitespace, and 50+ friendly type, contrast and touch targets.

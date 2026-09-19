@@ -4,6 +4,14 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-19 15:56 — Dashboard illustrations and core-journey corrections
+- Replaced all four broken dashboard images with the supplied blood-pressure, scale, hand-grip and stretching illustrations, shown uncropped at equal visual size.
+- Restored grade badges in saved history by deriving them from the existing single grader; no health-record schema or stored data changed.
+- Extended camera and upload reading to hand grip and sit-and-reach, with module-specific validated values and the existing editable confirmation step.
+- Added `/logbook` as the stable dashboard destination; module, summary, 404 and failure returns now go there instead of replaying the cover.
+- Moved cover privacy terms behind a visible link, translated error experiences, and aligned the interior palette with the supplied mint-and-navy cover.
+- Why: close the blockers found in the PRD reconciliation without introducing parallel data or changing the local-only privacy boundary. ([ADR 0016](adr/0016-stable-logbook-and-derived-history-grades.md))
+
 ## 2026-09-17 23:53 — Front-door build, no profile gate, icons and clearer privacy wording
 - Added the supplied 護心計劃 front page image as the first screen and paired the four dashboard choices with the uploaded placeholder images.
 - Removed age/gender collection from the live app and purge the legacy profile key; charts that need those details now show 「無適用參考標準」 while still saving the number.
