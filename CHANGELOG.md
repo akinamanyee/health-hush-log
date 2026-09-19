@@ -4,14 +4,22 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-19 23:07 — M18 audit cleanup: SSOT, perf, dead code, living docs
+- `interpretCard()` now calls `gradeEntry()` internally instead of duplicating grading logic — `gradeEntry` remains the single grading authority. ([ADR 0008](adr/0008-single-reader-single-grader.md))
+- Added `tone` to `CardInterpretation`; summary.tsx uses it directly, eliminating the duplicated `gradeTone()` function.
+- Hoisted `interpretCard` computation out of the render `.map()` loop into a `cardMap` computed once during `generate()`.
+- Removed dead `gradeEntry` import from summary.tsx.
+- Removed dead `generateHealthSummary`, `SummaryInput` and `groundingFailure` from ai.functions.ts (replaced by `generateRichSummary`).
+- PRD privacy boundary updated to reflect that M18 sends readings alongside grades. ([ADR 0018](adr/0018-summary-sends-readings-with-grades.md))
+- Updated ARCHITECTURE.md (data flow, SSOT docs, privacy model), Product_Roadmap.md (M18 entry, status line), and this changelog.
+
 ## 2026-09-19 — M18: Rich structured health summary with government-sourced tips
 - Replaced the free-text health summary with a structured report: each metric gets a plain-language interpretation card (value, grade badge, AI-written explanation), followed by 3–5 actionable health tips with clickable source links to Hong Kong government health articles.
-- Distilled 16 government articles into a bundled `TIPS_REFERENCE` constant (6 topic blocks covering cardiovascular disease, BMI, hypertension, visceral fat, diet and exercise); tips are pre-filtered by the user's grades before reaching the AI.
-- Added `interpretCard()` as the deterministic card-data builder for the summary; it calls `gradeEntry()` internally (SSOT — no duplicated grading logic) and returns structured data including tone.
+- Distilled 16 government articles into a bundled `TIPS_REFERENCE` constant (6 topic blocks covering cardiovascular disease, BMI, hypertension, visceral fat, diet and exercise); tips are pre-filtered by the user's grades before reaching the AI. ([ADR 0019](adr/0019-bundled-government-health-tips.md))
+- Added `interpretCard()` as the deterministic card-data builder for the summary, returning structured data with name, value, grade, tone, range, and action.
 - Source URL validation filters out AI-hallucinated URLs against the known valid set from bundled articles.
-- The AI now receives formatted values alongside grade labels (no dates, age or gender); PRD and privacy notices updated to match.
-- Removed the old `generateHealthSummary` server function (replaced by `generateRichSummary`).
-- Updated ARCHITECTURE.md (data flow, SSOT docs) and Product_Roadmap.md (M18 entry).
+- The AI now receives formatted values alongside grade labels (no dates, age or gender). ([ADR 0018](adr/0018-summary-sends-readings-with-grades.md))
+- Why: the summary should read like a clinic leaflet — every claim traceable to its source, every tip backed by a government article.
 
 ## 2026-09-19 21:34 — Multi-photo UX: smarter toast and progress counter
 - The toast after each AI photo read no longer says "請核對數值後儲存" when more screens remain. For modules with optional fields (currently Tanita), the toast now shows how many of the module's fields are filled and suggests continuing if any remain empty.
