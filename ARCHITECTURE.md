@@ -1,7 +1,7 @@
 # Architecture — 健康紀錄簿
 
 Describes how the code is actually built. The code is the SSOT for behaviour; this file
-describes it. Last reconciled against the code: **2026-09-19 15:56 HKT**.
+describes it. Last reconciled against the code: **2026-09-19 21:34 HKT**.
 
 ## Shape in one paragraph
 
@@ -51,6 +51,10 @@ camera/upload photo ──▶ ImageDrop (downscale ≤1600px, JPEG)
              │  strict zod values, nulls allowed
 voice ──▶ ─┐ ▼
 type  ──▶ ─┴ review form (RecordModule) ── user confirms ──▶ localStorage
+                     │
+                     │  Multi-photo merge: each photo overwrites only non-null
+                     │  AI values, preserving earlier reads. A progress counter
+                     │  and context-aware toast guide the user through the flow.
                      │
                      ├─▶ gradeEntry()  ── deterministic tables ──▶ badges
                      ├─▶ recheckDate() ──▶ .ics / Google Calendar link
