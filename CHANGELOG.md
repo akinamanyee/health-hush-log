@@ -4,6 +4,11 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-19 23:32 — Cover page: full-viewport image, no phone frame
+- Removed the card-like Button wrapper (`rounded-[2rem] border border-border bg-card shadow-2xl`) that made the cover image appear inside a phone frame.
+- The cover image now fills the entire viewport as an absolute-positioned background with `object-cover`; a simple "進入" button sits at the bottom and the "私隱與資料使用" dialog button floats top-right.
+- Why: the cover should show the supplied image edge-to-edge, not inside a device frame.
+
 ## 2026-09-19 23:07 — M18 audit cleanup: SSOT, perf, dead code, living docs
 - `interpretCard()` now calls `gradeEntry()` internally instead of duplicating grading logic — `gradeEntry` remains the single grading authority. ([ADR 0008](adr/0008-single-reader-single-grader.md))
 - Added `tone` to `CardInterpretation`; summary.tsx uses it directly, eliminating the duplicated `gradeTone()` function.
