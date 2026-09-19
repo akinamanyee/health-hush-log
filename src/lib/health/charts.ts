@@ -1,10 +1,15 @@
 // Deterministic grading tables. AI never grades — these charts do.
-// Sources: blood-pressure tiers follow common international reference charts
-// (ESH/ACC-AHA style categories); hand-grip and sit-and-reach matrices are
-// age/gender normative bands bundled with the app. The app does not collect
-// age/gender, so those matrices are retained as reference material only.
-
-export type Gender = "male" | "female";
+//
+// Provenance (single named source per table, no blending, no extrapolation):
+// - Blood pressure: 2017 ACC/AHA Hypertension Guideline categories
+//   (normal / elevated / stage 1 / stage 2), plus the guideline's
+//   hypertensive-crisis threshold of 180/110 mmHg.
+// - BMI: WHO Asia-Pacific (2000) cut-offs for Asian adults.
+// - Visceral fat: Tanita body-composition analyser manual rating scale
+//   (1–9 healthy, 10–14 high, 15+ very high).
+// Hand grip and sit-and-reach have no chart that applies without age and
+// gender, which this app does not collect — those modules record the reading
+// and report 「無適用參考標準」 rather than grading against a guessed band.
 
 export interface BpTier {
   id: string;
@@ -36,64 +41,6 @@ export function isIsolatedSystolic(systolic: number, diastolic: number): boolean
   return systolic >= 140 && diastolic < 90;
 }
 
-export interface NormBand {
-  minAge: number;
-  maxAge: number;
-  low: number; // below → 偏弱
-  high: number; // above → 良好
-}
-
-export interface NormTable {
-  label: string;
-  unit: string;
-  male: NormBand[];
-  female: NormBand[];
-}
-
-export const GRIP_NORMS: NormTable = {
-  label: "手握力",
-  unit: "公斤",
-  male: [
-    { minAge: 50, maxAge: 59, low: 32, high: 44 },
-    { minAge: 60, maxAge: 69, low: 28, high: 39 },
-    { minAge: 70, maxAge: 79, low: 24, high: 33 },
-    { minAge: 80, maxAge: 120, low: 18, high: 27 },
-  ],
-  female: [
-    { minAge: 50, maxAge: 59, low: 20, high: 28 },
-    { minAge: 60, maxAge: 69, low: 17, high: 24 },
-    { minAge: 70, maxAge: 79, low: 14, high: 21 },
-    { minAge: 80, maxAge: 120, low: 10, high: 17 },
-  ],
-};
-
-export const SIT_REACH_NORMS: NormTable = {
-  label: "坐地前伸測試",
-  unit: "厘米",
-  male: [
-    { minAge: 50, maxAge: 59, low: 0, high: 20 },
-    { minAge: 60, maxAge: 69, low: -2, high: 17 },
-    { minAge: 70, maxAge: 79, low: -5, high: 14 },
-    { minAge: 80, maxAge: 120, low: -8, high: 10 },
-  ],
-  female: [
-    { minAge: 50, maxAge: 59, low: 3, high: 24 },
-    { minAge: 60, maxAge: 69, low: 1, high: 21 },
-    { minAge: 70, maxAge: 79, low: -2, high: 18 },
-    { minAge: 80, maxAge: 120, low: -5, high: 14 },
-  ],
-};
-
-export type NormGrade = "偏弱" | "正常" | "良好" | "無適用參考標準";
-
-export function gradeAgainstNorms(table: NormTable, value: number, age: number, gender: Gender): NormGrade {
-  const band = table[gender].find((b) => age >= b.minAge && age <= b.maxAge);
-  if (!band) return "無適用參考標準";
-  if (value < band.low) return "偏弱";
-  if (value > band.high) return "良好";
-  return "正常";
-}
-
 // Body-composition bands. Deterministic, same status as the tables above.
 export type BandGrade = "過輕" | "偏低" | "正常" | "偏高" | "過高" | "無適用參考標準";
 
@@ -102,14 +49,6 @@ export function gradeBmi(bmi: number): BandGrade {
   if (bmi < 18.5) return "過輕";
   if (bmi < 23) return "正常";
   if (bmi < 25) return "偏高";
-  return "過高";
-}
-
-export function gradeBodyFat(percent: number, gender: Gender): BandGrade {
-  const [low, high, veryHigh] = gender === "male" ? [11, 22, 27] : [21, 33, 39];
-  if (percent < low) return "偏低";
-  if (percent <= high) return "正常";
-  if (percent <= veryHigh) return "偏高";
   return "過高";
 }
 

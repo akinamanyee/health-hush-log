@@ -4,6 +4,16 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-19 17:01 — Truthful privacy wording, checked summaries, honest dates
+- Restated the NORTHSTAR as no health record stored off the device, matching the PRD's own transient photo-read and grade-label allowance.
+- The health summary is now checked after it is written: any number not in the bundled leaflet, or a missing medical reminder, triggers one strict retry and then a plain refusal instead of ungrounded advice.
+- Named one official source per grading table and removed the unreachable age/gender norm tables the app can never apply.
+- Record dates and the daily AI count now follow the device's local calendar, so an early-morning reading no longer saves to yesterday; re-check dates clamp at month end.
+- Voice input understands spoken Chinese numerals and decimals, not only digits.
+- Any past blood-pressure record can now produce its own re-check reminder from the history list.
+- Logbook tuning for older eyes: smaller phone illustrations, stronger secondary text, shorter guidance, and 清除所有資料 moved into its own clearly-marked area.
+- Why: close the real drift found in the PRD reconciliation. ([ADR 0017](adr/0017-grounding-check-local-dates-named-sources.md))
+
 ## 2026-09-19 15:56 — Dashboard illustrations and core-journey corrections
 - Replaced all four broken dashboard images with the supplied blood-pressure, scale, hand-grip and stretching illustrations, shown uncropped at equal visual size.
 - Restored grade badges in saved history by deriving them from the existing single grader; no health-record schema or stored data changed.

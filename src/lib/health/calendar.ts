@@ -1,9 +1,9 @@
 // Calendar export: everything is generated client-side. No scheduler, no server.
+import { addMonthsClamped } from "./dates";
 
 export function recheckDate(fromDate: string, months: number): Date {
-  const d = new Date(fromDate + "T00:00:00");
-  d.setMonth(d.getMonth() + months);
-  return d;
+  // Clamped so a 31st never overflows into the following month.
+  return addMonthsClamped(fromDate, months);
 }
 
 export function formatChineseDate(isoDate: string): string {

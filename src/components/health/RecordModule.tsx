@@ -25,6 +25,7 @@ import { extractFromImage } from "@/lib/health/ai.functions";
 import { gradeBloodPressure } from "@/lib/health/charts";
 import { gradeEntry } from "@/lib/health/grade";
 import { formatChineseDate, recheckDate, downloadIcs, googleCalendarUrl } from "@/lib/health/calendar";
+import { todayIso, toIsoDate } from "@/lib/health/dates";
 import { Button } from "@/components/ui/button";
 import { GradeBadge } from "./GradeBadge";
 import { ImageDrop } from "./ImageDrop";
@@ -35,11 +36,11 @@ export function RecordModule({ mod }: { mod: ModuleDef }) {
   const { data: entries, save, hydrated } = useLocalData<HealthEntry[]>(mod.storageKey, []);
   const extract = useServerFn(extractFromImage);
 
-  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [date, setDate] = useState(() => todayIso());
   const [values, setValues] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [savedId, setSavedId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const numeric = useMemo(() => {
     const out: Record<string, number> = {};
@@ -104,13 +105,19 @@ export function RecordModule({ mod }: { mod: ModuleDef }) {
     const entry = makeEntry(numeric, date);
     save((prev) => sortEntries([entry, ...prev]));
     setValues({});
-    setSavedId(entry.id);
+    setSelectedId(entry.id);
     toast.success("已儲存紀錄（只保存於此裝置）。");
   };
 
-  const remove = (id: string) => save((prev) => prev.filter((e) => e.id !== id));
+  const remove = (id: string) =>
+    save((prev) => {
+      setSelectedId((cur) => (cur === id ? null : cur));
+      return prev.filter((e) => e.id !== id);
+    });
 
-  const saved = savedId ? entries.find((e) => e.id === savedId) : undefined;
+  // Follow-up scheduling works for any record the user picks from history,
+  // not only the one just saved.
+  const saved = selectedId ? entries.find((e) => e.id === selectedId) : undefined;
   const savedSystolic = saved?.values["systolic"];
   const savedDiastolic = saved?.values["diastolic"];
   const savedTier =
@@ -221,7 +228,7 @@ export function RecordModule({ mod }: { mod: ModuleDef }) {
             recheck && (
               <>
                 <p className="mt-3 text-lg">
-                  建議於 <strong>{formatChineseDate(recheck.toISOString().slice(0, 10))}</strong>（約 {savedTier.recheckMonths} 個月後）再次量度血壓。
+                  建議於 <strong>{formatChineseDate(toIsoDate(recheck))}</strong>（約 {savedTier.recheckMonths} 個月後）再次量度血壓。
                 </p>
                 <div className="mt-4 flex flex-wrap gap-3">
                   <Button
@@ -308,6 +315,18 @@ export function RecordModule({ mod }: { mod: ModuleDef }) {
                       </div>
                     )}
                   </div>
+                  <div className="flex shrink-0 items-center gap-1">
+                  {mod.id === "bp" && e.values["systolic"] != null && e.values["diastolic"] != null && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="lg"
+                      onClick={() => setSelectedId(e.id)}
+                      className="min-h-12 rounded-xl text-base font-medium text-primary hover:bg-secondary"
+                    >
+                      複查提醒
+                    </Button>
+                  )}
                   <Button
                     type="button"
                     onClick={() => remove(e.id)}
@@ -318,6 +337,7 @@ export function RecordModule({ mod }: { mod: ModuleDef }) {
                   >
                     <Trash2 className="size-5" />
                   </Button>
+                  </div>
                 </li>
                 );
               })}

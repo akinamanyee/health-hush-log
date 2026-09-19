@@ -1,5 +1,3 @@
-import { Droplets, Scale, Hand, Ruler } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
 import { STORAGE_KEYS } from "./store";
 
 export interface FieldDef {
@@ -15,7 +13,6 @@ export interface ModuleDef {
   id: "tanita" | "bp" | "grip" | "sitreach";
   title: string;
   subtitle: string;
-  icon: LucideIcon;
   path: string;
   storageKey: string;
   fields: FieldDef[];
@@ -27,7 +24,6 @@ export const MODULES: ModuleDef[] = [
     id: "tanita",
     title: "身體成份分析儀",
     subtitle: "身體成份分析儀讀數",
-    icon: Scale,
     path: "/tanita",
     storageKey: STORAGE_KEYS.tanita,
     supportsImage: true,
@@ -42,8 +38,7 @@ export const MODULES: ModuleDef[] = [
   {
     id: "bp",
     title: "血壓",
-    subtitle: "收縮壓・舒張壓・脈搏",
-    icon: Droplets,
+    subtitle: "上壓・下壓・脈搏",
     path: "/blood-pressure",
     storageKey: STORAGE_KEYS.bp,
     supportsImage: true,
@@ -57,7 +52,6 @@ export const MODULES: ModuleDef[] = [
     id: "grip",
     title: "手握力",
     subtitle: "記錄手部肌力讀數",
-    icon: Hand,
     path: "/grip",
     storageKey: STORAGE_KEYS.grip,
     supportsImage: true,
@@ -67,7 +61,6 @@ export const MODULES: ModuleDef[] = [
     id: "sitreach",
     title: "坐地前伸測試",
     subtitle: "記錄柔軟度測試距離",
-    icon: Ruler,
     path: "/sit-and-reach",
     storageKey: STORAGE_KEYS.sitreach,
     supportsImage: true,
