@@ -95,7 +95,7 @@ export function RecordModule({ mod }: { mod: ModuleDef }) {
       const raw = values[f.key];
       const v = parseFloat(raw ?? "");
       if (raw == null || raw === "" || Number.isNaN(v)) {
-        errs[f.key] = "請輸入數值";
+        if (!f.optional) errs[f.key] = "請輸入數值";
       } else if (v < f.min || v > f.max) {
         errs[f.key] = `請輸入 ${f.min} 至 ${f.max} 之間的數值`;
       }
@@ -171,28 +171,74 @@ export function RecordModule({ mod }: { mod: ModuleDef }) {
           <span className="text-base text-muted-foreground">或直接於下方輸入</span>
         </div>
 
-        <div className="mt-5 grid gap-4 sm:grid-cols-2">
-          {mod.fields.map((f) => (
-            <div key={f.key}>
-              <label htmlFor={`field-${f.key}`} className="text-base font-medium">
-                {f.label}
-                {f.unit && <span className="ml-1 text-muted-foreground">（{f.unit}）</span>}
-              </label>
-              <input
-                id={`field-${f.key}`}
-                type="number"
-                inputMode="decimal"
-                step={f.step ?? "any"}
-                min={f.min}
-                max={f.max}
-                value={values[f.key] ?? ""}
-                onChange={(e) => setValues((v) => ({ ...v, [f.key]: e.target.value }))}
-                className="mt-1 min-h-14 w-full rounded-xl border border-input bg-card px-4 text-lg"
-                aria-invalid={Boolean(errors[f.key])}
-              />
-              {errors[f.key] && <p className="mt-1 text-base text-destructive">{errors[f.key]}</p>}
-            </div>
-          ))}
+        <div className="mt-5 space-y-6">
+          {(() => {
+            const fieldInput = (f: (typeof mod.fields)[number]) => (
+              <div key={f.key}>
+                <label htmlFor={`field-${f.key}`} className="text-base font-medium">
+                  {f.label}
+                  {f.unit && <span className="ml-1 text-muted-foreground">（{f.unit}）</span>}
+                  {f.optional && <span className="ml-1 text-sm text-muted-foreground">選填</span>}
+                </label>
+                <input
+                  id={`field-${f.key}`}
+                  type="number"
+                  inputMode="decimal"
+                  step={f.step ?? "any"}
+                  min={f.min}
+                  max={f.max}
+                  value={values[f.key] ?? ""}
+                  onChange={(e) => setValues((v) => ({ ...v, [f.key]: e.target.value }))}
+                  className="mt-1 min-h-14 w-full rounded-xl border border-input bg-card px-4 text-lg"
+                  aria-invalid={Boolean(errors[f.key])}
+                />
+                {errors[f.key] && <p className="mt-1 text-base text-destructive">{errors[f.key]}</p>}
+              </div>
+            );
+
+            const ungrouped = mod.fields.filter((f) => !f.group);
+            const groupOrder: string[] = [];
+            const groups: Record<string, (typeof mod.fields)[number][]> = {};
+            for (const f of mod.fields) {
+              if (!f.group) continue;
+              if (!groups[f.group]) { groups[f.group] = []; groupOrder.push(f.group); }
+              groups[f.group].push(f);
+            }
+
+            const collapsedGroups = new Set(["部位脂肪率", "部位肌肉量"]);
+
+            return (
+              <>
+                {ungrouped.length > 0 && (
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    {ungrouped.map(fieldInput)}
+                  </div>
+                )}
+                {groupOrder.map((g) => {
+                  const fields = groups[g];
+                  const content = (
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      {fields.map(fieldInput)}
+                    </div>
+                  );
+                  if (collapsedGroups.has(g)) {
+                    return (
+                      <details key={g} className="border-t border-border pt-4">
+                        <summary className="cursor-pointer text-base font-semibold">{g}</summary>
+                        <div className="mt-3">{content}</div>
+                      </details>
+                    );
+                  }
+                  return (
+                    <div key={g} className="border-t border-border pt-4">
+                      <h3 className="mb-3 text-base font-semibold">{g}</h3>
+                      {content}
+                    </div>
+                  );
+                })}
+              </>
+            );
+          })()}
         </div>
 
         {grades.length > 0 && (
