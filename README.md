@@ -17,7 +17,8 @@ These four are authoritative. This README is derivative and must never contradic
 | [PRD.md](PRD.md) | What we're building and why it exists — intent |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | How the code is built: modules, data flow, key choices |
 | [DECISIONS.md](DECISIONS.md) + [adr/](adr/) | Why each decision was made, and what was rejected |
-| [CHANGELOG.md](CHANGELOG.md) | What changed, when, and why — newest first |
+| [CHANGELOG.md](CHANGELOG.md) | What changed, when, and why — newest first (older half moves to `changelog-archive.md` past ~100 entries) |
+| [AGENTS.md](AGENTS.md) | How AI assistants must behave in this repo — the working constitution |
 
 Build planning: [Product_Roadmap.md](Product_Roadmap.md) (the ordered milestones) and
 [plan/](plan/) (one build plan per milestone).

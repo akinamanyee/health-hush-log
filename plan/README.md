@@ -14,3 +14,5 @@ Existing plans:
 - [13-m12-full-recording-date.md](13-m12-full-recording-date.md) — M12 full date and year
 - [14-m13-camera-or-upload.md](14-m13-camera-or-upload.md) — M13 camera or upload photo entry
 - [15-m14-privacy-data-usage.md](15-m14-privacy-data-usage.md) — M14 privacy and data usage wording
+- [16-m15-coherent-record-journey.md](16-m15-coherent-record-journey.md) — M15 coherent record journey
+- [17-m16-trustworthy-numbers-and-dates.md](17-m16-trustworthy-numbers-and-dates.md) — M16 checked summaries, named sources, local dates
