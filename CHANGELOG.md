@@ -4,6 +4,11 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-19 23:58 — Cover page: spacing and privacy button refinement
+- Increased bottom padding from `pb-12` to `pb-24` so the "進入" button sits further from the image icons above it.
+- Moved the "私隱與資料使用" dialog trigger from top-right to bottom-right, reduced to ~40% of its former size (`text-xs`, `size-3.5` icon, no background or shadow), styled as a subtle `muted-foreground/70` ghost button.
+- Why: the enter button was too close to the cover image's icons; the privacy link should be discoverable but unobtrusive.
+
 ## 2026-09-19 23:32 — Cover page: full-viewport image, no phone frame
 - Removed the card-like Button wrapper (`rounded-[2rem] border border-border bg-card shadow-2xl`) that made the cover image appear inside a phone frame.
 - The cover image now fills the entire viewport as an absolute-positioned background with `object-cover`; a simple "進入" button sits at the bottom and the "私隱與資料使用" dialog button floats top-right.
