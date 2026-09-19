@@ -1,36 +1,70 @@
-# 45+ 易用性與儀表板版面優化
+# Complete PRD-to-build reconciliation
 
-## 評估結論
+## Scope
 
-目前整體已具備 45+ 友善基礎，但仍可明顯改善手機上的掃讀效率。
+Produce a report-only audit. Re-read `PRD.md` in full, inspect the current implementation and stored-data model, and test the live user journey. Do not change application code, data, or authoritative product documents during this review.
 
-**做得好的地方**
-- 全站基礎字級為 18px，主標題與選項名稱清楚、深藍對比充足。
-- 四張選項卡的整張範圍都可點擊，點擊面積遠高於一般無障礙最低要求。
-- 圖示風格一致、內容容易辨認，並以完整顯示而非裁切處理。
-- 桌面版每個圖示約 144 × 144px，配合 540 × 209px 卡片，比例合適。
-- 手機版沒有橫向溢出，主要內容與按鈕均保持足夠間距。
+## 1. Requirement-by-requirement reconciliation
 
-**需要改善的地方**
-- 手機版圖示約 126 × 126px，佔卡片過多空間；「身體成份分析儀」因此斷成兩行，副標題也不自然換行。
-- 每張手機卡片約 198px 高；在常見手機首屏只能完整看到兩個選項，四項選擇不夠一目了然。
-- 副標題顏色偏淡，對視力開始退化或在戶外閱讀的使用者不夠穩妥。
-- 頁首說明重複列出四個項目，增加閱讀量，卻沒有幫助選擇。
-- 「清除所有資料」與一般報告操作並排，雖有二次確認，但危險操作的分組仍不夠明確。
+Cover every statement in these PRD sections, in order:
 
-## 建議調整
+- Version 1.3 scope statement
+- NORTHSTAR
+- USER
+- PROBLEM
+- USER JOURNEY, items 1–7
+- SUCCESS, split into each independently testable claim
+- OUT OF SCOPE, checked item by item for accidental additions
+- HARD CONSTRAINTS, checked item by item
 
-1. 手機版將圖示容器縮至約 96–104px，桌面版維持目前約 144px。
-2. 手機卡片高度收窄至約 156–168px，同時保留整張卡片的大型點擊範圍。
-3. 增加手機文字欄寬，讓「身體成份分析儀」盡量保持單行；若窄屏仍需換行，保持兩行整齊且不擠壓副標題。
-4. 提高副標題對比及行距，不縮小現有文字。
-5. 將頁首說明簡化為「請選擇記錄項目」，由四張卡片本身承擔名稱識別。
-6. 將「清除所有資料」與摘要／匯出操作拉開，保留現有二次確認。
-7. 保持現有薄荷綠、深藍、近白色及四張插圖，不更換視覺方向。
+For every requirement, the report will include:
 
-## 驗證標準
+1. The exact PRD quotation.
+2. The exact file, component, function, or stored-data key responsible.
+3. A verdict: **Works**, **Partial/diverges**, or **Missing**.
+4. Concrete evidence from source and, where behaviour matters, the live preview.
 
-- 390 × 844 手機畫面可在較少捲動下看到更多選項，且沒有文字擠壓或橫向捲動。
-- 四個名稱、副標題及圖示均清晰；最長名稱不產生難看的逐字斷行。
-- 桌面版維持目前清楚、平衡的圖示比例。
-- 所有卡片及操作按鈕仍保有適合 45+ 使用者的點擊範圍與清楚對比。
+## 2. Fidelity checks
+
+Test the real information hierarchy and user behaviour rather than treating file existence as proof:
+
+- Cover image, privacy link, disclosure content, and entry into the logbook.
+- Four exact Traditional Chinese choices and supplied illustrations.
+- Camera, upload, voice, and manual paths in all four modules.
+- Editable review before save and validation behaviour.
+- Deterministic grading, including 152/78, isolated systolic wording, and six-month follow-up.
+- Full saved date including year, history grade persistence by derivation, and direct return to the logbook.
+- `.ics`, Google Calendar, Excel-readable CSV, and health-summary behaviour.
+- Traditional Chinese errors, empty states, notices, and unsupported-capability states.
+- Desktop and phone layout, with explicit 45+/50+ readability, contrast, touch-target, icon-size, and scanning findings.
+
+AI calls that would consume quota will be assessed from source and observable request boundaries unless a safe existing test fixture is available; no fabricated successful AI result will be reported.
+
+## 3. SSOT, access, safety, and data audit
+
+Document:
+
+- Anything implemented but absent from the PRD.
+- Any duplicated state, duplicated grading logic, parallel authority, dead reference data, or orphaned fields.
+- Every PRD requirement that remains unbuilt or only partially built.
+- Whether anonymous, single-device access and local-only health-data rules are enforced exactly as specified.
+- Which payloads can reach the server, where credentials live, and whether dates or raw readings can escape unexpectedly.
+- Input validation, upload limits, AI retention controls, error reporting, and rate-limit limitations relevant to this pass.
+- The complete current data schema, version envelope, local-storage keys, optional fields, and AI-usage record.
+- Whether any database, cloud table, migration, account, role, or server-side health record exists.
+- Whether recent changes preserve prior health entries and whether any legacy data is deleted.
+
+## 4. Priority and recommendation
+
+Rank every confirmed finding as:
+
+1. **NORTHSTAR blocker** — compromises trustworthy/readable local health records or privacy.
+2. **SUCCESS blocker** — prevents the exact demonstration in the PRD.
+3. **Important usability/fidelity issue** — especially for the intended 50+ audience.
+4. **Noted, not blocking** — genuine drift that breaks neither NORTHSTAR nor SUCCESS.
+
+End with one committed correction sequence based only on confirmed findings. This review will recommend fixes but will not apply them until separately approved.
+
+## Deliverable
+
+A complete written audit with no silent passes, no claims based only on memory, no invented scope, and an explicit statement that no application changes were made.
