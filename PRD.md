@@ -15,7 +15,7 @@ is built: [ARCHITECTURE.md](ARCHITECTURE.md) · why: [DECISIONS.md](DECISIONS.md
 [CHANGELOG.md](CHANGELOG.md) · roadmap: [Product_Roadmap.md](Product_Roadmap.md).
 
 ## NORTHSTAR
-Make self-tracked health numbers as trustworthy and readable as a clinic report, without a single byte of medical data leaving the user's device.
+Make self-tracked health numbers as trustworthy and readable as a clinic report, with no health record ever stored outside the user's own device. The only data that may leave the device is transient and user-initiated: a photo sent for one-off reading, and derived grade labels sent for a summary — neither is retained anywhere.
 
 ## USER
 Traditional-Chinese-reading adults aged 50+ in Hong Kong and Taiwan who already own a body-composition analyser, a home blood-pressure monitor, or attend community fitness checks — and who keep the results on paper, in photos, or nowhere at all.
