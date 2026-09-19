@@ -38,7 +38,7 @@ export const MODULES: ModuleDef[] = [
   {
     id: "bp",
     title: "血壓",
-    subtitle: "收縮壓・舒張壓・脈搏",
+    subtitle: "上壓・下壓・脈搏",
     path: "/blood-pressure",
     storageKey: STORAGE_KEYS.bp,
     supportsImage: true,
