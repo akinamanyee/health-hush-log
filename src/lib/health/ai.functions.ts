@@ -6,7 +6,7 @@ import { REFERENCE_LEAFLET } from "./charts";
 
 const ExtractInput = z.object({
   image: z.string().startsWith("data:image/"), // base64 data URL, real MIME type
-  module: z.enum(["tanita", "bp"]),
+  module: z.enum(["tanita", "bp", "grip", "sitreach"]),
 });
 
 const TANITA_SCHEMA = z.object({
@@ -23,6 +23,23 @@ const BP_SCHEMA = z.object({
   pulse: z.number().nullable(),
 });
 
+const GRIP_SCHEMA = z.object({ grip: z.number().nullable() });
+const SIT_REACH_SCHEMA = z.object({ distance: z.number().nullable() });
+
+const EXTRACTION_FIELDS = {
+  tanita: "weight（體重 kg）、bodyFat（體脂率 %）、muscleMass（肌肉量 kg）、bmi、visceralFat（內臟脂肪等級）",
+  bp: "systolic（收縮壓 mmHg）、diastolic（舒張壓 mmHg）、pulse（脈搏）",
+  grip: "grip（手握力 kg）",
+  sitreach: "distance（坐地前伸距離 cm，可為負數）",
+} as const;
+
+const EXTRACTION_SCHEMAS = {
+  tanita: TANITA_SCHEMA,
+  bp: BP_SCHEMA,
+  grip: GRIP_SCHEMA,
+  sitreach: SIT_REACH_SCHEMA,
+};
+
 function extractJson(text: string): unknown {
   const match = text.match(/\{[\s\S]*\}/);
   if (!match) throw new Error("AI 未能讀取圖片，請改用手動輸入。");
@@ -38,10 +55,7 @@ export const extractFromImage = createServerFn({ method: "POST" })
     if (!serverCapOk(ip)) throw new Error("今日讀取次數已達上限，請明天再試或手動輸入。");
 
     const gateway = createGateway();
-    const fields =
-      data.module === "tanita"
-        ? "weight（體重 kg）、bodyFat（體脂率 %）、muscleMass（肌肉量 kg）、bmi、visceralFat（內臟脂肪等級）"
-        : "systolic（收縮壓 mmHg）、diastolic（舒張壓 mmHg）、pulse（脈搏）";
+    const fields = EXTRACTION_FIELDS[data.module];
 
     // Streaming on the wire; consumed server-side for a one-shot result.
     const result = streamText({
@@ -70,7 +84,7 @@ export const extractFromImage = createServerFn({ method: "POST" })
 
     const text = await result.text;
     try {
-      const schema = data.module === "tanita" ? TANITA_SCHEMA : BP_SCHEMA;
+      const schema = EXTRACTION_SCHEMAS[data.module];
       return { ok: true as const, values: schema.parse(extractJson(text)) };
     } catch {
       throw new Error("AI 未能清楚讀取圖片，請拍清楚一點再試，或手動輸入。");

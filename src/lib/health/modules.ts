@@ -60,7 +60,7 @@ export const MODULES: ModuleDef[] = [
     icon: Hand,
     path: "/grip",
     storageKey: STORAGE_KEYS.grip,
-    supportsImage: false,
+    supportsImage: true,
     fields: [{ key: "grip", label: "手握力", unit: "公斤", min: 1, max: 100, step: "0.1" }],
   },
   {
@@ -70,7 +70,7 @@ export const MODULES: ModuleDef[] = [
     icon: Ruler,
     path: "/sit-and-reach",
     storageKey: STORAGE_KEYS.sitreach,
-    supportsImage: false,
+    supportsImage: true,
     fields: [{ key: "distance", label: "前彎距離", unit: "厘米", min: -30, max: 60, step: "0.5" }],
   },
 ];
