@@ -211,8 +211,9 @@ export function RecordModule({ mod }: { mod: ModuleDef }) {
             const groups: Record<string, (typeof mod.fields)[number][]> = {};
             for (const f of mod.fields) {
               if (!f.group) continue;
-              if (!groups[f.group]) { groups[f.group] = []; groupOrder.push(f.group); }
-              groups[f.group].push(f);
+              let bucket = groups[f.group];
+              if (!bucket) { bucket = groups[f.group] = []; groupOrder.push(f.group); }
+              bucket.push(f);
             }
 
             const collapsedGroups = new Set(["部位脂肪率", "部位肌肉量"]);
@@ -225,7 +226,7 @@ export function RecordModule({ mod }: { mod: ModuleDef }) {
                   </div>
                 )}
                 {groupOrder.map((g) => {
-                  const fields = groups[g];
+                  const fields = groups[g]!;
                   const content = (
                     <div className="grid gap-4 sm:grid-cols-2">
                       {fields.map(fieldInput)}
