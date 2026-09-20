@@ -4,7 +4,7 @@ import { ShieldCheck } from "lucide-react";
 import { purgeLegacyProfileData } from "@/lib/health/store";
 import { Button } from "@/components/ui/button";
 import { PrivacyNotice } from "@/components/health/PrivacyNotice";
-import frontPageAsset from "@/assets/front-page-3.jpg.asset.json";
+import frontPageAsset from "@/assets/front-page-4.jpg.asset.json";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/")({
@@ -59,7 +59,7 @@ function Index() {
         >
           <img
             src={frontPageAsset.url}
-            alt="護心計劃，守護心腦血管健康，輕鬆記錄評估資料"
+            alt="護心計劃，守護您的心腦血管健康，輕鬆記錄評估資料"
             className="pointer-events-none h-full w-full -translate-y-14 object-contain motion-reduce:transform-none sm:-translate-y-8"
           />
         </button>
