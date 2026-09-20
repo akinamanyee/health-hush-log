@@ -40,6 +40,7 @@ function Index() {
           aria-hidden
           className="pointer-events-none absolute inset-0 h-full w-full scale-150 object-cover blur-3xl brightness-105"
         />
+        <div aria-hidden className="pointer-events-none absolute inset-0 bg-[#e6f9f0]/70" />
         <Dialog>
           <DialogTrigger asChild>
             <Button
