@@ -4,6 +4,11 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-20 13:57 — Cover: viewport-relative overlay replaces image mask
+- Root cause: CSS mask percentages are element-relative, but `object-cover` + `object-position: center 30%` maps image content to different element positions depending on viewport aspect ratio. On wider viewports the second tagline fell into the mask’s fade zone.
+- Fix: removed the bottom fade from the image mask (kept only top fade-in at 6% and side feathering at 8%/92%). Added a viewport-relative gradient overlay `<div>` covering the bottom 50% of the screen (`h-1/2`), fading from transparent to `#e6f9f0` (the mint tint). Since the overlay is viewport-sized, it consistently hides the baked-in icons on every screen while keeping both taglines fully visible in the top half.
+- No colour, wording, layout or logic changes.
+
 ## 2026-09-20 13:38 — Adjust cover mask fade to show both tagline lines
 - Pushed the vertical mask fade from `black_48%, transparent_58%` to `black_55%, transparent_65%` so the second tagline line (輕鬆記錄評估資料) and more watercolor artwork remain at full opacity. The baked-in icons at ~55–65% still fall in the fade zone.
 
