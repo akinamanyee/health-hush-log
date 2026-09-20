@@ -4,6 +4,12 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-20 20:43 — Cover privacy notice rewritten with full 5-section disclosure
+- Replaced the three short bullet points in the cover 私隱與資料使用 dialog with a comprehensive 私隱與資料使用聲明 covering: 100% local storage, no-PII guidance, AI processing details (OCR + health summary), data autonomy/deletion, and medical disclaimer.
+- Dialog title updated from 「私隱與資料使用」 to 「私隱與資料使用聲明」; dialog is now scrollable (`max-h-[85vh] overflow-y-auto`) to accommodate the longer content.
+- Other contexts (module, dashboard, summary) keep their existing concise copy.
+- No data, grading, storage, AI or logic changes.
+
 ## 2026-09-20 20:32 — Info popovers on grip and sit-and-reach pages
 - Added an ⓘ icon next to the page title on `/grip` and `/sit-and-reach` that opens a Popover explaining why each test matters (muscle health, cardiovascular associations) with a medical-disclaimer note.
 - Data model: `ModuleDef` gains an optional `infoText` field (`{ intro, points[], note }`) so any module can opt in to an info popover without code changes.
