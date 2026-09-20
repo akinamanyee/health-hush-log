@@ -38,7 +38,7 @@ function Index() {
           src={frontPageAsset.url}
           alt=""
           aria-hidden
-          className="pointer-events-none absolute inset-0 h-full w-full scale-110 object-cover blur-2xl"
+          className="pointer-events-none absolute inset-0 h-full w-full scale-150 object-cover blur-3xl brightness-105"
         />
         <Dialog>
           <DialogTrigger asChild>
