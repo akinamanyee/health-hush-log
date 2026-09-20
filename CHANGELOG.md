@@ -4,6 +4,10 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-20 15:40 — Cover: move 進入 button up for spacing with privacy link
+- Changed `bottom-16` to `bottom-24` so the 進入 button has more breathing room above the 私隱與資料使用 link.
+- No other changes.
+
 ## 2026-09-20 15:01 — Cover: responsive overlay height to fully hide icons on all viewports
 - Phone viewports need a taller overlay (`h-[70%]`) because `object-cover` barely crops the nearly-matching aspect ratio image, placing the baked-in icons higher on screen. Wider viewports revert to `sm:h-1/2` where the icons are pushed lower by extra scaling. The gradient stays solid for 70% of the overlay height, fading to transparent by 88%.
 - No colour, wording, layout or logic changes.

@@ -75,7 +75,7 @@ function Index() {
           type="button"
           onClick={() => void navigate({ to: "/logbook" })}
           size="lg"
-          className="absolute bottom-16 left-1/2 z-10 min-h-14 w-[min(80%,20rem)] -translate-x-1/2 rounded-xl px-8 text-lg font-semibold shadow-lg"
+          className="absolute bottom-24 left-1/2 z-10 min-h-14 w-[min(80%,20rem)] -translate-x-1/2 rounded-xl px-8 text-lg font-semibold shadow-lg"
         >
           進入
         </Button>
