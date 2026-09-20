@@ -59,6 +59,12 @@ function Index() {
             alt="護心計劃，守護您的心腦血管健康"
             className="pointer-events-none h-full w-full object-cover"
           />
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute left-1/2 top-[86%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#2B3A67] px-14 py-4 text-xl font-bold tracking-[0.3em] text-white shadow-lg sm:top-[84%] sm:px-16 sm:py-5 sm:text-2xl"
+          >
+            進入
+          </span>
         </button>
       </main>
     );
