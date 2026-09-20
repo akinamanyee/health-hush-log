@@ -53,12 +53,12 @@ function Index() {
           alt="護心計劃，守護您的心腦血管健康"
           className="absolute inset-0 h-full w-full object-cover"
         />
-        <section className="relative flex min-h-screen w-full flex-col items-center justify-end pb-[8%] sm:pb-[12%] md:pb-[18%]">
+        <section className="relative flex min-h-screen w-full flex-col items-center justify-end pb-[10%] sm:pb-[12%] md:pb-[18%]">
           <Button
             type="button"
             onClick={() => void navigate({ to: "/logbook" })}
             size="lg"
-            className="h-14 w-[min(92%,24rem)] sm:w-[min(48%,12rem)] rounded-xl px-6 text-lg font-semibold shadow-lg"
+            className="h-14 w-[min(90%,23rem)] sm:w-[min(48%,12rem)] rounded-xl px-6 text-lg font-semibold shadow-lg"
           >
             進入
           </Button>
