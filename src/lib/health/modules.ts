@@ -25,7 +25,7 @@ export const MODULES: ModuleDef[] = [
   {
     id: "tanita",
     title: "身體成份分析儀",
-    subtitle: "身體成份分析儀讀數",
+    subtitle: "記錄脂肪率．肌肉量．BMI",
     path: "/tanita",
     storageKey: STORAGE_KEYS.tanita,
     supportsImage: true,
@@ -56,14 +56,14 @@ export const MODULES: ModuleDef[] = [
   {
     id: "bp",
     title: "血壓",
-    subtitle: "上壓・下壓・脈搏",
+    subtitle: "上壓・下壓・脈博",
     path: "/blood-pressure",
     storageKey: STORAGE_KEYS.bp,
     supportsImage: true,
     fields: [
       { key: "systolic", label: "收縮壓（上壓）", unit: "mmHg", min: 50, max: 260, step: "1" },
       { key: "diastolic", label: "舒張壓（下壓）", unit: "mmHg", min: 30, max: 160, step: "1" },
-      { key: "pulse", label: "脈搏", unit: "次/分鐘", min: 30, max: 220, step: "1" },
+      { key: "pulse", label: "脈博", unit: "次/分鐘", min: 30, max: 220, step: "1" },
     ],
   },
   {
@@ -78,7 +78,7 @@ export const MODULES: ModuleDef[] = [
   {
     id: "sitreach",
     title: "坐地前伸測試",
-    subtitle: "記錄柔軟度測試距離",
+    subtitle: "記錄柔軟度",
     path: "/sit-and-reach",
     storageKey: STORAGE_KEYS.sitreach,
     supportsImage: true,
