@@ -33,7 +33,7 @@ function Index() {
   useEffect(() => purgeLegacyProfileData(), []);
 
   return (
-      <main className="relative min-h-screen overflow-hidden bg-[linear-gradient(180deg,#C7E7D7_0%,#C8E5CF_50%,#C6E3CD_100%)]">
+      <main className="relative min-h-screen overflow-hidden bg-[linear-gradient(180deg,#ddf9f2_0%,#e2f8ef_50%,#c4eee7_100%)]">
         <Dialog>
           <DialogTrigger asChild>
             <Button
@@ -55,12 +55,12 @@ function Index() {
           type="button"
           onClick={() => void navigate({ to: "/logbook" })}
           aria-label="進入健康紀錄簿"
-          className="absolute inset-0 block h-full w-full appearance-none border-0 bg-transparent p-0 text-left cursor-pointer transition-opacity duration-200 hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+          className="absolute inset-0 flex h-full w-full appearance-none items-center justify-center border-0 bg-transparent p-0 text-left cursor-pointer transition-opacity duration-200 hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
         >
           <img
             src={frontPageAsset.url}
             alt="護心計劃，守護您的心腦血管健康，輕鬆記錄評估資料"
-            className="pointer-events-none h-full w-full -translate-y-14 object-contain motion-reduce:transform-none sm:-translate-y-8"
+            className="pointer-events-none max-h-full max-w-full -translate-y-14 motion-reduce:transform-none sm:-translate-y-8 [mask-image:linear-gradient(to_right,transparent,black_5%,black_95%,transparent),linear-gradient(to_bottom,transparent,black_4%,black_96%,transparent)] [mask-composite:intersect] [-webkit-mask-image:linear-gradient(to_right,transparent,black_5%,black_95%,transparent),linear-gradient(to_bottom,transparent,black_4%,black_96%,transparent)] [-webkit-mask-composite:source-in]"
           />
         </button>
       </main>
