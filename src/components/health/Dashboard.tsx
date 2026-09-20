@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Download, FileText, Trash2 } from "lucide-react";
+import { ArrowLeft, Download, FileText, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { MODULES } from "@/lib/health/modules";
 import { clearAllHealthData } from "@/lib/health/store";
@@ -40,9 +40,11 @@ export function Dashboard() {
 
   return (
     <main className="mx-auto w-full max-w-5xl px-4 pb-24 pt-10 sm:px-6">
+      <Link to="/" className="mb-6 inline-flex items-center gap-2 text-muted-foreground hover:text-foreground">
+        <ArrowLeft className="size-5" /> 返回首頁
+      </Link>
       <header className="text-center">
-        <p className="text-lg text-muted-foreground">本地優先・資料只存在此裝置</p>
-        <h1 className="font-display mt-2 text-4xl font-bold sm:text-5xl">健康紀錄簿</h1>
+        <h1 className="font-display text-4xl font-bold sm:text-5xl">健康紀錄簿</h1>
         <p className="mx-auto mt-3 max-w-md text-lg text-foreground/75">
           請選擇要記錄的項目。
         </p>

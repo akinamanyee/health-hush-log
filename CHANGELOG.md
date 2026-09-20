@@ -4,6 +4,13 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-20 20:16 — Dashboard and module wording updates, back-to-cover navigation
+- Tanita subtitle changed from 「身體成份分析儀讀數」 to 「記錄脂肪率．肌肉量．BMI」 (propagates to both `/tanita` and `/logbook`).
+- Sit-and-reach subtitle changed from 「記錄柔軟度測試距離」 to 「記錄柔軟度」 (propagates to both `/sit-and-reach` and `/logbook`).
+- Removed 「本地優先・資料只存在此裝置」 from the dashboard header (the privacy notice in the footer already covers this).
+- Added 「返回首頁」 link at the top of `/logbook` pointing back to the cover page (`/`).
+- No data, grading, storage, AI or logic changes.
+
 ## 2026-09-20 20:01 — Cover: revert HTML taglines, restore mask-based approach
 - Reverted PR #19 at user’s request, restoring the PR #18 cover state: image mask with bottom fade (`black 55% → transparent 72%`), shorter gradient (`h-[45%] sm:h-[38%]`), no HTML tagline elements.
 - The HTML text overlay worked technically but the user preferred the previous version.
