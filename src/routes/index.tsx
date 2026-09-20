@@ -67,10 +67,10 @@ function Index() {
           <img
             src={frontPageAsset.url}
             alt="護心計劃，守護您的心腦血管健康，輕鬆記錄評估資料"
-            className="pointer-events-none h-full w-full object-cover object-[center_30%] -translate-y-14 motion-reduce:transform-none sm:-translate-y-8 [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent),linear-gradient(to_bottom,transparent,black_6%,black)] [mask-composite:intersect] [-webkit-mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent),linear-gradient(to_bottom,transparent,black_6%,black)] [-webkit-mask-composite:source-in]"
+            className="pointer-events-none h-full w-full object-cover object-[center_30%] -translate-y-14 motion-reduce:transform-none sm:-translate-y-8 [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent),linear-gradient(to_bottom,transparent,black_6%,black_55%,transparent_72%)] [mask-composite:intersect] [-webkit-mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent),linear-gradient(to_bottom,transparent,black_6%,black_55%,transparent_72%)] [-webkit-mask-composite:source-in]"
           />
         </button>
-        <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-[70%] sm:h-1/2 bg-[linear-gradient(to_top,#e6f9f0,#e6f9f0_70%,transparent_88%)]" />
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-[45%] sm:h-[38%] bg-[linear-gradient(to_top,#e6f9f0,#e6f9f0_70%,transparent_88%)]" />
         <Button
           type="button"
           onClick={() => void navigate({ to: "/logbook" })}

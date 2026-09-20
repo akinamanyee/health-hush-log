@@ -4,6 +4,11 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-20 18:42 — Cover: show taglines by masking out icons at the image level
+- Added a bottom fade to the image mask (`black 55% → transparent 72%`) so the baked-in icon buttons are clipped on the image itself, while both taglines (守護心血管健康, 輕鬆記錄評估資料) remain fully visible.
+- Shortened the gradient overlay from `h-[70%] sm:h-1/2` to `h-[45%] sm:h-[38%]` since it no longer needs to hide icons — it just blends the masked image edge into the mint background.
+- No other changes.
+
 ## 2026-09-20 15:40 — Cover: move 進入 button up for spacing with privacy link
 - Changed `bottom-16` to `bottom-24` so the 進入 button has more breathing room above the 私隱與資料使用 link.
 - No other changes.
