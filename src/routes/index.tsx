@@ -36,7 +36,7 @@ function Index() {
       <main className="relative min-h-screen bg-background">
         <Dialog>
           <DialogTrigger asChild>
-            <Button variant="ghost" className="absolute bottom-3 right-4 z-10 rounded-full px-3 py-1 text-xs text-muted-foreground/70 backdrop-blur-sm hover:text-muted-foreground sm:right-6">
+            <Button variant="ghost" className="absolute top-4 right-4 z-10 rounded-full bg-background/40 px-3 py-1 text-xs text-foreground/80 backdrop-blur-sm hover:bg-background/60 hover:text-foreground sm:right-6">
               <ShieldCheck className="size-3.5" /> 私隱與資料使用
             </Button>
           </DialogTrigger>
