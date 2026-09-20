@@ -36,7 +36,7 @@ function Index() {
       <main className="relative min-h-screen bg-background">
         <Dialog>
           <DialogTrigger asChild>
-            <Button variant="ghost" className="absolute bottom-3 right-4 z-10 rounded-full px-3 py-1 text-xs text-muted-foreground/70 backdrop-blur-sm hover:text-muted-foreground sm:right-6">
+            <Button variant="ghost" className="absolute top-4 right-4 z-10 rounded-full bg-background/40 px-3 py-1 text-xs text-foreground/80 backdrop-blur-sm hover:bg-background/60 hover:text-foreground sm:right-6">
               <ShieldCheck className="size-3.5" /> 私隱與資料使用
             </Button>
           </DialogTrigger>
@@ -48,21 +48,18 @@ function Index() {
             <PrivacyNotice context="cover" />
           </DialogContent>
         </Dialog>
-        <img
-          src={frontPageAsset.url}
-          alt="護心計劃，守護您的心腦血管健康"
-          className="absolute inset-0 h-full w-full object-cover"
-        />
-        <section className="relative flex min-h-screen w-full flex-col items-center justify-end pb-24">
-          <Button
-            type="button"
-            onClick={() => void navigate({ to: "/logbook" })}
-            size="lg"
-            className="min-h-14 w-[min(80%,20rem)] rounded-xl px-8 text-lg font-semibold shadow-lg"
-          >
-            進入
-          </Button>
-        </section>
+        <button
+          type="button"
+          onClick={() => void navigate({ to: "/logbook" })}
+          aria-label="進入健康紀錄簿"
+          className="absolute inset-0 block h-full w-full appearance-none border-0 bg-transparent p-0 text-left cursor-pointer transition-opacity duration-200 hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+        >
+          <img
+            src={frontPageAsset.url}
+            alt="護心計劃，守護您的心腦血管健康"
+            className="pointer-events-none h-full w-full object-cover"
+          />
+        </button>
       </main>
     );
 }
