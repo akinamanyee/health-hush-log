@@ -70,6 +70,14 @@ function Index() {
             className="pointer-events-none h-full w-full object-cover object-[center_30%] -translate-y-14 motion-reduce:transform-none sm:-translate-y-8 [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent),linear-gradient(to_bottom,transparent,black_6%,black_94%,transparent)] [mask-composite:intersect] [-webkit-mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent),linear-gradient(to_bottom,transparent,black_6%,black_94%,transparent)] [-webkit-mask-composite:source-in]"
           />
         </button>
+        <Button
+          type="button"
+          onClick={() => void navigate({ to: "/logbook" })}
+          size="lg"
+          className="absolute bottom-16 left-1/2 z-10 min-h-14 w-[min(80%,20rem)] -translate-x-1/2 rounded-xl px-8 text-lg font-semibold shadow-lg"
+        >
+          進入
+        </Button>
       </main>
     );
 }
