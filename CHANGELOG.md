@@ -4,6 +4,11 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-20 12:18 — Replace cover image with updated wording
+- Swapped the cover asset to `front-page-3.jpg`, which shows the revised tagline 「守護心腦血管健康 / 輕鬆記錄評估資料」.
+- Removed the obsolete `front-page-2.jpg.asset.json` pointer; the old asset is no longer referenced.
+- Kept the whole cover clickable to `/logbook` and the subtle bottom-right `私隱與資料使用` trigger unchanged.
+
 ## 2026-09-20 11:25 — Cover spacing and privacy-link placement
 - Shifted the complete cover image upward so its printed 進入 button has breathing room above the phone edge while reducing the excess space at the top.
 - Moved 私隱與資料使用 to a subtle bottom-right text control with a safe 44px touch target; its dialog content and behaviour are unchanged.
