@@ -67,7 +67,7 @@ function Index() {
           <img
             src={frontPageAsset.url}
             alt="護心計劃，守護您的心腦血管健康，輕鬆記錄評估資料"
-            className="pointer-events-none max-h-full max-w-full -translate-y-14 motion-reduce:transform-none sm:-translate-y-8 [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent),linear-gradient(to_bottom,transparent,black_6%,black_94%,transparent)] [mask-composite:intersect] [-webkit-mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent),linear-gradient(to_bottom,transparent,black_6%,black_94%,transparent)] [-webkit-mask-composite:source-in]"
+            className="pointer-events-none h-full w-full object-cover object-[center_30%] -translate-y-14 motion-reduce:transform-none sm:-translate-y-8 [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent),linear-gradient(to_bottom,transparent,black_6%,black_94%,transparent)] [mask-composite:intersect] [-webkit-mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent),linear-gradient(to_bottom,transparent,black_6%,black_94%,transparent)] [-webkit-mask-composite:source-in]"
           />
         </button>
       </main>
