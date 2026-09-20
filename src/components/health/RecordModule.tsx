@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowLeft, Trash2 } from "lucide-react";
+import { ArrowLeft, Info, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import {
   Line,
@@ -27,6 +27,7 @@ import { gradeEntry } from "@/lib/health/grade";
 import { formatChineseDate, recheckDate, downloadIcs, googleCalendarUrl } from "@/lib/health/calendar";
 import { todayIso, toIsoDate } from "@/lib/health/dates";
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { GradeBadge } from "./GradeBadge";
 import { ImageDrop } from "./ImageDrop";
 import { PrivacyNotice } from "./PrivacyNotice";
@@ -153,7 +154,37 @@ export function RecordModule({ mod }: { mod: ModuleDef }) {
       <Link to="/logbook" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground">
         <ArrowLeft className="size-5" /> 返回健康紀錄簿
       </Link>
-      <h1 className="mt-4 text-3xl font-bold sm:text-4xl">{mod.title}</h1>
+      <div className="mt-4 flex items-center gap-2">
+        <h1 className="text-3xl font-bold sm:text-4xl">{mod.title}</h1>
+        {mod.infoText && (
+          <Popover>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                aria-label="關於此測試"
+                className="inline-flex shrink-0 items-center justify-center rounded-full text-muted-foreground/70 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <Info className="size-6" />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent
+              side="bottom"
+              align="start"
+              className="w-[min(calc(100vw-2rem),24rem)] rounded-2xl border bg-card/80 p-5 shadow-lg backdrop-blur-xl"
+            >
+              <p className="text-base leading-relaxed">{mod.infoText.intro}</p>
+              <ul className="mt-3 space-y-2">
+                {mod.infoText.points.map((pt) => (
+                  <li key={pt.label} className="text-base leading-relaxed">
+                    <strong>{pt.label}</strong>{pt.text}
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-3 text-sm text-muted-foreground">{mod.infoText.note}</p>
+            </PopoverContent>
+          </Popover>
+        )}
+      </div>
       <p className="mt-1 text-lg text-muted-foreground">{mod.subtitle}</p>
 
       <section className="glass-card mt-8 rounded-3xl p-6 sm:p-8">

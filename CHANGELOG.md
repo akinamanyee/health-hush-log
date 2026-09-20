@@ -4,6 +4,12 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-20 20:32 — Info popovers on grip and sit-and-reach pages
+- Added an ⓘ icon next to the page title on `/grip` and `/sit-and-reach` that opens a Popover explaining why each test matters (muscle health, cardiovascular associations) with a medical-disclaimer note.
+- Data model: `ModuleDef` gains an optional `infoText` field (`{ intro, points[], note }`) so any module can opt in to an info popover without code changes.
+- Uses the existing Radix-based Popover component with glassmorphic styling (`backdrop-blur-xl bg-card/80`).
+- No data, grading, storage, AI or logic changes.
+
 ## 2026-09-20 20:16 — Dashboard and module wording updates, back-to-cover navigation
 - Tanita subtitle changed from 「身體成份分析儀讀數」 to 「記錄脂肪率．肌肉量．BMI」 (propagates to both `/tanita` and `/logbook`).
 - Sit-and-reach subtitle changed from 「記錄柔軟度測試距離」 to 「記錄柔軟度」 (propagates to both `/sit-and-reach` and `/logbook`).
@@ -12,13 +18,13 @@ Once this file passes ~100 entries, the older half moves to `changelog-archive.m
 - No data, grading, storage, AI or logic changes.
 
 ## 2026-09-20 20:01 — Cover: revert HTML taglines, restore mask-based approach
-- Reverted PR #19 at user’s request, restoring the PR #18 cover state: image mask with bottom fade (`black 55% → transparent 72%`), shorter gradient (`h-[45%] sm:h-[38%]`), no HTML tagline elements.
+- Reverted PR #19 at user's request, restoring the PR #18 cover state: image mask with bottom fade (`black 55% → transparent 72%`), shorter gradient (`h-[45%] sm:h-[38%]`), no HTML tagline elements.
 - The HTML text overlay worked technically but the user preferred the previous version.
 - No other changes.
 
 ## 2026-09-20 19:36 — Cover: render taglines as HTML text above gradient (reverted)
 - Attempted a different approach to the tagline-visibility problem: reverted image mask to no bottom fade and gradient to `h-[70%] sm:h-1/2`, then added the two taglines (守護心血管健康, 輕鬆記錄評估資料) as HTML `<p>` elements at z-10 above the gradient.
-- Reverted in the next entry at user’s request.
+- Reverted in the next entry at user's request.
 
 ## 2026-09-20 18:42 — Cover: show taglines by masking out icons at the image level
 - Added a bottom fade to the image mask (`black 55% → transparent 72%`) so the baked-in icon buttons are clipped on the image itself, while both taglines (守護心血管健康, 輕鬆記錄評估資料) remain fully visible.
