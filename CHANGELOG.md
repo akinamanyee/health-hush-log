@@ -4,6 +4,12 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-20 23:03 — ARCHITECTURE.md reconciled with PRs #22–24
+- Updated "Last reconciled" timestamp to 2026-09-20 23:03 HKT.
+- Documented the optional `infoText` field on `ModuleDef` in the Modules table.
+- Noted info-popover rendering capability in the RecordModule description.
+- All other living docs (CHANGELOG, DECISIONS, PRD, Product_Roadmap) were audited and found current — no changes needed.
+
 ## 2026-09-20 20:43 — Cover privacy notice rewritten with full 5-section disclosure
 - Replaced the three short bullet points in the cover 私隱與資料使用 dialog with a comprehensive 私隱與資料使用聲明 covering: 100% local storage, no-PII guidance, AI processing details (OCR + health summary), data autonomy/deletion, and medical disclaimer.
 - Dialog title updated from 「私隱與資料使用」 to 「私隱與資料使用聲明」; dialog is now scrollable (`max-h-[85vh] overflow-y-auto`) to accommodate the longer content.
