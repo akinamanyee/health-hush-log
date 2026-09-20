@@ -59,7 +59,7 @@ function Index() {
         >
           <img
             src={frontPageAsset.url}
-            alt="護心計劃，守護您的心腦血管健康"
+            alt="護心計劃，守護心腦血管健康，輕鬆記錄評估資料"
             className="pointer-events-none h-full w-full -translate-y-14 object-contain motion-reduce:transform-none sm:-translate-y-8"
           />
         </button>
