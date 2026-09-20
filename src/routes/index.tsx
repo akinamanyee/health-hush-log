@@ -33,7 +33,7 @@ function Index() {
   useEffect(() => purgeLegacyProfileData(), []);
 
   return (
-      <main className="relative min-h-screen overflow-hidden bg-[linear-gradient(180deg,#e4f7f4_0%,#eef9f1_50%,#c5e8e3_100%)]">
+      <main className="relative min-h-screen overflow-hidden bg-[linear-gradient(180deg,#daf7f3_0%,#e6f9f0_50%,#b8ece7_100%)]">
         <Dialog>
           <DialogTrigger asChild>
             <Button
