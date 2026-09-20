@@ -4,6 +4,10 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-20 13:14 — Add visible "進入" button back to cover
+- Added a visible "進入" `<Button>` at `bottom-16` (4rem from edge), centred horizontally, `z-10` layered above the full-screen clickable image. Styled as primary, `min-h-14`, `rounded-xl`, `shadow-lg`, capped at `min(80%, 20rem)` width.
+- Why: the previous commit cropped the baked-in dark "進入" bar from the image, leaving no visible enter affordance — tapping anywhere worked but was invisible.
+
 ## 2026-09-20 13:06 — Cover image: crop baked-in UI, show branding
 - Changed the sharp cover image from `max-h-full max-w-full` (letterboxed) to `h-full w-full object-cover object-[center_30%]` so the image fills the viewport and is anchored at 30% from the top — showing the 護心計劃 branding and watercolor artwork while cropping the baked-in icon buttons and dark bar at the bottom that created a phone-frame appearance.
 - No colour, wording, graphic design or logic changes.
