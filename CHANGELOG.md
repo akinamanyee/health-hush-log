@@ -4,6 +4,11 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-20 19:36 — Cover: render taglines as HTML text above gradient
+- The baked-in image taglines and icon buttons sit too close together for any gradient or mask to hide icons without also hiding taglines. Mask-based bottom fading was tried and abandoned (see 13:57 entry) because mask percentages are element-relative while `object-cover` positioning is viewport-dependent.
+- Fix: reverted image mask to no bottom fade and gradient overlay to `h-[70%] sm:h-1/2` (proven to hide icons). Added the two taglines (守護心血管健康, 輕鬆記錄評估資料) as HTML `<p>` elements at z-10, above the gradient — same layering the 進入 button uses.
+- No other changes.
+
 ## 2026-09-20 18:42 — Cover: show taglines by masking out icons at the image level
 - Added a bottom fade to the image mask (`black 55% → transparent 72%`) so the baked-in icon buttons are clipped on the image itself, while both taglines (守護心血管健康, 輕鬆記錄評估資料) remain fully visible.
 - Shortened the gradient overlay from `h-[70%] sm:h-1/2` to `h-[45%] sm:h-[38%]` since it no longer needs to hide icons — it just blends the masked image edge into the mint background.
