@@ -4,6 +4,10 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-20 14:17 — Cover: responsive overlay height to fully hide icons on all viewports
+- Phone viewports need a taller overlay (`h-[70%]`) because `object-cover` barely crops the nearly-matching aspect ratio image, placing the baked-in icons higher on screen. Wider viewports revert to `sm:h-1/2` where the icons are pushed lower by extra scaling. The gradient stays solid for 70% of the overlay height, fading to transparent by 88%.
+- No colour, wording, layout or logic changes.
+
 ## 2026-09-20 14:08 — Cover: extend overlay to fully hide baked-in icon squares
 - The viewport-relative gradient overlay was too transparent at the icon height (~40% from bottom). Extended from `h-1/2` to `h-[58%]` and changed to a multi-stop gradient (`#e6f9f0` solid up to 66% of the div, fading to transparent by 85%`) so the two baked-in icon squares are fully covered while both taglines remain untouched.
 - No colour, wording, layout or logic changes.
