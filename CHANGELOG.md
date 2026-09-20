@@ -4,6 +4,11 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-20 11:25 — Cover spacing and privacy-link placement
+- Shifted the complete cover image upward so its printed 進入 button has breathing room above the phone edge while reducing the excess space at the top.
+- Moved 私隱與資料使用 to a subtle bottom-right text control with a safe 44px touch target; its dialog content and behaviour are unchanged.
+- Kept the whole cover clickable to `/logbook`; no record, grading, storage, AI, export or interior-page logic changed.
+
 ## 2026-09-20 10:52 — Cover page: printed 進入 button cropped off on wide screens (fixed)
 - Root cause: the supplied cover image (889×1920 portrait) contains its own printed navy 進入 button near the bottom; `object-cover` cropped the top/bottom on wider viewports (including the user's 948×1092 preview), cutting the printed button off so no enter control was visible.
 - Fix: switched the cover image to `object-contain` so the whole poster — including its printed 進入 button — always displays, and set the page background to a vertical mint gradient (#C7E7D7 → #C8E5CF → #C6E3CD) sampled from the image edges so the letterbox fill blends seamlessly.

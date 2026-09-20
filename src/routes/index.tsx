@@ -33,10 +33,13 @@ function Index() {
   useEffect(() => purgeLegacyProfileData(), []);
 
   return (
-      <main className="relative min-h-screen bg-[linear-gradient(180deg,#C7E7D7_0%,#C8E5CF_50%,#C6E3CD_100%)]">
+      <main className="relative min-h-screen overflow-hidden bg-[linear-gradient(180deg,#C7E7D7_0%,#C8E5CF_50%,#C6E3CD_100%)]">
         <Dialog>
           <DialogTrigger asChild>
-            <Button variant="ghost" className="absolute top-4 right-4 z-10 rounded-full bg-background/40 px-3 py-1 text-xs text-foreground/80 backdrop-blur-sm hover:bg-background/60 hover:text-foreground sm:right-6">
+            <Button
+              variant="ghost"
+              className="absolute right-2 bottom-[max(0.25rem,env(safe-area-inset-bottom))] z-10 min-h-11 px-3 text-sm font-normal text-foreground/60 hover:bg-transparent hover:text-foreground hover:underline sm:right-4"
+            >
               <ShieldCheck className="size-3.5" /> 私隱與資料使用
             </Button>
           </DialogTrigger>
@@ -57,7 +60,7 @@ function Index() {
           <img
             src={frontPageAsset.url}
             alt="護心計劃，守護您的心腦血管健康"
-            className="pointer-events-none h-full w-full object-contain"
+            className="pointer-events-none h-full w-full -translate-y-14 object-contain motion-reduce:transform-none sm:-translate-y-8"
           />
         </button>
       </main>
