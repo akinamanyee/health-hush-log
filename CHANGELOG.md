@@ -4,6 +4,11 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-20 13:28 — Fade out bottom half of cover image to hide baked-in icons
+- Changed the vertical mask gradient from `black_94%, transparent` (fade at bottom edge only) to `black_48%, transparent_58%` (fade starting at 48%, fully transparent by 58%). This hides the baked-in icon buttons at ~55–65% of the image height, which were visible because the image's aspect ratio (889×1920) nearly matches a phone viewport, so `object-cover` provides no vertical cropping.
+- The logo, tagline and watercolor artwork in the top half remain fully visible; the bottom fades into the blurred underlay + mint tint, giving the "進入" button a clean background.
+- No colour, wording, layout or logic changes.
+
 ## 2026-09-20 13:14 — Add visible "進入" button back to cover
 - Added a visible "進入" `<Button>` at `bottom-16` (4rem from edge), centred horizontally, `z-10` layered above the full-screen clickable image. Styled as primary, `min-h-14`, `rounded-xl`, `shadow-lg`, capped at `min(80%, 20rem)` width.
 - Why: the previous commit cropped the baked-in dark "進入" bar from the image, leaving no visible enter affordance — tapping anywhere worked but was invisible.
@@ -13,7 +18,7 @@ Once this file passes ~100 entries, the older half moves to `changelog-archive.m
 - No colour, wording, graphic design or logic changes.
 
 ## 2026-09-20 12:48 — Frameless cover via blurred underlay
-- Replaced the sampled-gradient background with a blurred underlay: the same cover image fills the screen with object-cover, scale-150 and blur-3xl, softened by a light mint tint overlay (#e6f9f0 at 70%), so the surround is the image’s own blurred extension rather than a guessed colour.
+- Replaced the sampled-gradient background with a blurred underlay: the same cover image fills the screen with object-cover, scale-150 and blur-3xl, softened by a light mint tint overlay (#e6f9f0 at 70%), so the surround is the image's own blurred extension rather than a guessed colour.
 - Kept a gentle edge mask (8% horizontal, 6% vertical feather) on the sharp cover image so its edges blend into the underlay at any aspect ratio; no cropping of the printed 進入 button.
 - Kept the whole cover clickable to /logbook, the upward shift, and the subtle bottom-right 私隱與資料使用 trigger unchanged. No logic, storage, grading, or interior-page changes.
 - Verified desktop (1280×800), tablet (588×709), and mobile (390×844): no visible frame, privacy dialog opens, cover navigates to /logbook, no console errors. Build OK.
@@ -41,7 +46,7 @@ Once this file passes ~100 entries, the older half moves to `changelog-archive.m
 - Kept the whole cover clickable to `/logbook`; no record, grading, storage, AI, export or interior-page logic changed.
 
 ## 2026-09-20 10:52 — Cover page: printed 進入 button cropped off on wide screens (fixed)
-- Root cause: the supplied cover image (889×1920 portrait) contains its own printed navy 進入 button near the bottom; `object-cover` cropped the top/bottom on wider viewports (including the user’s 948×1092 preview), cutting the printed button off so no enter control was visible.
+- Root cause: the supplied cover image (889×1920 portrait) contains its own printed navy 進入 button near the bottom; `object-cover` cropped the top/bottom on wider viewports (including the user's 948×1092 preview), cutting the printed button off so no enter control was visible.
 - Fix: switched the cover image to `object-contain` so the whole poster — including its printed 進入 button — always displays, and set the page background to a vertical mint gradient (#C7E7D7 → #C8E5CF → #C6E3CD) sampled from the image edges so the letterbox fill blends seamlessly.
 - The whole cover remains one accessible button to `/logbook`; the privacy dialog trigger is unchanged.
 - Verified with Playwright screenshots at 1280×1800, 948×1092, and 390×844: exactly one visible 進入 button on all sizes; click-through to `/logbook` confirmed. Build OK.
@@ -49,7 +54,7 @@ Once this file passes ~100 entries, the older half moves to `changelog-archive.m
 ## 2026-09-19 23:58 — Cover page: spacing and privacy button refinement
 - Increased bottom padding from `pb-12` to `pb-24` so the "進入" button sits further from the image icons above it.
 - Moved the "私隱與資料使用" dialog trigger from top-right to bottom-right, reduced to ~40% of its former size (`text-xs`, `size-3.5` icon, no background or shadow), styled as a subtle `muted-foreground/70` ghost button.
-- Why: the enter button was too close to the cover image’s icons; the privacy link should be discoverable but unobtrusive.
+- Why: the enter button was too close to the cover image's icons; the privacy link should be discoverable but unobtrusive.
 
 ## 2026-09-19 23:32 — Cover page: full-viewport image, no phone frame
 - Removed the card-like Button wrapper (`rounded-[2rem] border border-border bg-card shadow-2xl`) that made the cover image appear inside a phone frame.
@@ -67,14 +72,14 @@ Once this file passes ~100 entries, the older half moves to `changelog-archive.m
 
 ## 2026-09-19 — M18: Rich structured health summary with government-sourced tips
 - Replaced the free-text health summary with a structured report: each metric gets a plain-language interpretation card (value, grade badge, AI-written explanation), followed by 3–5 actionable health tips with clickable source links to Hong Kong government health articles.
-- Distilled 16 government articles into a bundled `TIPS_REFERENCE` constant (6 topic blocks covering cardiovascular disease, BMI, hypertension, visceral fat, diet and exercise); tips are pre-filtered by the user’s grades before reaching the AI. ([ADR 0019](adr/0019-bundled-government-health-tips.md))
+- Distilled 16 government articles into a bundled `TIPS_REFERENCE` constant (6 topic blocks covering cardiovascular disease, BMI, hypertension, visceral fat, diet and exercise); tips are pre-filtered by the user's grades before reaching the AI. ([ADR 0019](adr/0019-bundled-government-health-tips.md))
 - Added `interpretCard()` as the deterministic card-data builder for the summary, returning structured data with name, value, grade, tone, range, and action.
 - Source URL validation filters out AI-hallucinated URLs against the known valid set from bundled articles.
 - The AI now receives formatted values alongside grade labels (no dates, age or gender). ([ADR 0018](adr/0018-summary-sends-readings-with-grades.md))
 - Why: the summary should read like a clinic leaflet — every claim traceable to its source, every tip backed by a government article.
 
 ## 2026-09-19 21:34 — Multi-photo UX: smarter toast and progress counter
-- The toast after each AI photo read no longer says "請核對數值後儲存" when more screens remain. For modules with optional fields (currently Tanita), the toast now shows how many of the module’s fields are filled and suggests continuing if any remain empty.
+- The toast after each AI photo read no longer says "請核對數值後儲存" when more screens remain. For modules with optional fields (currently Tanita), the toast now shows how many of the module's fields are filled and suggests continuing if any remain empty.
 - A "已填 X / Y 項" progress counter appears above the save button once at least one field is filled, so the user can see at a glance how complete the record is across multiple photos.
 - No data-model, grading, storage or API changes — both additions are gated behind the existing `optional` field flag and only activate for Tanita.
 
@@ -87,15 +92,15 @@ Once this file passes ~100 entries, the older half moves to `changelog-archive.m
 
 ## 2026-09-19 17:08 — Living docs reconciled and completed
 - Added the missing build plans for the last two milestones and recorded M16 in the roadmap, so every delivered milestone has its own small plan file.
-- Wrote the project’s working constitution (the rules any AI assistant must follow: local-first, deterministic grading, no invented numbers, review before save, server-side credentials, Traditional Chinese, docs updated in the same pass) into AGENTS.md and linked it from the README.
-- Cleared the stale internal task list and noted the changelog’s own archive rule in the README.
+- Wrote the project's working constitution (the rules any AI assistant must follow: local-first, deterministic grading, no invented numbers, review before save, server-side credentials, Traditional Chinese, docs updated in the same pass) into AGENTS.md and linked it from the README.
+- Cleared the stale internal task list and noted the changelog's own archive rule in the README.
 - Timestamp fetched live (Sat, 19 Sep 2026 09:08:32 GMT → 2026-09-19 17:08 HKT), not guessed.
 
 ## 2026-09-19 17:01 — Truthful privacy wording, checked summaries, honest dates
-- Restated the NORTHSTAR as no health record stored off the device, matching the PRD’s own transient photo-read and grade-label allowance.
+- Restated the NORTHSTAR as no health record stored off the device, matching the PRD's own transient photo-read and grade-label allowance.
 - The health summary is now checked after it is written: any number not in the bundled leaflet, or a missing medical reminder, triggers one strict retry and then a plain refusal instead of ungrounded advice.
 - Named one official source per grading table and removed the unreachable age/gender norm tables the app can never apply.
-- Record dates and the daily AI count now follow the device’s local calendar, so an early-morning reading no longer saves to yesterday; re-check dates clamp at month end.
+- Record dates and the daily AI count now follow the device's local calendar, so an early-morning reading no longer saves to yesterday; re-check dates clamp at month end.
 - Voice input understands spoken Chinese numerals and decimals, not only digits.
 - Any past blood-pressure record can now produce its own re-check reminder from the history list.
 - Logbook tuning for older eyes: smaller phone illustrations, stronger secondary text, shorter guidance, and 清除所有資料 moved into its own clearly-marked area.
@@ -147,7 +152,7 @@ Once this file passes ~100 entries, the older half moves to `changelog-archive.m
 - CSV export gained a 評級 column and keeps its UTF-8 BOM; grades sit only on graded fields.
   ([ADR 0011](adr/0011-csv-bom-and-grade-column.md))
 - The daily AI counter now increments only after a successful call, so a failure no longer
-  burns the user’s allowance. ([ADR 0010](adr/0010-best-effort-daily-ai-cap.md))
+  burns the user's allowance. ([ADR 0010](adr/0010-best-effort-daily-ai-cap.md))
 - Form inputs are now properly linked to their labels, which also helps screen readers.
 - Restored `PRD.md` to the project root as the single source of truth for scope.
 - Plan: [plan/09-prd-reconciliation.md](plan/09-prd-reconciliation.md)
