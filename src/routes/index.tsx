@@ -4,7 +4,7 @@ import { ShieldCheck } from "lucide-react";
 import { purgeLegacyProfileData } from "@/lib/health/store";
 import { Button } from "@/components/ui/button";
 import { PrivacyNotice } from "@/components/health/PrivacyNotice";
-import frontPageAsset from "@/assets/front-page-2.jpg.asset.json";
+import frontPageAsset from "@/assets/front-page-3.jpg.asset.json";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/")({
