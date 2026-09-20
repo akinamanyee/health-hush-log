@@ -128,8 +128,37 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+// A new deployment replaces the hashed route chunks, so a page still open from the
+// previous build fails its dynamic import ("Importing a module script failed") and
+// renders blank. Reload once to pick up the current chunks.
+function useChunkReloadRecovery() {
+  useEffect(() => {
+    const RELOAD_FLAG = "hlb:chunk-reloaded";
+    const recover = () => {
+      if (sessionStorage.getItem(RELOAD_FLAG)) return;
+      sessionStorage.setItem(RELOAD_FLAG, "1");
+      window.location.reload();
+    };
+    const onPreloadError = () => recover();
+    const onRejection = (event: PromiseRejectionEvent) => {
+      const message = event.reason instanceof Error ? event.reason.message : String(event.reason);
+      if (/importing a module script failed|failed to fetch dynamically imported module/i.test(message)) {
+        recover();
+      }
+    };
+    window.addEventListener("vite:preloadError", onPreloadError);
+    window.addEventListener("unhandledrejection", onRejection);
+    sessionStorage.removeItem(RELOAD_FLAG);
+    return () => {
+      window.removeEventListener("vite:preloadError", onPreloadError);
+      window.removeEventListener("unhandledrejection", onRejection);
+    };
+  }, []);
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  useChunkReloadRecovery();
 
   return (
     <QueryClientProvider client={queryClient}>
