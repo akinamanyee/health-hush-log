@@ -1,7 +1,7 @@
 # Architecture — 健康紀錄簿
 
 Describes how the code is actually built. The code is the SSOT for behaviour; this file
-describes it. Last reconciled against the code: **2026-09-19 23:37 HKT**.
+describes it. Last reconciled against the code: **2026-09-20 23:03 HKT**.
 
 ## Shape in one paragraph
 
@@ -22,7 +22,7 @@ server-side. Grading is pure local computation over bundled reference tables.
 
 | Concern | Home |
 | --- | --- |
-| Module definitions (id, title, fields, units, min/max, route, storage key) | `src/lib/health/modules.ts` |
+| Module definitions (id, title, fields, units, min/max, route, storage key, optional `infoText`) | `src/lib/health/modules.ts` |
 | Reference tables + leaflet text (one named source per table) | `src/lib/health/charts.ts` |
 | Local calendar dates and clamped month arithmetic | `src/lib/health/dates.ts` |
 | Spoken-number parsing (Arabic + Chinese numerals) | `src/lib/health/voice.ts` |
@@ -32,7 +32,7 @@ server-side. Grading is pure local computation over bundled reference tables.
 | CSV export | `src/lib/health/csv.ts` |
 | Server-side AI (image read, summary) | `src/lib/health/ai.functions.ts` |
 | Gateway client + per-IP backstop | `src/lib/ai-gateway.server.ts` |
-| Shared record-and-review form | `src/components/health/RecordModule.tsx` |
+| Shared record-and-review form (with optional info popover per module) | `src/components/health/RecordModule.tsx` |
 | Photo drop (client-side downscale), voice, grade badge | `src/components/health/{ImageDrop,VoiceButton,GradeBadge}.tsx` |
 | Cover entrance, dashboard, four module pages, summary page | `src/routes/*.tsx` and `src/components/health/Dashboard.tsx` |
 
