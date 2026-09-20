@@ -33,7 +33,14 @@ function Index() {
   useEffect(() => purgeLegacyProfileData(), []);
 
   return (
-      <main className="relative min-h-screen overflow-hidden bg-[linear-gradient(180deg,#ddf9f2_0%,#e2f8ef_50%,#c4eee7_100%)]">
+      <main className="relative min-h-screen overflow-hidden">
+        <img
+          src={frontPageAsset.url}
+          alt=""
+          aria-hidden
+          className="pointer-events-none absolute inset-0 h-full w-full scale-150 object-cover blur-3xl brightness-105"
+        />
+        <div aria-hidden className="pointer-events-none absolute inset-0 bg-[#e6f9f0]/70" />
         <Dialog>
           <DialogTrigger asChild>
             <Button
@@ -60,7 +67,7 @@ function Index() {
           <img
             src={frontPageAsset.url}
             alt="護心計劃，守護您的心腦血管健康，輕鬆記錄評估資料"
-            className="pointer-events-none max-h-full max-w-full -translate-y-14 motion-reduce:transform-none sm:-translate-y-8 [mask-image:linear-gradient(to_right,transparent,black_5%,black_95%,transparent),linear-gradient(to_bottom,transparent,black_4%,black_96%,transparent)] [mask-composite:intersect] [-webkit-mask-image:linear-gradient(to_right,transparent,black_5%,black_95%,transparent),linear-gradient(to_bottom,transparent,black_4%,black_96%,transparent)] [-webkit-mask-composite:source-in]"
+            className="pointer-events-none max-h-full max-w-full -translate-y-14 motion-reduce:transform-none sm:-translate-y-8 [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent),linear-gradient(to_bottom,transparent,black_6%,black_94%,transparent)] [mask-composite:intersect] [-webkit-mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent),linear-gradient(to_bottom,transparent,black_6%,black_94%,transparent)] [-webkit-mask-composite:source-in]"
           />
         </button>
       </main>

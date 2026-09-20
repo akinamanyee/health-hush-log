@@ -4,6 +4,12 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-20 12:48 — Frameless cover via blurred underlay
+- Replaced the sampled-gradient background with a blurred underlay: the same cover image fills the screen with object-cover, scale-150 and blur-3xl, softened by a light mint tint overlay (#e6f9f0 at 70%), so the surround is the image's own blurred extension rather than a guessed colour.
+- Kept a gentle edge mask (8% horizontal, 6% vertical feather) on the sharp cover image so its edges blend into the underlay at any aspect ratio; no cropping of the printed 進入 button.
+- Kept the whole cover clickable to /logbook, the upward shift, and the subtle bottom-right 私隱與資料使用 trigger unchanged. No logic, storage, grading, or interior-page changes.
+- Verified desktop (1280×800), tablet (588×709), and mobile (390×844): no visible frame, privacy dialog opens, cover navigates to /logbook, no console errors. Build OK.
+
 ## 2026-09-20 12:40 — Seamless full-screen cover background
 - Replaced the mismatched deep-mint page gradient with one sampled from the actual cover image edges (#ddf9f2 → #e2f8ef → #c4eee7), removing the visible colour bands left/right/bottom.
 - Changed the cover `<img>` from full-viewport `object-contain` to an exactly-fitted element (`max-h-full max-w-full`, flex-centred) with a soft edge mask so the image feathers into the background — no hard seam at any aspect ratio, and no cropping of the printed 進入 button.
