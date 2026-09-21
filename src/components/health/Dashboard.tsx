@@ -7,16 +7,11 @@ import { clearAllHealthData } from "@/lib/health/store";
 import { exportAllToCsv } from "@/lib/health/csv";
 import { Button } from "@/components/ui/button";
 import { PrivacyNotice } from "./PrivacyNotice";
-import bloodPressureAsset from "@/assets/bloodpressure.jpg.asset.json";
-import bodyCompositionAsset from "@/assets/scale.jpg.asset.json";
-import handGripAsset from "@/assets/handgrip.jpg.asset.json";
-import stretchingAsset from "@/assets/stretching.jpg.asset.json";
-
 const moduleAssets = {
-  bp: bloodPressureAsset.url,
-  tanita: bodyCompositionAsset.url,
-  grip: handGripAsset.url,
-  sitreach: stretchingAsset.url,
+  bp: "/images/bloodpressure.jpg",
+  tanita: "/images/scale.jpg",
+  grip: "/images/handgrip.jpg",
+  sitreach: "/images/stretching.jpg",
 } as const;
 
 const dashboardOrder = ["bp", "tanita", "grip", "sitreach"] as const;

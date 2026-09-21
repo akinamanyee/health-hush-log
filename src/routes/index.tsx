@@ -4,7 +4,7 @@ import { ShieldCheck } from "lucide-react";
 import { purgeLegacyProfileData } from "@/lib/health/store";
 import { Button } from "@/components/ui/button";
 import { PrivacyNotice } from "@/components/health/PrivacyNotice";
-import frontPageAsset from "@/assets/front-page-4.jpg.asset.json";
+const frontPageUrl = "/images/front-page-4.jpg";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/")({
@@ -35,7 +35,7 @@ function Index() {
   return (
       <main className="relative min-h-screen overflow-hidden">
         <img
-          src={frontPageAsset.url}
+          src={frontPageUrl}
           alt=""
           aria-hidden
           className="pointer-events-none absolute inset-0 h-full w-full scale-150 object-cover blur-3xl brightness-105"
@@ -65,7 +65,7 @@ function Index() {
           className="absolute inset-0 flex h-full w-full appearance-none items-center justify-center border-0 bg-transparent p-0 text-left cursor-pointer transition-opacity duration-200 hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
         >
           <img
-            src={frontPageAsset.url}
+            src={frontPageUrl}
             alt="護心計劃，守護您的心腦血管健康，輕鬆記錄評估資料"
             className="pointer-events-none h-full w-full object-cover object-[center_30%] -translate-y-14 motion-reduce:transform-none sm:-translate-y-8 [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent),linear-gradient(to_bottom,transparent,black_6%,black_55%,transparent_72%)] [mask-composite:intersect] [-webkit-mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent),linear-gradient(to_bottom,transparent,black_6%,black_55%,transparent_72%)] [-webkit-mask-composite:source-in]"
           />

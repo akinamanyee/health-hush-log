@@ -4,6 +4,15 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-21 18:21 — Eject Lovable dependencies for Cloud Run deployment
+
+- Replaced `@lovable.dev/vite-tanstack-config` with explicit Vite config using `tanstackStart`, `react`, `tailwindcss`, `tsConfigPaths`, and `nitro` plugins. Nitro preset switched from `cloudflare-module` to `node-server`.
+- Swapped AI provider from `@ai-sdk/openai` (Lovable gateway) to `@ai-sdk/google` (Google Gemini). Model changed from `openai/gpt-6-astra` to `gemini-2.5-flash`. Removed OpenAI-specific `providerOptions` blocks. Env var changed from `LOVABLE_API_KEY` to `GEMINI_API_KEY`.
+- Migrated 5 image assets from Lovable's `/__l5e/assets-v1/` proxy to local `public/images/` paths. Updated imports in `index.tsx` and `Dashboard.tsx`.
+- Removed Lovable-specific entries from `bunfig.toml` and `package.json`. Regenerated `bun.lock` from public npm registry.
+- Added `Dockerfile` (multi-stage: bun build, node runtime) and `.dockerignore`.
+- Removed Lovable sync notice from `AGENTS.md`.
+
 ## 2026-09-20 18:42 — Cover: show taglines by masking out icons at the image level
 - Added a bottom fade to the image mask (`black 55% → transparent 72%`) so the baked-in icon buttons are clipped on the image itself, while both taglines (守護心血管健康, 輕鬆記錄評估資料) remain fully visible.
 - Shortened the gradient overlay from `h-[70%] sm:h-1/2` to `h-[45%] sm:h-[38%]` since it no longer needs to hide icons — it just blends the masked image edge into the mint background.

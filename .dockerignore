@@ -1,0 +1,8 @@
+node_modules
+.output
+.git
+*.md
+!README.md
+.eslintcache
+.vscode
+.idea

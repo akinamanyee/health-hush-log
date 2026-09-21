@@ -1,17 +1,10 @@
-import { createOpenAI } from "@ai-sdk/openai";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
 
-// Server-only. The gateway key is read inside handlers and never reaches the browser.
+// Server-only. The API key is read inside handlers and never reaches the browser.
 export function createGateway() {
-  const apiKey = process.env["LOVABLE_API_KEY"];
-  if (!apiKey) throw new Error("Missing LOVABLE_API_KEY");
-  return createOpenAI({
-    baseURL: "https://ai.gateway.lovable.dev/v1",
-    apiKey,
-    headers: {
-      "Lovable-API-Key": apiKey,
-      "X-Lovable-AIG-SDK": "vercel-ai-sdk",
-    },
-  });
+  const apiKey = process.env["GEMINI_API_KEY"];
+  if (!apiKey) throw new Error("Missing GEMINI_API_KEY");
+  return createGoogleGenerativeAI({ apiKey });
 }
 
 // Coarse best-effort per-IP daily backstop cap (the app is anonymous; the
