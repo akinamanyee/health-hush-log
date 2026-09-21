@@ -73,9 +73,8 @@ export const extractFromImage = createServerFn({ method: "POST" })
     const gateway = createGateway();
     const fields = EXTRACTION_FIELDS[data.module];
 
-    // Streaming on the wire; consumed server-side for a one-shot result.
     const result = streamText({
-      model: gateway.responses("openai/gpt-6-astra"),
+      model: gateway("gemini-2.5-flash"),
       messages: [
         {
           role: "user",
@@ -88,14 +87,6 @@ export const extractFromImage = createServerFn({ method: "POST" })
           ],
         },
       ],
-      providerOptions: {
-        openai: {
-          store: false,
-          forceReasoning: true,
-          reasoningEffort: "low",
-          include: ["reasoning.encrypted_content"],
-        },
-      },
     });
 
     const text = await result.text;
@@ -228,16 +219,8 @@ ${tipsText}
 
     const run = async (prompt: string) => {
       const result = streamText({
-        model: gateway.responses("openai/gpt-6-astra"),
+        model: gateway("gemini-2.5-flash"),
         messages: [{ role: "user", content: prompt }],
-        providerOptions: {
-          openai: {
-            store: false,
-            forceReasoning: true,
-            reasoningEffort: "low",
-            include: ["reasoning.encrypted_content"],
-          },
-        },
       });
       return (await result.text).trim();
     };
@@ -285,4 +268,3 @@ ${tipsText}
 
     return { ok: true as const, result: output };
   });
-

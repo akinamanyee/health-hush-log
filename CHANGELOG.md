@@ -4,6 +4,14 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-21 14:22 — Cloud Run prep: eject Lovable vite config, swap AI to Google Gemini
+- Ejected `@lovable.dev/vite-tanstack-config` wrapper and wrote a standard `vite.config.ts` composing the same 5 essential plugins (tanstackStart, react, tailwindcss, viteTsConfigPaths, nitro) with the `node-server` Nitro preset for Cloud Run deployment.
+- Swapped AI provider from OpenAI (`@ai-sdk/openai` via Lovable gateway) to Google Gemini (`@ai-sdk/google` with `gemini-2.5-flash`). Env var changes: `LOVABLE_API_KEY` → `GOOGLE_AI_API_KEY`.
+- Removed OpenAI-specific `providerOptions` (store, forceReasoning, reasoningEffort, encrypted_content) from both `extractFromImage` and `generateRichSummary`.
+- Cleaned Lovable-specific entries from `bunfig.toml`.
+- Privacy: targeting Google AI paid tier where data is NOT used for model training, preserving the app’s local-first privacy commitment.
+- No changes to app function, layout, logic, prompts, schemas, grounding checks, or the privacy model.
+
 ## 2026-09-20 23:03 — ARCHITECTURE.md reconciled with PRs #22–24
 - Updated "Last reconciled" timestamp to 2026-09-20 23:03 HKT.
 - Documented the optional `infoText` field on `ModuleDef` in the Modules table.
