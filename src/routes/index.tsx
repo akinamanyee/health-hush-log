@@ -50,9 +50,9 @@ function Index() {
               <ShieldCheck className="size-3.5" /> 私隱與資料使用
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-xl rounded-2xl bg-card">
+          <DialogContent className="max-h-[85vh] max-w-xl overflow-y-auto rounded-2xl bg-card">
             <DialogHeader>
-              <DialogTitle className="text-2xl text-primary">私隱與資料使用</DialogTitle>
+              <DialogTitle className="text-2xl text-primary">私隱與資料使用聲明</DialogTitle>
               <DialogDescription className="sr-only">健康資料、相片及醫療免責說明</DialogDescription>
             </DialogHeader>
             <PrivacyNotice context="cover" />

@@ -11,6 +11,17 @@ export interface FieldDef {
   group?: string;
 }
 
+export interface InfoPoint {
+  label: string;
+  text: string;
+}
+
+export interface InfoText {
+  intro: string;
+  points: InfoPoint[];
+  note: string;
+}
+
 export interface ModuleDef {
   id: "tanita" | "bp" | "grip" | "sitreach";
   title: string;
@@ -19,13 +30,14 @@ export interface ModuleDef {
   storageKey: string;
   fields: FieldDef[];
   supportsImage: boolean;
+  infoText?: InfoText;
 }
 
 export const MODULES: ModuleDef[] = [
   {
     id: "tanita",
     title: "身體成份分析儀",
-    subtitle: "身體成份分析儀讀數",
+    subtitle: "記錄脂肪率．肌肉量．BMI",
     path: "/tanita",
     storageKey: STORAGE_KEYS.tanita,
     supportsImage: true,
@@ -56,14 +68,14 @@ export const MODULES: ModuleDef[] = [
   {
     id: "bp",
     title: "血壓",
-    subtitle: "上壓・下壓・脈搏",
+    subtitle: "上壓・下壓・脈博",
     path: "/blood-pressure",
     storageKey: STORAGE_KEYS.bp,
     supportsImage: true,
     fields: [
       { key: "systolic", label: "收縮壓（上壓）", unit: "mmHg", min: 50, max: 260, step: "1" },
       { key: "diastolic", label: "舒張壓（下壓）", unit: "mmHg", min: 30, max: 160, step: "1" },
-      { key: "pulse", label: "脈搏", unit: "次/分鐘", min: 30, max: 220, step: "1" },
+      { key: "pulse", label: "脈博", unit: "次/分鐘", min: 30, max: 220, step: "1" },
     ],
   },
   {
@@ -74,15 +86,43 @@ export const MODULES: ModuleDef[] = [
     storageKey: STORAGE_KEYS.grip,
     supportsImage: true,
     fields: [{ key: "grip", label: "手握力", unit: "公斤", min: 1, max: 100, step: "0.1" }],
+    infoText: {
+      intro: "手握力是一項簡單且安全的日常健康指標：",
+      points: [
+        {
+          label: "肌肉與體能狀態：",
+          text: "反映全身的基礎肌肉力量，幫助了解日常活動能力及隨年齡增長的體能變化。",
+        },
+        {
+          label: "心血管健康參考：",
+          text: "研究顯示，握力表現與整體心血管健康具關聯性，可作為日常保健的輔助參考。",
+        },
+      ],
+      note: "註：測試結果僅供個人健康管理參考，不能作任何醫療診斷用途。",
+    },
   },
   {
     id: "sitreach",
     title: "坐地前伸測試",
-    subtitle: "記錄柔軟度測試距離",
+    subtitle: "記錄柔軟度",
     path: "/sit-and-reach",
     storageKey: STORAGE_KEYS.sitreach,
     supportsImage: true,
     fields: [{ key: "distance", label: "前彎距離", unit: "厘米", min: -30, max: 60, step: "0.5" }],
+    infoText: {
+      intro: "坐地前伸測試是量度身體柔軟度的簡單指標，近年研究亦發現它與心血管健康具一定關聯：",
+      points: [
+        {
+          label: "肌肉與關節靈活度：",
+          text: "主要評估下背部及大腿後側的伸展能力，維持良好彈性有助預防日常活動勞損。",
+        },
+        {
+          label: "血管健康參考：",
+          text: "醫學研究顯示，中老年人的軀幹柔軟度與動脈血管彈性具正向關聯。保持身體柔軟，可能有助促進血液循環，可作為心血管健康的日常輔助參考。",
+        },
+      ],
+      note: "註：測試結果僅供個人健康管理與體能紀錄參考，不能作任何醫療診斷用途。",
+    },
   },
 ];
 

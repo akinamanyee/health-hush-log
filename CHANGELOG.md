@@ -13,6 +13,40 @@ Once this file passes ~100 entries, the older half moves to `changelog-archive.m
 - Added `Dockerfile` (multi-stage: bun build, node runtime) and `.dockerignore`.
 - Removed Lovable sync notice from `AGENTS.md`.
 
+## 2026-09-20 23:03 — ARCHITECTURE.md reconciled with PRs #22–24
+- Updated "Last reconciled" timestamp to 2026-09-20 23:03 HKT.
+- Documented the optional `infoText` field on `ModuleDef` in the Modules table.
+- Noted info-popover rendering capability in the RecordModule description.
+- All other living docs (CHANGELOG, DECISIONS, PRD, Product_Roadmap) were audited and found current — no changes needed.
+
+## 2026-09-20 20:43 — Cover privacy notice rewritten with full 5-section disclosure
+- Replaced the three short bullet points in the cover 私隱與資料使用 dialog with a comprehensive 私隱與資料使用聲明 covering: 100% local storage, no-PII guidance, AI processing details (OCR + health summary), data autonomy/deletion, and medical disclaimer.
+- Dialog title updated from 「私隱與資料使用」 to 「私隱與資料使用聲明」; dialog is now scrollable (`max-h-[85vh] overflow-y-auto`) to accommodate the longer content.
+- Other contexts (module, dashboard, summary) keep their existing concise copy.
+- No data, grading, storage, AI or logic changes.
+
+## 2026-09-20 20:32 — Info popovers on grip and sit-and-reach pages
+- Added an ⓘ icon next to the page title on `/grip` and `/sit-and-reach` that opens a Popover explaining why each test matters (muscle health, cardiovascular associations) with a medical-disclaimer note.
+- Data model: `ModuleDef` gains an optional `infoText` field (`{ intro, points[], note }`) so any module can opt in to an info popover without code changes.
+- Uses the existing Radix-based Popover component with glassmorphic styling (`backdrop-blur-xl bg-card/80`).
+- No data, grading, storage, AI or logic changes.
+
+## 2026-09-20 20:16 — Dashboard and module wording updates, back-to-cover navigation
+- Tanita subtitle changed from 「身體成份分析儀讀數」 to 「記錄脂肪率．肌肉量．BMI」 (propagates to both `/tanita` and `/logbook`).
+- Sit-and-reach subtitle changed from 「記錄柔軟度測試距離」 to 「記錄柔軟度」 (propagates to both `/sit-and-reach` and `/logbook`).
+- Removed 「本地優先・資料只存在此裝置」 from the dashboard header (the privacy notice in the footer already covers this).
+- Added 「返回首頁」 link at the top of `/logbook` pointing back to the cover page (`/`).
+- No data, grading, storage, AI or logic changes.
+
+## 2026-09-20 20:01 — Cover: revert HTML taglines, restore mask-based approach
+- Reverted PR #19 at user's request, restoring the PR #18 cover state: image mask with bottom fade (`black 55% → transparent 72%`), shorter gradient (`h-[45%] sm:h-[38%]`), no HTML tagline elements.
+- The HTML text overlay worked technically but the user preferred the previous version.
+- No other changes.
+
+## 2026-09-20 19:36 — Cover: render taglines as HTML text above gradient (reverted)
+- Attempted a different approach to the tagline-visibility problem: reverted image mask to no bottom fade and gradient to `h-[70%] sm:h-1/2`, then added the two taglines (守護心血管健康, 輕鬆記錄評估資料) as HTML `<p>` elements at z-10 above the gradient.
+- Reverted in the next entry at user's request.
+
 ## 2026-09-20 18:42 — Cover: show taglines by masking out icons at the image level
 - Added a bottom fade to the image mask (`black 55% → transparent 72%`) so the baked-in icon buttons are clipped on the image itself, while both taglines (守護心血管健康, 輕鬆記錄評估資料) remain fully visible.
 - Shortened the gradient overlay from `h-[70%] sm:h-1/2` to `h-[45%] sm:h-[38%]` since it no longer needs to hide icons — it just blends the masked image edge into the mint background.
