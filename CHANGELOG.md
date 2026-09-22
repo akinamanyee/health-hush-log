@@ -4,6 +4,13 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-22 23:42 — Deploy M19 + SSOT fix to Cloud Run (heartcaring.fit)
+
+- Deployed `cloud-run-prep` branch to Cloud Run service `heartcaring-app` (revision 17), region `asia-east1`.
+- Initial deploy went to a new service named `health-hush-log` instead of the existing `heartcaring-app` that `heartcaring.fit` is domain-mapped to — mobile showed the old Tanita layout while Chrome (which had visited the Cloud Run URL directly) showed the update.
+- Redeployed to the correct `heartcaring-app` service; deleted the unused `health-hush-log` service.
+- M19 six-screen Tanita sections and the SSOT fix are now live on heartcaring.fit.
+
 ## 2026-09-22 22:04 — Fix triple SSOT for field-to-screen mapping
 
 - Removed dead `screen?: string` property from `FieldDef` interface and all 21 Tanita field definitions — nothing read it.
