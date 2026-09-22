@@ -3,6 +3,7 @@ import { getRequest } from "@tanstack/react-start/server";
 import { generateText } from "ai";
 import { z } from "zod";
 import { REFERENCE_LEAFLET, TIPS_REFERENCE, type TipBlock } from "./charts";
+import { MODULE_BY_ID } from "./modules";
 
 const ExtractInput = z.object({
   image: z.string().startsWith("data:image/"), // base64 data URL, real MIME type
@@ -57,31 +58,14 @@ const EXTRACTION_SCHEMAS = {
   sitreach: SIT_REACH_SCHEMA,
 };
 
-const TANITA_SCREEN_FIELDS: Record<string, { prompt: string; keys: string[] }> = {
-  bodyFat: {
-    prompt: "weight（體重 kg）、bodyFat（體脂率 %）、fatMass（體脂量 kg）、fatTrunk（軀幹脂肪率 %）、fatArmR（右臂脂肪率 %）、fatArmL（左臂脂肪率 %）、fatLegR（右腿脂肪率 %）、fatLegL（左腿脂肪率 %）",
-    keys: ["weight", "bodyFat", "fatMass", "fatTrunk", "fatArmR", "fatArmL", "fatLegR", "fatLegL"],
-  },
-  muscle: {
-    prompt: "weight（體重 kg）、muscleMass（肌肉量 kg）、muscleRatio（肌肉比率 %）、muscleTrunk（軀幹肌肉量 kg）、muscleArmR（右臂肌肉量 kg）、muscleArmL（左臂肌肉量 kg）、muscleLegR（右腿肌肉量 kg）、muscleLegL（左腿肌肉量 kg）",
-    keys: ["weight", "muscleMass", "muscleRatio", "muscleTrunk", "muscleArmR", "muscleArmL", "muscleLegR", "muscleLegL"],
-  },
-  water: {
-    prompt: "weight（體重 kg）、bodyWaterPct（身體水分率 %）、bodyWaterKg（身體水分量 kg）",
-    keys: ["weight", "bodyWaterPct", "bodyWaterKg"],
-  },
-  visceral: {
-    prompt: "weight（體重 kg）、visceralFat（內臟脂肪等級）",
-    keys: ["weight", "visceralFat"],
-  },
-  bmr: {
-    prompt: "weight（體重 kg）、bmrKcal（基礎代謝率 kcal）、bmrKj（基礎代謝率 kJ）",
-    keys: ["weight", "bmrKcal", "bmrKj"],
-  },
-  bmi: {
-    prompt: "weight（體重 kg）、bmi（BMI）",
-    keys: ["weight", "bmi"],
-  },
+const TANITA_SCREENS = MODULE_BY_ID.tanita.screens!;
+const TANITA_SCREEN_PROMPTS: Record<string, string> = {
+  bodyFat: "weight（體重 kg）、bodyFat（體脂率 %）、fatMass（體脂量 kg）、fatTrunk（軀幹脂肪率 %）、fatArmR（右臂脂肪率 %）、fatArmL（左臂脂肪率 %）、fatLegR（右腿脂肪率 %）、fatLegL（左腿脂肪率 %）",
+  muscle: "weight（體重 kg）、muscleMass（肌肉量 kg）、muscleRatio（肌肉比率 %）、muscleTrunk（軀幹肌肉量 kg）、muscleArmR（右臂肌肉量 kg）、muscleArmL（左臂肌肉量 kg）、muscleLegR（右腿肌肉量 kg）、muscleLegL（左腿肌肉量 kg）",
+  water: "weight（體重 kg）、bodyWaterPct（身體水分率 %）、bodyWaterKg（身體水分量 kg）",
+  visceral: "weight（體重 kg）、visceralFat（內臟脂肪等級）",
+  bmr: "weight（體重 kg）、bmrKcal（基礎代謝率 kcal）、bmrKj（基礎代謝率 kJ）",
+  bmi: "weight（體重 kg）、bmi（BMI）",
 };
 
 function extractJson(text: string): unknown {
@@ -100,12 +84,13 @@ export const extractFromImage = createServerFn({ method: "POST" })
 
     const gateway = createGateway();
 
-    const screenDef = data.module === "tanita" && data.screen
-      ? TANITA_SCREEN_FIELDS[data.screen]
+    const screenMeta = data.module === "tanita" && data.screen
+      ? TANITA_SCREENS.find((s) => s.id === data.screen)
       : undefined;
-    const fields = screenDef ? screenDef.prompt : EXTRACTION_FIELDS[data.module];
-    const screenHint = screenDef
-      ? `這是身體組成分析儀「${data.screen === "bodyFat" ? "體脂率" : data.screen === "muscle" ? "肌肉量" : data.screen === "water" ? "身體水分" : data.screen === "visceral" ? "內臟脂肪" : data.screen === "bmr" ? "基礎代謝率" : "BMI"}」畫面的照片。`
+    const screenPrompt = screenMeta ? TANITA_SCREEN_PROMPTS[screenMeta.id] : undefined;
+    const fields = screenPrompt ?? EXTRACTION_FIELDS[data.module];
+    const screenHint = screenMeta
+      ? `這是身體組成分析儀「${screenMeta.label}」畫面的照片。`
       : "這是一張健康儀器屏幕的照片。";
 
     const result = await generateText({
@@ -126,9 +111,9 @@ export const extractFromImage = createServerFn({ method: "POST" })
 
     const text = result.text;
     try {
-      if (screenDef) {
+      if (screenMeta) {
         const shape: Record<string, z.ZodNullable<z.ZodNumber>> = {};
-        for (const k of screenDef.keys) shape[k] = z.number().nullable();
+        for (const k of screenMeta.fields) shape[k] = z.number().nullable();
         const screenSchema = z.object(shape);
         return { ok: true as const, values: screenSchema.parse(extractJson(text)) };
       }
