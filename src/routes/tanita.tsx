@@ -1,17 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { RecordModule } from "@/components/health/RecordModule";
+import { TanitaRecord } from "@/components/health/TanitaRecord";
 import { MODULE_BY_ID } from "@/lib/health/modules";
 
 export const Route = createFileRoute("/tanita")({
   head: () => ({
     meta: [
       { title: "身體成份分析儀 — 健康紀錄簿" },
-      { name: "description", content: "拍攝或上載身體成份分析儀屏幕照片，讀取體重、體脂率、肌肉量、BMI 與內臟脂肪。" },
+      { name: "description", content: "按六個畫面分類拍攝或上載身體成份分析儀屏幕照片，讀取體脂率、肌肉量、身體水分、內臟脂肪、基礎代謝率與 BMI。" },
       { property: "og:title", content: "身體成份分析儀 — 健康紀錄簿" },
-      { property: "og:description", content: "記錄身體成份分析儀讀數，照片讀取或手動輸入。" },
+      { property: "og:description", content: "記錄身體成份分析儀讀數，六屏分類照片讀取或手動輸入。" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: () => <RecordModule mod={MODULE_BY_ID.tanita} />,
+  component: () => <TanitaRecord mod={MODULE_BY_ID.tanita} />,
 });

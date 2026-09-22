@@ -7,6 +7,7 @@ import { REFERENCE_LEAFLET, TIPS_REFERENCE, type TipBlock } from "./charts";
 const ExtractInput = z.object({
   image: z.string().startsWith("data:image/"), // base64 data URL, real MIME type
   module: z.enum(["tanita", "bp", "grip", "sitreach"]),
+  screen: z.string().optional(),
 });
 
 const TANITA_SCHEMA = z.object({
@@ -56,6 +57,33 @@ const EXTRACTION_SCHEMAS = {
   sitreach: SIT_REACH_SCHEMA,
 };
 
+const TANITA_SCREEN_FIELDS: Record<string, { prompt: string; keys: string[] }> = {
+  bodyFat: {
+    prompt: "weight（體重 kg）、bodyFat（體脂率 %）、fatMass（體脂量 kg）、fatTrunk（軀幹脂肪率 %）、fatArmR（右臂脂肪率 %）、fatArmL（左臂脂肪率 %）、fatLegR（右腿脂肪率 %）、fatLegL（左腿脂肪率 %）",
+    keys: ["weight", "bodyFat", "fatMass", "fatTrunk", "fatArmR", "fatArmL", "fatLegR", "fatLegL"],
+  },
+  muscle: {
+    prompt: "weight（體重 kg）、muscleMass（肌肉量 kg）、muscleRatio（肌肉比率 %）、muscleTrunk（軀幹肌肉量 kg）、muscleArmR（右臂肌肉量 kg）、muscleArmL（左臂肌肉量 kg）、muscleLegR（右腿肌肉量 kg）、muscleLegL（左腿肌肉量 kg）",
+    keys: ["weight", "muscleMass", "muscleRatio", "muscleTrunk", "muscleArmR", "muscleArmL", "muscleLegR", "muscleLegL"],
+  },
+  water: {
+    prompt: "weight（體重 kg）、bodyWaterPct（身體水分率 %）、bodyWaterKg（身體水分量 kg）",
+    keys: ["weight", "bodyWaterPct", "bodyWaterKg"],
+  },
+  visceral: {
+    prompt: "weight（體重 kg）、visceralFat（內臟脂肪等級）",
+    keys: ["weight", "visceralFat"],
+  },
+  bmr: {
+    prompt: "weight（體重 kg）、bmrKcal（基礎代謝率 kcal）、bmrKj（基礎代謝率 kJ）",
+    keys: ["weight", "bmrKcal", "bmrKj"],
+  },
+  bmi: {
+    prompt: "weight（體重 kg）、bmi（BMI）",
+    keys: ["weight", "bmi"],
+  },
+};
+
 function extractJson(text: string): unknown {
   const match = text.match(/\{[\s\S]*\}/);
   if (!match) throw new Error("AI 未能讀取圖片，請改用手動輸入。");
@@ -71,7 +99,15 @@ export const extractFromImage = createServerFn({ method: "POST" })
     if (!serverCapOk(ip)) throw new Error("今日讀取次數已達上限，請明天再試或手動輸入。");
 
     const gateway = createGateway();
-    const fields = EXTRACTION_FIELDS[data.module];
+
+    const screenDef = data.module === "tanita" && data.screen
+      ? TANITA_SCREEN_FIELDS[data.screen]
+      : undefined;
+    const fields = screenDef ? screenDef.prompt : EXTRACTION_FIELDS[data.module];
+    const screenHint = screenDef
+      ? `這是身體組成分析儀「${data.screen === "bodyFat" ? "體脂率" : data.screen === "muscle" ? "肌肉量" : data.screen === "water" ? "身體水分" : data.screen === "visceral" ? "內臟脂肪" : data.screen === "bmr" ? "基礎代謝率" : "BMI"}」畫面的照片。`
+      : "這是一張健康儀器屏幕的照片。";
+
     const result = await generateText({
       model: gateway("gemini-3.6-flash"),
       messages: [
@@ -80,7 +116,7 @@ export const extractFromImage = createServerFn({ method: "POST" })
           content: [
             {
               type: "text",
-              text: `這是一張健康儀器屏幕的照片。請讀取以下數值：${fields}。只輸出一個 JSON 物件，鍵名用英文，讀不到的數值用 null，不要輸出任何其他文字。`,
+              text: `${screenHint}請讀取以下數值：${fields}。只輸出一個 JSON 物件，鍵名用英文，讀不到的數值用 null，不要輸出任何其他文字。`,
             },
             { type: "image", image: data.image },
           ],
@@ -90,6 +126,12 @@ export const extractFromImage = createServerFn({ method: "POST" })
 
     const text = result.text;
     try {
+      if (screenDef) {
+        const shape: Record<string, z.ZodNullable<z.ZodNumber>> = {};
+        for (const k of screenDef.keys) shape[k] = z.number().nullable();
+        const screenSchema = z.object(shape);
+        return { ok: true as const, values: screenSchema.parse(extractJson(text)) };
+      }
       const schema = EXTRACTION_SCHEMAS[data.module];
       return { ok: true as const, values: schema.parse(extractJson(text)) };
     } catch {
