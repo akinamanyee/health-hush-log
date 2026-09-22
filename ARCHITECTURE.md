@@ -1,7 +1,7 @@
 # Architecture — 健康紀錄簿
 
 Describes how the code is actually built. The code is the SSOT for behaviour; this file
-describes it. Last reconciled against the code: **2026-09-22 18:18 HKT**.
+describes it. Last reconciled against the code: **2026-09-22 20:21 HKT**.
 
 ## Shape in one paragraph
 
@@ -15,7 +15,7 @@ server-side. Grading is pure local computation over bundled reference tables.
 - TanStack Start v1 (React 19, Vite 8), file-based routes in `src/routes`
 - Tailwind CSS v4 via `src/styles.css` (design tokens in `@theme`, `glass-card` utility)
 - `sonner` for notices, `recharts` for trend lines, `lucide-react` icons, the supplied cover image and four supplied module illustrations
-- AI SDK (`ai` + `@ai-sdk/google`) calling Google Gemini directly via `generateText`
+- AI SDK (`ai` v7 + `@ai-sdk/google` v4) calling Google Gemini (`gemini-3.6-flash`) directly via `generateText`
 - Storage: `localStorage` only
 
 ## Modules

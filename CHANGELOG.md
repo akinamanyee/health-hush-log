@@ -4,10 +4,15 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-22 20:21 — Track package-lock.json and regenerate bun.lock
+
+- `package-lock.json` added to version control for the first time — ensures reproducible `npm install` in CI or manual builds.
+- `bun.lock` regenerated to match the `@ai-sdk/google` v4 upgrade. The Dockerfile uses `bun install --frozen-lockfile`, so the lockfile must stay in sync with `package.json`.
+
 ## 2026-09-22 20:00 — Fix photo extraction inline_data bug
 
 - Photo extraction (`extractFromImage`) failed with "Invalid value at 'contents[0].parts[1].inline_data' (data), Starting an object on a scalar field" when sending images to Gemini.
-- Root cause: `ai` v7 core wraps image data in tagged objects `{ type: "data", data: base64 }` before passing to the provider. `@ai-sdk/google` v2 (`@ai-sdk/provider-utils` v3) passed the tagged object directly to the Gemini API as `convertToBase64(part.data)` where a plain base64 string is expected.
+- Root cause: `ai` v7 core wraps image data in tagged objects `{ type: "data", data: base64 }` before passing to the provider. `@ai-sdk/google` v2 (`@ai-sdk/provider-utils` v3) passed the tagged object directly to the Gemini API as `convertToBase64(part.data)` where a plain base64 string is expected. A pre-processing workaround (converting the data URL to `Uint8Array`) was attempted first but does not work — the v7 core re-wraps `Uint8Array` in the same tagged structure.
 - Fix: upgraded `@ai-sdk/google` from `^2.0.0` (v2.0.97) to `^4.0.0` (v4.0.76). The v4 provider uses `@ai-sdk/provider-utils` v5, matching `ai` v7, and correctly accesses `contentPart.data.data` (the inner value) instead of `contentPart.data` (the tagged wrapper).
 - No code changes to `ai.functions.ts`. No change to inputs, outputs, or data flow.
 
