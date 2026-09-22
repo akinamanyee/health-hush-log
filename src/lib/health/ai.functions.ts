@@ -75,7 +75,7 @@ export const extractFromImage = createServerFn({ method: "POST" })
 
     // Streaming on the wire; consumed server-side for a one-shot result.
     const result = streamText({
-      model: gateway("gemini-2.5-flash"),
+      model: gateway("gemini-3.6-flash"),
       messages: [
         {
           role: "user",
@@ -220,7 +220,7 @@ ${tipsText}
 
     const run = async (prompt: string) => {
       const result = streamText({
-        model: gateway("gemini-2.5-flash"),
+        model: gateway("gemini-3.6-flash"),
         messages: [{ role: "user", content: prompt }],
       });
       return (await result.text).trim();
