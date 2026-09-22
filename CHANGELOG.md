@@ -7,9 +7,9 @@ Once this file passes ~100 entries, the older half moves to `changelog-archive.m
 ## 2026-09-22 20:00 — Fix photo extraction inline_data bug
 
 - Photo extraction (`extractFromImage`) failed with "Invalid value at 'contents[0].parts[1].inline_data' (data), Starting an object on a scalar field" when sending images to Gemini.
-- Root cause: `ai` v7 core wraps data URL strings in tagged objects `{ type: "data", data: base64 }` before passing to the provider. `@ai-sdk/google` v2 doesn't unwrap these and passes the object directly to the Gemini API where a plain base64 string is expected.
-- Fix: pre-process the data URL into a `Uint8Array` in `dataUrlToUint8Array()` before passing it to `generateText`. The Google provider correctly handles `Uint8Array` via its `convertToBase64` path, bypassing the tagged object issue entirely.
-- No package upgrades needed. No change to inputs, outputs, or data flow.
+- Root cause: `ai` v7 core wraps image data in tagged objects `{ type: "data", data: base64 }` before passing to the provider. `@ai-sdk/google` v2 (`@ai-sdk/provider-utils` v3) passed the tagged object directly to the Gemini API as `convertToBase64(part.data)` where a plain base64 string is expected.
+- Fix: upgraded `@ai-sdk/google` from `^2.0.0` (v2.0.97) to `^4.0.0` (v4.0.76). The v4 provider uses `@ai-sdk/provider-utils` v5, matching `ai` v7, and correctly accesses `contentPart.data.data` (the inner value) instead of `contentPart.data` (the tagged wrapper).
+- No code changes to `ai.functions.ts`. No change to inputs, outputs, or data flow.
 
 ## 2026-09-22 18:18 — Switch AI calls from streamText to generateText
 

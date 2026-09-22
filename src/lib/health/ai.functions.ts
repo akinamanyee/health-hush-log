@@ -56,15 +56,6 @@ const EXTRACTION_SCHEMAS = {
   sitreach: SIT_REACH_SCHEMA,
 };
 
-function dataUrlToUint8Array(dataUrl: string): { bytes: Uint8Array; mediaType: string } {
-  const comma = dataUrl.indexOf(",");
-  const mediaType = dataUrl.slice(5, dataUrl.indexOf(";", 5)) || "image/jpeg";
-  const bin = atob(dataUrl.slice(comma + 1));
-  const bytes = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-  return { bytes, mediaType };
-}
-
 function extractJson(text: string): unknown {
   const match = text.match(/\{[\s\S]*\}/);
   if (!match) throw new Error("AI 未能讀取圖片，請改用手動輸入。");
@@ -81,8 +72,6 @@ export const extractFromImage = createServerFn({ method: "POST" })
 
     const gateway = createGateway();
     const fields = EXTRACTION_FIELDS[data.module];
-    const { bytes, mediaType } = dataUrlToUint8Array(data.image);
-
     const result = await generateText({
       model: gateway("gemini-3.6-flash"),
       messages: [
@@ -93,7 +82,7 @@ export const extractFromImage = createServerFn({ method: "POST" })
               type: "text",
               text: `這是一張健康儀器屏幕的照片。請讀取以下數值：${fields}。只輸出一個 JSON 物件，鍵名用英文，讀不到的數值用 null，不要輸出任何其他文字。`,
             },
-            { type: "image", image: bytes, mediaType },
+            { type: "image", image: data.image },
           ],
         },
       ],
