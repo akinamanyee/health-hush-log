@@ -1,7 +1,7 @@
 # Architecture — 健康紀錄簿
 
 Describes how the code is actually built. The code is the SSOT for behaviour; this file
-describes it. Last reconciled against the code: **2026-09-22 20:21 HKT**.
+describes it. Last reconciled against the code: **2026-09-22 22:04 HKT**.
 
 ## Shape in one paragraph
 
@@ -22,7 +22,7 @@ server-side. Grading is pure local computation over bundled reference tables.
 
 | Concern | Home |
 | --- | --- |
-| Module definitions (id, title, fields, units, min/max, route, storage key, optional `infoText`) | `src/lib/health/modules.ts` |
+| Module definitions (id, title, fields, units, min/max, route, storage key, optional `infoText`, optional `screens`) | `src/lib/health/modules.ts` |
 | Reference tables + leaflet text (one named source per table) | `src/lib/health/charts.ts` |
 | Local calendar dates and clamped month arithmetic | `src/lib/health/dates.ts` |
 | Spoken-number parsing (Arabic + Chinese numerals) | `src/lib/health/voice.ts` |
@@ -32,12 +32,17 @@ server-side. Grading is pure local computation over bundled reference tables.
 | CSV export | `src/lib/health/csv.ts` |
 | Server-side AI (image read, summary) | `src/lib/health/ai.functions.ts` |
 | Gateway client + per-IP backstop | `src/lib/ai-gateway.server.ts` |
-| Shared record-and-review form (with optional info popover per module) | `src/components/health/RecordModule.tsx` |
+| Shared record state and behaviour hook | `src/components/health/useRecordState.ts` |
+| Shared record-and-review form for bp/grip/sitreach (with optional info popover per module) | `src/components/health/RecordModule.tsx` |
+| Six-screen Tanita recorder (per-screen photo extraction, no voice) | `src/components/health/TanitaRecord.tsx` |
 | Photo drop (client-side downscale), voice, grade badge | `src/components/health/{ImageDrop,VoiceButton,GradeBadge}.tsx` |
 | Cover entrance, dashboard, four module pages, summary page | `src/routes/*.tsx` and `src/components/health/Dashboard.tsx` |
 
-The four module routes (`/tanita`, `/blood-pressure`, `/grip`, `/sit-and-reach`) are thin
-wrappers that pass a `ModuleDef` into `RecordModule`; all record behaviour lives once.
+Three module routes (`/blood-pressure`, `/grip`, `/sit-and-reach`) pass a `ModuleDef` into
+`RecordModule`. The `/tanita` route passes its `ModuleDef` into `TanitaRecord`, which renders
+six labelled sections matching the physical analyser's screens, each with its own `ImageDrop`
+for per-screen photo extraction. Both components consume the `useRecordState` hook, which holds
+all record state and behaviour once.
 The cover remains `/`; the stable dashboard destination is `/logbook`, so module, summary and
 error returns do not replay the cover.
 
@@ -46,11 +51,14 @@ error returns do not replay the cover.
 ```text
 camera/upload photo ──▶ ImageDrop (downscale ≤1600px, JPEG)
              │
-             ▼  data URL only
+             ▼  data URL + optional screen id
        extractFromImage  (server fn, credential server-side, nothing stored)
+             │  Tanita per-screen: narrow prompt (3–8 fields) + screen-specific
+             │  Zod schema (keys derived from ScreenDef.fields SSOT).
+             │  Other modules: full-field prompt.
              │  strict zod values, nulls allowed
-voice ──▶ ─┐ ▼
-type  ──▶ ─┴ review form (RecordModule) ── user confirms ──▶ localStorage
+voice ──▶ ─┐ ▼  (voice not available on Tanita — per-screen photo replaces it)
+type  ──▶ ─┴ review form (RecordModule / TanitaRecord) ── user confirms ──▶ localStorage
                      │
                      │  Multi-photo merge: each photo overwrites only non-null
                      │  AI values, preserving earlier reads. A progress counter
@@ -72,6 +80,9 @@ latest readings + grades ──▶ generateRichSummary (server fn, leaflet-groun
   CSV and the summary all call it, so they cannot disagree. `interpretCard()` calls
   `gradeEntry()` internally and layers on range/action/value for the rich summary.
 - **Field metadata**: `modules.ts` only — labels, units and limits are never retyped in a route.
+- **Field-to-screen mapping** (Tanita): `ScreenDef.fields` in `modules.ts` is the single
+  source. `TanitaRecord` filters fields by it for rendering; `ai.functions.ts` derives Zod
+  schema keys and screen-hint labels from it, keeping only AI-specific prompt text locally.
 - **Reference numbers**: `charts.ts` only, and the same leaflet text both grounds the AI and is the allow-list the generated summary is checked against after generation (fails → one strict retry → withheld).
 
 ## Storage keys

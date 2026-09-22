@@ -4,6 +4,22 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-22 22:04 — Fix triple SSOT for field-to-screen mapping
+
+- Removed dead `screen?: string` property from `FieldDef` interface and all 21 Tanita field definitions — nothing read it.
+- In `ai.functions.ts`, replaced the hardcoded `TANITA_SCREEN_FIELDS` (which duplicated both field keys and screen labels from `modules.ts`) with `TANITA_SCREEN_PROMPTS` (AI-specific prompt strings only). Zod schema keys are now derived from `ScreenDef.fields` at runtime, and screen-hint labels come from `ScreenDef.label`.
+- Single source of truth for field-to-screen mapping is now `ScreenDef.fields` in `modules.ts`.
+- No data, storage, grading, or behavioral changes.
+
+## 2026-09-22 22:04 — M19: Six-screen Tanita sections with per-screen photo extraction
+
+- Restructured the Tanita module into six labelled sections matching the physical analyser's display screens (體脂率, 肌肉量, 身體水分, 內臟脂肪, 基礎代謝率, BMI), each with its own camera/upload button and narrowed AI extraction prompt (3–8 fields instead of 21).
+- Extracted shared record state and behaviour from `RecordModule` into a `useRecordState` hook, consumed by both the new `TanitaRecord` component (Tanita) and the existing `RecordModule` (bp/grip/sitreach). The hook extraction is a pure refactor — no behavioral change for existing modules.
+- Weight is editable only in section 1 (體脂率); sections 2–6 show weight as a read-only disabled input sharing the same value.
+- Voice input removed from Tanita only — impractical for 21 fields across 6 screens; per-screen photo extraction replaces it. Other modules keep voice. PRD line 34 mentions "speak the numbers"; this is an intentional deviation documented in [ADR 0022](adr/0022-tanita-six-screen-sections.md).
+- No changes to storage format, field keys, grading, CSV export, or data migration. Existing `hlb:tanita` records load correctly.
+- Plan: [plan/20-m19-tanita-screen-sections.md](plan/20-m19-tanita-screen-sections.md)
+
 ## 2026-09-22 20:21 — Track package-lock.json and regenerate bun.lock
 
 - `package-lock.json` added to version control for the first time — ensures reproducible `npm install` in CI or manual builds.

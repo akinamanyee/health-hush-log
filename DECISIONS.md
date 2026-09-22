@@ -26,3 +26,4 @@ in the linked ADR file under `adr/`. This index never holds the argument itself.
 | 2026-09-19 | [0019](adr/0019-bundled-government-health-tips.md) | Health tips distilled from government articles and bundled as constants |
 | 2026-09-22 | [0020](adr/0020-direct-gemini-and-generatetext.md) | Direct Google Gemini provider and generateText over streamText |
 | 2026-09-22 | [0021](adr/0021-pre-process-image-to-uint8array.md) | Upgrade @ai-sdk/google to v4 for ai v7 compatibility (fixes inline_data bug) |
+| 2026-09-22 | [0022](adr/0022-tanita-six-screen-sections.md) | Six-screen Tanita sections with per-screen photo extraction; voice removed from Tanita; ScreenDef.fields is the SSOT for field-to-screen mapping |
