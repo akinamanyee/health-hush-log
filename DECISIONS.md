@@ -24,3 +24,4 @@ in the linked ADR file under `adr/`. This index never holds the argument itself.
 | 2026-09-19 | [0017](adr/0017-grounding-check-local-dates-named-sources.md) | Summaries are grounding-checked after generation; dates are local; grading sources named one-per-table |
 | 2026-09-19 | [0018](adr/0018-summary-sends-readings-with-grades.md) | The AI summary receives readings alongside grade labels (supersedes 0007) |
 | 2026-09-19 | [0019](adr/0019-bundled-government-health-tips.md) | Health tips distilled from government articles and bundled as constants |
+| 2026-09-22 | [0020](adr/0020-direct-gemini-and-generatetext.md) | Direct Google Gemini provider and generateText over streamText |

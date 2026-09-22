@@ -4,6 +4,29 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-22 18:18 — Switch AI calls from streamText to generateText
+
+- Replaced `streamText` with `generateText` from the AI SDK in both server functions (`extractFromImage` and `generateRichSummary`). Both calls were consuming the full result server-side (`await result.text`), so streaming added complexity with no benefit.
+- Root cause: `streamText` was throwing `NoOutputGeneratedError` ("No output generated. Check the stream for errors.") on Cloud Run — the SSE stream opened but produced zero content chunks before closing. `generateText` makes a single request/response call and surfaces API errors directly instead of swallowing them.
+- No change to inputs, outputs, error handling, or data flow — the same Zod schemas validate, the same grounding check runs, the same retry logic applies.
+
+## 2026-09-22 18:18 — Update Gemini model from 2.5-flash to 3.6-flash
+
+- Changed `gateway("gemini-2.5-flash")` to `gateway("gemini-3.6-flash")` in both AI call sites.
+- Root cause: Google retired `gemini-2.5-flash`; the API returned 404 "no longer available to new users. Please update your code to use models/gemini-3.6-flash".
+- The `@ai-sdk/google` v2.0.97 SDK passes model names directly to the API URL and already recognises `gemini-3.x` models via its capability detection logic — no SDK upgrade needed.
+
+## 2026-09-22 18:18 — Remove Lovable dead code
+
+- Deleted `src/lib/lovable-error-reporting.ts` — called `window.__lovableEvents` which only exists in the Lovable editor; dead on any standalone deployment.
+- Removed the `useEffect` in `__root.tsx` that imported and called `reportLovableError`.
+- Deleted 9 orphaned `.asset.json` files under `src/assets/` — Lovable CDN pointers with no code importing them.
+
+## 2026-09-22 18:18 — Merge main into cloud-run-prep (PRs #19–#25)
+
+- Incorporated 6 merged PRs from `origin/main`: privacy notice rewrite, info popovers on grip/sit-reach, dashboard wording updates, back-to-cover navigation, and docs reconciliation.
+- Resolved one CHANGELOG.md merge conflict by keeping the ejection entry (2026-09-21) above main-branch entries (2026-09-20) in reverse chronological order.
+
 ## 2026-09-21 18:21 — Eject Lovable dependencies for Cloud Run deployment
 
 - Replaced `@lovable.dev/vite-tanstack-config` with explicit Vite config using `tanstackStart`, `react`, `tailwindcss`, `tsConfigPaths`, and `nitro` plugins. Nitro preset switched from `cloudflare-module` to `node-server`.
