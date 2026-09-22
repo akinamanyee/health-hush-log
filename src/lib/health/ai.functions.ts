@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
-import { streamText } from "ai";
+import { generateText } from "ai";
 import { z } from "zod";
 import { REFERENCE_LEAFLET, TIPS_REFERENCE, type TipBlock } from "./charts";
 
@@ -73,8 +73,7 @@ export const extractFromImage = createServerFn({ method: "POST" })
     const gateway = createGateway();
     const fields = EXTRACTION_FIELDS[data.module];
 
-    // Streaming on the wire; consumed server-side for a one-shot result.
-    const result = streamText({
+    const result = await generateText({
       model: gateway("gemini-3.6-flash"),
       messages: [
         {
@@ -90,7 +89,7 @@ export const extractFromImage = createServerFn({ method: "POST" })
       ],
     });
 
-    const text = await result.text;
+    const text = result.text;
     try {
       const schema = EXTRACTION_SCHEMAS[data.module];
       return { ok: true as const, values: schema.parse(extractJson(text)) };
@@ -219,11 +218,11 @@ ${tipsText}
 {"cards":[{"name":"項目名稱","interpretation":"解讀文字"}],"tips":[{"tip":"建議內容","source":"來源文章標題","url":"來源網址"}],"disclaimer":"提醒文字，須包含「醫生」二字"}`;
 
     const run = async (prompt: string) => {
-      const result = streamText({
+      const result = await generateText({
         model: gateway("gemini-3.6-flash"),
         messages: [{ role: "user", content: prompt }],
       });
-      return (await result.text).trim();
+      return result.text.trim();
     };
 
     const parseOutput = (text: string): RichSummaryResult => {
