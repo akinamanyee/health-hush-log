@@ -25,3 +25,4 @@ in the linked ADR file under `adr/`. This index never holds the argument itself.
 | 2026-09-19 | [0018](adr/0018-summary-sends-readings-with-grades.md) | The AI summary receives readings alongside grade labels (supersedes 0007) |
 | 2026-09-19 | [0019](adr/0019-bundled-government-health-tips.md) | Health tips distilled from government articles and bundled as constants |
 | 2026-09-22 | [0020](adr/0020-direct-gemini-and-generatetext.md) | Direct Google Gemini provider and generateText over streamText |
+| 2026-09-22 | [0021](adr/0021-pre-process-image-to-uint8array.md) | Pre-process image data URL to Uint8Array to fix ai v7 / @ai-sdk/google v2 mismatch |
