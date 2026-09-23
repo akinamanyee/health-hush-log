@@ -19,6 +19,23 @@ bun run lint       # eslint
 bun run format     # prettier
 ```
 
+### Deploy to production (heartcaring.fit)
+
+Run from Cloud Shell — Claude Code sessions have no `gcloud` credentials.
+
+```bash
+cd ~/health-hush-log
+git fetch origin && git pull --ff-only origin cloud-run-prep   # else Cloud Run rebuilds stale local source
+gcloud run deploy heartcaring-app --source . --region asia-east1 --allow-unauthenticated
+```
+
+- Service name is **`heartcaring-app`** — NOT `health-hush-log`. `heartcaring.fit` is domain-mapped to `heartcaring-app`; deploying under the wrong name creates a separate service that never reaches the domain.
+- Region: `asia-east1`.
+- Verify active revision: `gcloud run services describe heartcaring-app --region asia-east1 --format="value(status.traffic[].revisionName,status.traffic[].percent)"`
+- Verify content: `curl -sL https://heartcaring.fit/ | grep -c "<expected-string>"`
+- Rollback: `gcloud run services update-traffic heartcaring-app --to-revisions=<prev-rev>=100 --region asia-east1`
+- Incident references: see CHANGELOG entries `2026-09-22 23:42` (wrong-service-name trap) and `2026-09-23 17:01` (stale-Cloud-Shell trap).
+
 ## Coding Principles
 
 - No assumptions. Investigate first, base everything on facts.
