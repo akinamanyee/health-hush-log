@@ -189,6 +189,7 @@ function richGroundingFailure(
   output: RawSummary,
   allowedNumbers: Set<string>,
   expectTips: boolean,
+  expectedCardCount: number,
 ): string | null {
   const allText = [
     ...output.cards.map((c) => c.interpretation),
@@ -205,6 +206,11 @@ function richGroundingFailure(
   // generation's relevantTips; the parse step drops mismatches. If we asked
   // for tips and got none through, the AI drifted on topic strings — retry.
   if (expectTips && output.tips.length === 0) return "貼士未能對應參考資料主題";
+  // Every card must carry a name that exactly matches one we sent; the parse
+  // step drops mismatches. If any card was dropped, the AI paraphrased at
+  // least one name (e.g. "血壓" → "血壓及脈搏") — retry, otherwise the
+  // client's cardMap lookup silently hides value + grade + date.
+  if (output.cards.length < expectedCardCount) return "卡片解讀未對應項目名稱";
   return null;
 }
 
@@ -237,11 +243,12 @@ export const generateRichSummary = createServerFn({ method: "POST" })
     ]);
 
     const validTopics = new Set(relevantTips.map((t) => t.topic));
+    const validCardNames = new Set(data.cards.map((c) => c.name));
 
     const basePrompt = `你是一位健康紀錄的摘要助手，為50歲以上的繁體中文讀者撰寫易讀的健康報告。請用JSON格式回覆。
 
 第一部分：逐項解讀
-根據以下各項檢查結果，用溫和易懂的語言解釋每項數據代表甚麼意思、落在甚麼範圍、以及建議的跟進行動。每項約50至80字。
+根據以下各項檢查結果，用溫和易懂的語言解釋每項數據代表甚麼意思、落在甚麼範圍、以及建議的跟進行動。每項約50至80字。每項解讀的 name 欄位必須與所示項目名稱完全一致（照抄「血壓」、「BMI」、「體脂率」、「內臟脂肪」、「手握力」、「坐地前伸」六者其一），不可加減字元、不可加描述。
 
 ${cardsText}
 
@@ -265,6 +272,7 @@ ${tipsText}
       const raw = extractJson(text);
       const parsed = RichSummaryOutput.parse(raw);
       parsed.tips = parsed.tips.filter((t) => validTopics.has(t.topic));
+      parsed.cards = parsed.cards.filter((c) => validCardNames.has(c.name));
       return parsed;
     };
 
@@ -280,17 +288,18 @@ ${tipsText}
     }
 
     const expectTips = relevantTips.length > 0;
-    let failure = richGroundingFailure(output, allowedNumbers, expectTips);
+    const expectedCardCount = data.cards.length;
+    let failure = richGroundingFailure(output, allowedNumbers, expectTips, expectedCardCount);
     if (failure) {
       text = await run(
-        `${basePrompt}\n\n【重要】上一次生成不合規（原因：${failure}）。請完全不要寫出任何參考資料沒有出現過的數字，並必須提醒不能取代醫生診斷，避免使用「男士、女士、長者、學生」等群體字眼。tips 陣列中每項的 topic 欄位必須完整複製參考資料【】內的主題名稱，不可簡化、不可翻譯、不可加減任何標點或字符。`,
+        `${basePrompt}\n\n【重要】上一次生成不合規（原因：${failure}）。請完全不要寫出任何參考資料沒有出現過的數字，並必須提醒不能取代醫生診斷，避免使用「男士、女士、長者、學生」等群體字眼。tips 陣列中每項的 topic 欄位必須完整複製參考資料【】內的主題名稱，不可簡化、不可翻譯、不可加減任何標點或字符。cards 陣列中每項的 name 欄位必須完整照抄輸入的項目名稱（例如「血壓」而非「血壓及脈搏」，「BMI」而非「BMI 體重」），不可加減字元或加描述。`,
       );
       try {
         output = parseOutput(text);
       } catch {
         throw new Error("摘要格式不正確，請稍後再試。");
       }
-      failure = richGroundingFailure(output, allowedNumbers, expectTips);
+      failure = richGroundingFailure(output, allowedNumbers, expectTips, expectedCardCount);
     }
     if (failure) {
       throw new Error(`摘要未通過內容核對（${failure}），已停止顯示。請稍後再試或參考各項評級。`);

@@ -4,6 +4,18 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-23 21:07 — M21 delivered: /summary cards always render name, value, grade and date (fixes latent M18 bug)
+
+- On the deployed rev 22, Gemini was observed paraphrasing a card `name` in its response (`"血壓"` → `"血壓及脈搏"`). `summary.tsx:117`'s strict `cardMap.get(card.name)` returned undefined, silently hiding value, grade badge, and date on the affected card. Latent since M18's structured summary; M20's date line simply made the failure visible.
+- Fix mirrors the tips-filter/retry pattern in the same file. Four coordinated changes in `src/lib/health/ai.functions.ts`:
+  1. Build `validCardNames = new Set(data.cards.map(c => c.name))` alongside the existing `validTopics`.
+  2. `parseOutput` filters `parsed.cards` by `validCardNames.has(c.name)`, symmetric to the existing tips filter.
+  3. `richGroundingFailure` gains `expectedCardCount`; returns `"卡片解讀未對應項目名稱"` when `output.cards.length < expectedCardCount`, tripping the existing single strict retry.
+  4. Both prompt strings tightened: base prompt enumerates the six legal card names ("血壓"、"BMI"、"體脂率"、"內臟脂肪"、"手握力"、"坐地前伸") and forbids adding descriptors; retry prompt names the specific failure mode ("血壓" not "血壓及脈搏").
+- Verified: type-check clean, build ✓; runtime exercised drifted response (`血壓 → 血壓及脈搏`) drops to 1 card and trips the new failure reason; clean response passes; sensitive-word / invented-number / empty-tips regressions still fire.
+- No storage change, no AI prompt data shift (still receives grade labels + values only per ADR 0018), no wire payload change, no client render change.
+- Full plan: `plan/22-m21-cards-name-match.md`. Awaiting Cloud Run redeploy.
+
 ## 2026-09-23 18:50 — Fix M20 wire-payload leak: strip client-only fields before sending to summary server function
 
 - Peer review of M20 found that `summary.tsx` was sending the full `CardInterpretation[]` (including `recordedAt` and `tone`) to `generateRichSummary`. Zod stripped both fields before the handler saw them, so the AI never received the date and nothing was persisted — but the fields still travelled from browser → app server in the raw JSON POST body, visible in DevTools Network. That contradicted PRD line 50 ("Dates never leave the device") and the SUCCESS demo checkpoint ("browser network tab shows no health readings leaving the device apart from the photo sent for reading and the latest readings sent for the summary").
