@@ -4,6 +4,13 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-23 17:34 — Add deploy-to-production runbook to CLAUDE.md
+
+- Added a "Deploy to production (heartcaring.fit)" block to `CLAUDE.md`'s Commands section, right below the `bun run` dev commands.
+- Consolidates the two operational rules that only lived in prior CHANGELOG entries: service name must be `heartcaring-app` (not `health-hush-log`), and Cloud Shell must `git fetch && git pull --ff-only origin cloud-run-prep` before `gcloud run deploy --source .` or Cloud Run rebuilds stale local source.
+- Includes verify, rollback, and cross-references to the two incident CHANGELOG entries.
+- Dev-facing doc only; not imported by code, not read at runtime, no deploy needed. Placed in `CLAUDE.md` rather than `AGENTS.md` (which is the 7-principle constitution) or a new `docs/DEPLOY.md` (overkill for this size).
+
 ## 2026-09-23 17:01 — Deploy agency-only summary + empty-tips guard to Cloud Run (rev 21)
 
 - Deployed `cloud-run-prep` HEAD (commit `ee316b0`) to Cloud Run service `heartcaring-app`, region `asia-east1`. New active revision: `heartcaring-app-00021-pvq` serving 100% of traffic on heartcaring.fit.
