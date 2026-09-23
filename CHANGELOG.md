@@ -4,6 +4,13 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-24 00:00 — Deploy M22 to Cloud Run (rev 24)
+
+- Deployed `cloud-run-prep` HEAD (commit `ac92b7b`) to Cloud Run service `heartcaring-app`, region `asia-east1`. New active revision: `heartcaring-app-00024-fzf` serving 100% of traffic on heartcaring.fit.
+- Ships live: preview block above `/summary`'s generate button (which modules will contribute cards, which are missing, remaining AI budget); button now rewords itself when disabled ("今日已達上限" or "尚未紀錄任何可摘要項目") instead of relying on the after-click toast alone.
+- Deploy printed a "Setting IAM policy failed" warning — harmless, cosmetic, because `allUsers` invoker binding was already present from earlier deploys (rev 17 onwards). Revision itself deployed cleanly; site remained publicly reachable throughout.
+- Verified live on phone (private tab): preview shows 「本次將包含：身體成份分析儀 · 2026年9月23日 記錄（含 BMI、體脂率、內臟脂肪）」 and 「血壓 · 2026年9月23日 記錄」, plus 「未曾記錄：手握力、坐地前伸測試」 and 「今日 AI 生成剩餘 19 / 20 次」. Generated summary produces 4 cards matching preview count; every card renders name, value, grade badge, date and interpretation (M20 + M21 + M22 all working together).
+
 ## 2026-09-23 22:04 — M22 delivered: preview before generating the summary
 
 - Above `/summary`'s generate button, a live preview block now shows: which of the four modules will contribute a card (with each latest reading's date), which are recorded but produce no grade-able card (e.g. Tanita weight-only), which are not recorded, and today's remaining AI budget (`Math.max(0, AI_DAILY_LIMIT - usageToday) / 20`).
