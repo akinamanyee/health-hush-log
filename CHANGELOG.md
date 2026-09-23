@@ -4,6 +4,12 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-23 21:30 — Deploy M21 to Cloud Run (rev 23)
+
+- Deployed `cloud-run-prep` HEAD (commit `430a51c`) to Cloud Run service `heartcaring-app`, region `asia-east1`. New active revision: `heartcaring-app-00023-d5r` serving 100% of traffic on heartcaring.fit.
+- Ships live: server-side card-name filter + retry that ensures `/summary` cards always render name, value, grade badge, date and interpretation together — even when Gemini paraphrases a card name in its response.
+- Cloud Shell → GitHub sync worked first try this time (fast-forward `09fd1c7` → `430a51c`).
+
 ## 2026-09-23 21:07 — M21 delivered: /summary cards always render name, value, grade and date (fixes latent M18 bug)
 
 - On the deployed rev 22, Gemini was observed paraphrasing a card `name` in its response (`"血壓"` → `"血壓及脈搏"`). `summary.tsx:117`'s strict `cardMap.get(card.name)` returned undefined, silently hiding value, grade badge, and date on the affected card. Latent since M18's structured summary; M20's date line simply made the failure visible.
