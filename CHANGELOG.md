@@ -4,6 +4,13 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-23 18:50 — Fix M20 wire-payload leak: strip client-only fields before sending to summary server function
+
+- Peer review of M20 found that `summary.tsx` was sending the full `CardInterpretation[]` (including `recordedAt` and `tone`) to `generateRichSummary`. Zod stripped both fields before the handler saw them, so the AI never received the date and nothing was persisted — but the fields still travelled from browser → app server in the raw JSON POST body, visible in DevTools Network. That contradicted PRD line 50 ("Dates never leave the device") and the SUCCESS demo checkpoint ("browser network tab shows no health readings leaving the device apart from the photo sent for reading and the latest readings sent for the summary").
+- Fix: `summary.tsx` now builds an explicit whitelist mapping (`{ name, value, grade, range, action, note }`) before calling `run`. Local `allCards` / `cardMap` keep `recordedAt` for the card render layer; the wire carries only the fields `RichSummaryInput.cards` accepts. As a side effect, `tone` is also no longer sent (was silently stripped by zod anyway).
+- Verified: type-check clean, build ✓, and a `JSON.stringify` on a fake payload confirms no `recordedAt` or `tone` string appears anywhere in the outgoing body.
+- No storage, grading, AI prompt, or grade.ts changes. The M20 card display is unaffected.
+
 ## 2026-09-23 18:15 — M20 delivered: date on each /summary card
 
 - `CardInterpretation` gains an optional `recordedAt?: string` (ISO yyyy-mm-dd). `interpretCard(mod, values, recordedAt?)` now stamps every returned card with the source entry's date; the switch body is unchanged (moved into a private `interpretCardCore` helper so stamping happens once, at the wrapper's edge).

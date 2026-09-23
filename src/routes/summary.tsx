@@ -69,7 +69,13 @@ function Summary() {
       }
 
       setCardMap(new Map(allCards.map((c) => [c.name, c])));
-      const res = await run({ data: { cards: allCards } });
+      // Explicit whitelist: only fields RichSummaryInput.cards accepts reach the wire.
+      // recordedAt and tone are client-render only. HARD CONSTRAINT: dates never
+      // leave the device (PRD line 50, SUCCESS network-tab checkpoint).
+      const serverCards = allCards.map(({ name, value, grade, range, action, note }) => ({
+        name, value, grade, range, action, note,
+      }));
+      const res = await run({ data: { cards: serverCards } });
       setResult(res.result);
       bumpAiUsage();
     } catch (e) {
