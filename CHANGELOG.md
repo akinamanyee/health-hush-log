@@ -4,6 +4,14 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-23 17:01 — Deploy agency-only summary + empty-tips guard to Cloud Run (rev 21)
+
+- Deployed `cloud-run-prep` HEAD (commit `ee316b0`) to Cloud Run service `heartcaring-app`, region `asia-east1`. New active revision: `heartcaring-app-00021-pvq` serving 100% of traffic on heartcaring.fit.
+- Ships live: gender-neutral tips + reference leaflet (`2c59509`), agency-only source attribution + sensitive-word grounding check (`dffdb9d`), empty-tips retry + fallback (`ee316b0`), and the associated ADRs 0023 and 0024.
+- **Root cause of earlier stealth failure**: three deploys (rev 18-20) happened between 13:37 and 15:39 HKT but every one silently rebuilt stale source. Cloud Shell's `~/health-hush-log` was checked out at `023e782`, five commits behind GitHub. `gcloud run deploy --source .` uploads the local working tree, not the remote branch, so the fix commits pushed from Claude Code never reached the container images. `git status` reported "up to date" only because the local `origin/cloud-run-prep` tracking ref was itself stale — no `git fetch` had run since the M19 deploy.
+- **Fix that worked**: `git fetch origin && git pull --ff-only origin cloud-run-prep` in Cloud Shell (fast-forward from `023e782` to `ee316b0`, 5 commits, 9 files, no conflicts with the 5 locally-staged `public/images/*.jpg` files), then the same `gcloud run deploy` command.
+- **Reminder for future deploys**: always `git fetch && git pull --ff-only origin cloud-run-prep` in Cloud Shell before `gcloud run deploy`, otherwise Cloud Run rebuilds whatever stale checkout Cloud Shell happens to hold.
+
 ## 2026-09-23 15:32 — Guard against empty-tips silent degradation
 
 - `richGroundingFailure()` now returns "貼士未能對應參考資料主題" when the AI was given reference material but every tip's `topic` field failed the strict verbatim match (e.g. drifted punctuation, added `【】` wrapping, translation, or truncation). This trips the existing single strict retry with an explicit "copy the topic name verbatim" reminder.
