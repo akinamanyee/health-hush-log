@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { ArrowLeft, FileText, Loader2, Heart, Activity, Scale, Eye, Hand, StretchHorizontal } from "lucide-react";
 import { toast } from "sonner";
@@ -41,11 +41,66 @@ const CARD_ICONS: Record<string, typeof Heart> = {
   "坐地前伸": StretchHorizontal,
 };
 
+interface PreviewItem {
+  moduleId: string;
+  moduleTitle: string;
+  hasEntry: boolean;
+  latestDate?: string;
+  cardCount: number;
+  tanitaMetrics?: string[];
+}
+
 function Summary() {
   const run = useServerFn(generateRichSummary);
   const [result, setResult] = useState<RichSummaryResult | null>(null);
   const [cardMap, setCardMap] = useState<Map<string, CardInterpretation>>(new Map());
   const [busy, setBusy] = useState(false);
+  const [preview, setPreview] = useState<PreviewItem[] | null>(null);
+  const [usageToday, setUsageToday] = useState<number | null>(null);
+  const [refreshTick, setRefreshTick] = useState(0);
+
+  useEffect(() => {
+    // Mirrors the generate flow's exact source (readEntries + interpretCard)
+    // so preview and generation can never disagree about what the summary
+    // will contain. Runs on mount and after each successful generate.
+    const items: PreviewItem[] = MODULES.map((mod) => {
+      const entries = readEntries(mod.storageKey);
+      const latest = entries[0];
+      if (!latest) {
+        return {
+          moduleId: mod.id,
+          moduleTitle: mod.title,
+          hasEntry: false,
+          cardCount: 0,
+        };
+      }
+      const cards = interpretCard(mod, latest.values, latest.date);
+      return {
+        moduleId: mod.id,
+        moduleTitle: mod.title,
+        hasEntry: true,
+        latestDate: latest.date,
+        cardCount: cards.length,
+        ...(mod.id === "tanita" ? { tanitaMetrics: cards.map((c) => c.name) } : {}),
+      };
+    });
+    setPreview(items);
+    setUsageToday(getAiUsageToday());
+  }, [refreshTick]);
+
+  const includedItems = preview?.filter((p) => p.cardCount > 0) ?? [];
+  const recordedButEmpty = preview?.filter((p) => p.hasEntry && p.cardCount === 0) ?? [];
+  const missingItems = preview?.filter((p) => !p.hasEntry) ?? [];
+  const capReached = usageToday != null && usageToday >= AI_DAILY_LIMIT;
+  const nothingToSummarize = preview != null && includedItems.length === 0;
+
+  const buttonLabel = busy
+    ? "正在生成⋯"
+    : capReached
+      ? "今日已達上限"
+      : nothingToSummarize
+        ? "尚未紀錄任何可摘要項目"
+        : "生成健康摘要";
 
   const generate = async () => {
     if (getAiUsageToday() >= AI_DAILY_LIMIT) {
@@ -78,6 +133,7 @@ function Summary() {
       const res = await run({ data: { cards: serverCards } });
       setResult(res.result);
       bumpAiUsage();
+      setRefreshTick((t) => t + 1);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "生成失敗，請稍後再試。");
     } finally {
@@ -96,15 +152,69 @@ function Summary() {
       </p>
 
       <section className="glass-card mt-8 rounded-3xl p-6 sm:p-8">
+        {preview != null && (
+          <div className="mb-6 rounded-2xl border border-border bg-card p-4 text-sm leading-relaxed">
+            <p className="text-muted-foreground">
+              本摘要根據您每個項目的最新一次紀錄。未曾記錄的項目不會出現。
+            </p>
+
+            {includedItems.length > 0 && (
+              <div className="mt-3">
+                <p className="font-medium text-foreground">本次將包含：</p>
+                <ul className="mt-1 space-y-1 text-muted-foreground">
+                  {includedItems.map((item) => (
+                    <li key={item.moduleId}>
+                      <span className="font-medium text-foreground">{item.moduleTitle}</span>
+                      {item.latestDate && (
+                        <>
+                          {" · "}
+                          {formatChineseDate(item.latestDate)} 記錄
+                        </>
+                      )}
+                      {item.tanitaMetrics && item.tanitaMetrics.length > 0 && (
+                        <>（含 {item.tanitaMetrics.join("、")}）</>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {recordedButEmpty.length > 0 && (
+              <div className="mt-3">
+                <p className="font-medium text-foreground">已紀錄但未含可評級指標（不會出現於摘要）：</p>
+                <p className="mt-1 text-muted-foreground">
+                  {recordedButEmpty.map((i) => i.moduleTitle).join("、")}
+                </p>
+              </div>
+            )}
+
+            {missingItems.length > 0 && (
+              <div className="mt-3">
+                <p className="font-medium text-foreground">未曾記錄（不會包含）：</p>
+                <p className="mt-1 text-muted-foreground">
+                  {missingItems.map((i) => i.moduleTitle).join("、")}
+                </p>
+              </div>
+            )}
+
+            {usageToday != null && (
+              <p className="mt-3 text-muted-foreground">
+                今日 AI 生成剩餘 <span className="font-medium text-foreground">{Math.max(0, AI_DAILY_LIMIT - usageToday)} / {AI_DAILY_LIMIT}</span> 次
+              </p>
+            )}
+          </div>
+        )}
+
         <Button
           type="button"
           onClick={generate}
-          disabled={busy}
+          disabled={busy || capReached || nothingToSummarize}
           size="lg"
           className="min-h-14 rounded-xl px-6 text-lg font-semibold"
         >
           {busy ? <Loader2 className="size-5 animate-spin" /> : <FileText className="size-5" />}
-          {busy ? "正在生成⋯" : "生成健康摘要"}
+          {buttonLabel}
         </Button>
 
         {result && (

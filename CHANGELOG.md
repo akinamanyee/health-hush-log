@@ -4,6 +4,16 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-23 22:04 — M22 delivered: preview before generating the summary
+
+- Above `/summary`'s generate button, a live preview block now shows: which of the four modules will contribute a card (with each latest reading's date), which are recorded but produce no grade-able card (e.g. Tanita weight-only), which are not recorded, and today's remaining AI budget (`Math.max(0, AI_DAILY_LIMIT - usageToday) / 20`).
+- Button rewords itself when disabled: 「今日已達上限」 (cap reached) or 「尚未紀錄任何可摘要項目」 (nothing to summarize). Replaces the after-click toast surprise.
+- Preview computed via `useEffect` from the same `readEntries` + `interpretCard` sources the generate flow uses — mirrors the exact code path so preview and generation can never disagree. Recomputes on mount and after each successful generate (`refreshTick` bump).
+- Uses `mod.title` from `MODULES` (「血壓」、「身體成份分析儀」、「手握力」、「坐地前伸測試」) which matches PRD USER JOURNEY 2 wording.
+- Verified: type-check clean, build ✓, runtime exercised across 5 module-state scenarios (only BP, BP+full Tanita, BP+Tanita weight-only, all four, none) — three-bucket split (included / recorded-but-empty / missing) behaves as designed.
+- No storage change, no AI prompt change, no wire payload change, no new persisted state. Existing zero-entry and cap-reached toasts remain as belt-and-braces.
+- Full plan: `plan/23-m22-summary-preview.md`. Awaiting Cloud Run redeploy.
+
 ## 2026-09-23 21:30 — Deploy M21 to Cloud Run (rev 23)
 
 - Deployed `cloud-run-prep` HEAD (commit `430a51c`) to Cloud Run service `heartcaring-app`, region `asia-east1`. New active revision: `heartcaring-app-00023-d5r` serving 100% of traffic on heartcaring.fit.
