@@ -15,6 +15,8 @@ export interface CardInterpretation {
   range: string;
   action: string;
   note?: string;
+  /** ISO yyyy-mm-dd of the saved entry this card was built from. */
+  recordedAt?: string;
 }
 
 export type Tone = "ok" | "warn" | "bad" | "urgent" | "neutral";
@@ -92,9 +94,19 @@ function bandTone(g: string): Tone {
 export function interpretCard(
   mod: ModuleDef,
   values: Record<string, number>,
+  recordedAt?: string,
 ): CardInterpretation[] {
   const grades = gradeEntry(mod, values);
+  const cards = interpretCardCore(mod, values, grades);
+  if (recordedAt) for (const c of cards) c.recordedAt = recordedAt;
+  return cards;
+}
 
+function interpretCardCore(
+  mod: ModuleDef,
+  values: Record<string, number>,
+  grades: ReturnType<typeof gradeEntry>,
+): CardInterpretation[] {
   switch (mod.id) {
     case "bp": {
       const sys = values["systolic"];

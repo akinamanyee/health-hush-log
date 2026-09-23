@@ -12,6 +12,7 @@ import {
 } from "@/lib/health/store";
 import { generateRichSummary, type RichSummaryResult } from "@/lib/health/ai.functions";
 import { agenciesForTopic } from "@/lib/health/charts";
+import { formatChineseDate } from "@/lib/health/calendar";
 import { interpretCard, type CardInterpretation } from "@/lib/health/grade";
 import { Button } from "@/components/ui/button";
 import { GradeBadge } from "@/components/health/GradeBadge";
@@ -58,7 +59,7 @@ function Summary() {
         const entries = readEntries(m.storageKey);
         if (entries.length === 0) continue;
         const latest = entries[0]!;
-        const cards = interpretCard(m, latest.values);
+        const cards = interpretCard(m, latest.values, latest.date);
         allCards.push(...cards);
       }
 
@@ -122,6 +123,11 @@ function Summary() {
                               </>
                             )}
                           </div>
+                          {match?.recordedAt && (
+                            <p className="mt-1 text-sm text-muted-foreground">
+                              {formatChineseDate(match.recordedAt)} 記錄
+                            </p>
+                          )}
                           <p className="mt-2 text-base leading-relaxed text-muted-foreground">
                             {card.interpretation}
                           </p>

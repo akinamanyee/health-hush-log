@@ -4,6 +4,14 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-23 18:15 — M20 delivered: date on each /summary card
+
+- `CardInterpretation` gains an optional `recordedAt?: string` (ISO yyyy-mm-dd). `interpretCard(mod, values, recordedAt?)` now stamps every returned card with the source entry's date; the switch body is unchanged (moved into a private `interpretCardCore` helper so stamping happens once, at the wrapper's edge).
+- `summary.tsx` passes `latest.date` when building cards and renders `{formatChineseDate(recordedAt)} 記錄` as a small muted line between the value/grade row and the AI interpretation paragraph. Reuses the existing `formatChineseDate` helper — no new formatter.
+- Closes the gap between PRD USER JOURNEY 5 / SUCCESS (「full recording date including year」) and the previous `/summary` render, which showed values + grades without a date. Tanita's three cards share one date (they come from one entry).
+- No storage change, no migration, no AI change, no data leaving the device. Type-check + build clean; `formatChineseDate("2026-09-23")` verified → `2026年9月23日`.
+- Full plan: `plan/21-m20-date-on-summary-cards.md`. Awaiting Cloud Run redeploy to go live on heartcaring.fit.
+
 ## 2026-09-23 17:34 — Add deploy-to-production runbook to CLAUDE.md
 
 - Added a "Deploy to production (heartcaring.fit)" block to `CLAUDE.md`'s Commands section, right below the `bun run` dev commands.
