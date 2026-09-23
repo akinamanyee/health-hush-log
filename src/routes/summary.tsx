@@ -144,21 +144,27 @@ function Summary() {
                   。
                 </p>
               )}
-              <ul className="mt-4 space-y-3">
-                {result.tips.map((tip, i) => {
-                  const tipAgencies = agenciesForTopic(tip.topic);
-                  return (
-                    <li key={i} className="rounded-2xl border border-border bg-card p-4">
-                      <p className="text-base leading-relaxed">{tip.tip}</p>
-                      {tipAgencies.length > 0 && (
-                        <p className="mt-2 text-sm text-muted-foreground">
-                          來源：{tipAgencies.join("、")}
-                        </p>
-                      )}
-                    </li>
-                  );
-                })}
-              </ul>
+              {result.tips.length === 0 ? (
+                <p className="mt-4 rounded-2xl border border-border bg-card p-4 text-base leading-relaxed text-muted-foreground">
+                  本次未能為您匹配合適的貼士，請稍後再試，或直接參考各項評級的建議。
+                </p>
+              ) : (
+                <ul className="mt-4 space-y-3">
+                  {result.tips.map((tip, i) => {
+                    const tipAgencies = agenciesForTopic(tip.topic);
+                    return (
+                      <li key={i} className="rounded-2xl border border-border bg-card p-4">
+                        <p className="text-base leading-relaxed">{tip.tip}</p>
+                        {tipAgencies.length > 0 && (
+                          <p className="mt-2 text-sm text-muted-foreground">
+                            來源：{tipAgencies.join("、")}
+                          </p>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
             </div>
 
             <p className="rounded-xl border border-border bg-muted/50 p-4 text-center text-base text-muted-foreground">

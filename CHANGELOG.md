@@ -4,6 +4,12 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-23 15:32 — Guard against empty-tips silent degradation
+
+- `richGroundingFailure()` now returns "貼士未能對應參考資料主題" when the AI was given reference material but every tip's `topic` field failed the strict verbatim match (e.g. drifted punctuation, added `【】` wrapping, translation, or truncation). This trips the existing single strict retry with an explicit "copy the topic name verbatim" reminder.
+- `/summary` shows a fallback line ("本次未能為您匹配合適的貼士，請稍後再試，或直接參考各項評級的建議。") when `result.tips` is empty after both attempts, so the tips section no longer renders as a bare header with nothing underneath.
+- No changes to grading, storage, privacy model, or the grounded article set.
+
 ## 2026-09-23 14:46 — Display agency instead of article title in health tips; extend grounding check
 
 - `TipBlock.sources` gains an `agency` field ("衞生防護中心" / "衞生署" / "職業安全健康局"). Titles and URLs stay internal for grounding traceability; the UI shows only the agency.

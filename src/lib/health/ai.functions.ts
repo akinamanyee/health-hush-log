@@ -188,6 +188,7 @@ type RawSummary = z.infer<typeof RichSummaryOutput>;
 function richGroundingFailure(
   output: RawSummary,
   allowedNumbers: Set<string>,
+  expectTips: boolean,
 ): string | null {
   const allText = [
     ...output.cards.map((c) => c.interpretation),
@@ -200,6 +201,10 @@ function richGroundingFailure(
   if (invented.length > 0) return `出現參考資料以外的數值：${invented.slice(0, 5).join("、")}`;
   if (SENSITIVE_LABEL_PATTERN.test(allText)) return "出現不適用的性別或群體字眼";
   if (!output.disclaimer.includes("醫生")) return "缺少就醫提醒";
+  // Every tip must carry a topic that exactly matches one bundled in this
+  // generation's relevantTips; the parse step drops mismatches. If we asked
+  // for tips and got none through, the AI drifted on topic strings — retry.
+  if (expectTips && output.tips.length === 0) return "貼士未能對應參考資料主題";
   return null;
 }
 
@@ -274,17 +279,18 @@ ${tipsText}
       output = parseOutput(text);
     }
 
-    let failure = richGroundingFailure(output, allowedNumbers);
+    const expectTips = relevantTips.length > 0;
+    let failure = richGroundingFailure(output, allowedNumbers, expectTips);
     if (failure) {
       text = await run(
-        `${basePrompt}\n\n【重要】上一次生成不合規（原因：${failure}）。請完全不要寫出任何參考資料沒有出現過的數字，並必須提醒不能取代醫生診斷，避免使用「男士、女士、長者、學生」等群體字眼。`,
+        `${basePrompt}\n\n【重要】上一次生成不合規（原因：${failure}）。請完全不要寫出任何參考資料沒有出現過的數字，並必須提醒不能取代醫生診斷，避免使用「男士、女士、長者、學生」等群體字眼。tips 陣列中每項的 topic 欄位必須完整複製參考資料【】內的主題名稱，不可簡化、不可翻譯、不可加減任何標點或字符。`,
       );
       try {
         output = parseOutput(text);
       } catch {
         throw new Error("摘要格式不正確，請稍後再試。");
       }
-      failure = richGroundingFailure(output, allowedNumbers);
+      failure = richGroundingFailure(output, allowedNumbers, expectTips);
     }
     if (failure) {
       throw new Error(`摘要未通過內容核對（${failure}），已停止顯示。請稍後再試或參考各項評級。`);
