@@ -28,3 +28,4 @@ in the linked ADR file under `adr/`. This index never holds the argument itself.
 | 2026-09-22 | [0021](adr/0021-pre-process-image-to-uint8array.md) | Upgrade @ai-sdk/google to v4 for ai v7 compatibility (fixes inline_data bug) |
 | 2026-09-22 | [0022](adr/0022-tanita-six-screen-sections.md) | Six-screen Tanita sections with per-screen photo extraction; voice removed from Tanita; ScreenDef.fields is the SSOT for field-to-screen mapping |
 | 2026-09-23 | [0023](adr/0023-gender-neutral-tips-and-leaflet.md) | Remove gender-specific content from health tips and reference leaflet; partially overrides ADR 0019 append-only rule |
+| 2026-09-23 | [0024](adr/0024-agency-only-attribution-and-sensitive-word-check.md) | Display agency only (not article titles/URLs); AI prompt no longer sees titles; grounding check rejects 男士/女士/長者/學生 |

@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowLeft, FileText, Loader2, ExternalLink, Heart, Activity, Scale, Eye, Hand, StretchHorizontal } from "lucide-react";
+import { ArrowLeft, FileText, Loader2, Heart, Activity, Scale, Eye, Hand, StretchHorizontal } from "lucide-react";
 import { toast } from "sonner";
 import { MODULES } from "@/lib/health/modules";
 import {
@@ -11,6 +11,7 @@ import {
   readEntries,
 } from "@/lib/health/store";
 import { generateRichSummary, type RichSummaryResult } from "@/lib/health/ai.functions";
+import { agenciesForTopic } from "@/lib/health/charts";
 import { interpretCard, type CardInterpretation } from "@/lib/health/grade";
 import { Button } from "@/components/ui/button";
 import { GradeBadge } from "@/components/health/GradeBadge";
@@ -134,21 +135,29 @@ function Summary() {
 
             <div>
               <h2 className="text-xl font-bold">為您挑選的健康貼士</h2>
+              {result.agencies.length > 0 && (
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                  本節建議整理自香港特別行政區政府公開衞生資料，來源包括：
+                  <span className="font-medium text-foreground">
+                    {result.agencies.join("、")}
+                  </span>
+                  。
+                </p>
+              )}
               <ul className="mt-4 space-y-3">
-                {result.tips.map((tip, i) => (
-                  <li key={i} className="rounded-2xl border border-border bg-card p-4">
-                    <p className="text-base leading-relaxed">{tip.tip}</p>
-                    <a
-                      href={tip.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-1 inline-flex items-center gap-1 text-sm text-accent hover:underline"
-                    >
-                      {tip.source}
-                      <ExternalLink className="size-3.5" />
-                    </a>
-                  </li>
-                ))}
+                {result.tips.map((tip, i) => {
+                  const tipAgencies = agenciesForTopic(tip.topic);
+                  return (
+                    <li key={i} className="rounded-2xl border border-border bg-card p-4">
+                      <p className="text-base leading-relaxed">{tip.tip}</p>
+                      {tipAgencies.length > 0 && (
+                        <p className="mt-2 text-sm text-muted-foreground">
+                          來源：{tipAgencies.join("、")}
+                        </p>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             </div>
 

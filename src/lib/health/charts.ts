@@ -69,10 +69,22 @@ export const REFERENCE_LEAFLET = `
 【一般建議】本應用程式所有內容僅供參考，不能取代醫生診斷。如讀數嚴重偏高或身體不適，請即時就醫。
 `.trim();
 
+// Agency labels shown to users. Titles and URLs stay internal for grounding
+// traceability; only the agency appears in the UI, so that source names like
+// 男士健康、學生健康 (which some Hong Kong government articles carry) never
+// leak into the summary, and the credibility signal reads as government-issued.
+export type Agency = "衞生防護中心" | "衞生署" | "職業安全健康局";
+
 export interface TipBlock {
   topic: string;
   tips: string;
-  sources: { title: string; url: string }[];
+  sources: { title: string; url: string; agency: Agency }[];
+}
+
+export function agenciesForTopic(topic: string): Agency[] {
+  const block = TIPS_REFERENCE.find((t) => t.topic === topic);
+  if (!block) return [];
+  return Array.from(new Set(block.sources.map((s) => s.agency)));
 }
 
 export const TIPS_REFERENCE: TipBlock[] = [
@@ -80,54 +92,54 @@ export const TIPS_REFERENCE: TipBlock[] = [
     topic: "心腦血管病、中風及預防",
     tips: `預防中風及心血管疾病的方法：(1) 定期量度血壓，高血壓患者須遵從醫囑服藥。(2) 戒煙，吸煙令中風風險增加27%。(3) 避免過量飲酒。(4) 控制體重及腰圍（男性腰圍<90厘米、女性<80厘米）。(5) 每週做至少150分鐘中等強度或75分鐘劇烈運動。(6) 健康飲食：每天最少5份蔬果、少油少鹽少糖。(7) 適當處理工作壓力。中風警號（FAST）：面部歪斜、手臂無力、說話困難、立即求醫。`,
     sources: [
-      { title: "中風", url: "https://www.chp.gov.hk/tc/healthtopics/content/25/55.html" },
-      { title: "腦血管病", url: "https://www.chp.gov.hk/tc/healthtopics/content/25/57.html" },
-      { title: "預防心血管疾病知多啲", url: "https://www.oshc.org.hk/oshc-publications/occupational-health-publications/" },
+      { title: "中風", url: "https://www.chp.gov.hk/tc/healthtopics/content/25/55.html", agency: "衞生防護中心" },
+      { title: "腦血管病", url: "https://www.chp.gov.hk/tc/healthtopics/content/25/57.html", agency: "衞生防護中心" },
+      { title: "預防心血管疾病知多啲", url: "https://www.oshc.org.hk/oshc-publications/occupational-health-publications/", agency: "職業安全健康局" },
     ],
   },
   {
     topic: "BMI（體重管理）",
     tips: `體重管理要點：(1) BMI（亞洲標準）18.5至22.9屬正常，23或以上屬過重，需注意。(2) 蘋果形身型（腰腹脂肪多）比啤梨形風險更高。(3) 定時飲食，不省早餐，戒掉宵夜。(4) 慢慢進食，每次咬一小口，感覺七至八成飽即停。(5) 以水果代替薯片、朱古力等零食。(6) 選擇低脂食品，多飲清水。(7) 以行樓梯代替電梯，午飯時步行10分鐘。(8) 超重會增加高血壓、糖尿病、心臟病風險。`,
     sources: [
-      { title: "體重管理行動計劃", url: "https://www.change4health.gov.hk/tc/healthy_weight/bmi/" },
-      { title: "肥胖問題", url: "https://www.studenthealth.gov.hk/tc_chi/health/health_ophp/health_ophp.html" },
-      { title: "控制體重的方法", url: "https://www.change4health.gov.hk/tc/healthy_weight/control_weight/" },
+      { title: "體重管理行動計劃", url: "https://www.change4health.gov.hk/tc/healthy_weight/bmi/", agency: "衞生署" },
+      { title: "肥胖問題", url: "https://www.studenthealth.gov.hk/tc_chi/health/health_ophp/health_ophp.html", agency: "衞生署" },
+      { title: "控制體重的方法", url: "https://www.change4health.gov.hk/tc/healthy_weight/control_weight/", agency: "衞生署" },
     ],
   },
   {
     topic: "高血壓及預防",
     tips: `預防及控制高血壓：(1) 香港約29.5%人口有高血壓，近半不自知，應定期量度。(2) 減少鹽分攝取：少用醬油、蠔油、魚露等。(3) 控制體重：BMI每增加5，高血壓風險升49%；腰圍每增10厘米風險升27%。(4) 避免久坐：每天久坐多1小時，高血壓風險增4%。(5) 戒煙：吸煙令風險增27%。(6) 腰圍是內臟脂肪的指標——男性腰圍90厘米或以上、女性80厘米或以上屬中央肥胖。(7) 每週做150分鐘中等強度運動，減少長時間靜坐。`,
     sources: [
-      { title: "高血壓", url: "https://www.chp.gov.hk/tc/healthtopics/content/25/35390.html" },
-      { title: "腰圍、體型及健康", url: "https://www.change4health.gov.hk/tc/healthy_weight/waist/" },
-      { title: "保持健康腰圍", url: "https://www.change4health.gov.hk/tc/healthy_weight/keep_healthy_waist/" },
+      { title: "高血壓", url: "https://www.chp.gov.hk/tc/healthtopics/content/25/35390.html", agency: "衞生防護中心" },
+      { title: "腰圍、體型及健康", url: "https://www.change4health.gov.hk/tc/healthy_weight/waist/", agency: "衞生署" },
+      { title: "保持健康腰圍", url: "https://www.change4health.gov.hk/tc/healthy_weight/keep_healthy_waist/", agency: "衞生署" },
     ],
   },
   {
     topic: "內臟脂肪問題與預防",
     tips: `內臟脂肪管理：(1) 內臟脂肪等級9或以下屬正常，10至14屬偏高，15或以上屬過高。(2) 蘋果形身型（脂肪集中腰腹）患心臟病及糖尿病風險較高。(3) 腰圍每增10厘米，全因死亡風險增11%。(4) 飲食以健康飲食金字塔為原則：穀物最多、蔬菜其次、肉類最少。(5) 每天最少吃3份蔬菜及2份水果。(6) 每週做150分鐘中等強度運動。(7) 減少長時間坐著，每30至60分鐘起身活動。`,
     sources: [
-      { title: "腰圍、體型及健康", url: "https://www.change4health.gov.hk/tc/healthy_weight/waist/" },
-      { title: "保持健康腰圍", url: "https://www.change4health.gov.hk/tc/healthy_weight/keep_healthy_waist/" },
+      { title: "腰圍、體型及健康", url: "https://www.change4health.gov.hk/tc/healthy_weight/waist/", agency: "衞生署" },
+      { title: "保持健康腰圍", url: "https://www.change4health.gov.hk/tc/healthy_weight/keep_healthy_waist/", agency: "衞生署" },
     ],
   },
   {
     topic: "健康飲食（針對過重及高血壓）",
     tips: `健康飲食實用建議：(1) 飯盒比例3:2:1（穀物:蔬菜:肉類）。(2) 每日「二加三」——2份水果加3份蔬菜（1份水果＝1個中型水果；1份蔬菜＝半碗煮熟蔬菜）。(3) 買菜選新鮮食材、瘦肉、低脂奶品。(4) 烹調去皮去脂，用蒸、燉、炆、烚代替煎炸，以天然調味（薑蔥蒜）代替醬料。(5) 外出用餐：選清湯麵飯、要求「醬汁另上」、多叫灼菜、飲清水或清茶。(6) 減少飽和脂肪及反式脂肪：少吃牛角包、酥皮，吃肉去皮去肥膏。(7) 每週吃兩次魚，選用橄欖油等植物油。(8) 吃全穀類食物如麥皮、紅糙米。(9) 慢慢進食，七至八成飽即停。`,
     sources: [
-      { title: "預防肥胖與飲食建議", url: "https://www.change4health.gov.hk/tc/healthy_diet/preventive_diet/" },
-      { title: "均衡飲食FAQ", url: "https://www.change4health.gov.hk/tc/healthy_diet/faq/" },
-      { title: "當外出用膳時", url: "https://www.change4health.gov.hk/tc/healthy_diet/facts/eat_smart/eating_out/index.html" },
-      { title: "高血壓", url: "https://www.chp.gov.hk/tc/healthtopics/content/25/35390.html" },
+      { title: "預防肥胖與飲食建議", url: "https://www.change4health.gov.hk/tc/healthy_diet/preventive_diet/", agency: "衞生署" },
+      { title: "均衡飲食FAQ", url: "https://www.change4health.gov.hk/tc/healthy_diet/faq/", agency: "衞生署" },
+      { title: "當外出用膳時", url: "https://www.change4health.gov.hk/tc/healthy_diet/facts/eat_smart/eating_out/index.html", agency: "衞生署" },
+      { title: "高血壓", url: "https://www.chp.gov.hk/tc/healthtopics/content/25/35390.html", agency: "衞生防護中心" },
     ],
   },
   {
     topic: "日常運動（針對預防過重）",
     tips: `運動建議：(1) 每天累積至少30分鐘中等強度運動（如急步行、踏單車、游泳），可分段進行，每段最少10分鐘。(2) 日常增加活動量：行樓梯代替電梯、午飯步行10分鐘、看電視時站起伸展。(3) 運動三類型均衡：耐力運動（步行、游泳）、伸展運動（太極、瑜珈）、重力運動（行樓梯、掌上壓）。(4) 跑步前2小時進食，以碳水化合物為主，避免空腹或飽腹運動。(5) 運動前先熱身3至5分鐘，伸展時維持10至30秒。(6) 運動後慢跑或步行3至5分鐘作緩和。(7) 隨時補充水分，避免含酒精或咖啡因飲料。(8) 感到不適應立即停止，如有健康問題先諮詢醫生。`,
     sources: [
-      { title: "有關跑步的健康建議", url: "https://www.chp.gov.hk/tc/static/101307.html" },
-      { title: "體重管理行動計劃", url: "https://www.change4health.gov.hk/tc/healthy_weight/bmi/" },
-      { title: "控制體重的方法", url: "https://www.change4health.gov.hk/tc/healthy_weight/control_weight/" },
+      { title: "有關跑步的健康建議", url: "https://www.chp.gov.hk/tc/static/101307.html", agency: "衞生防護中心" },
+      { title: "體重管理行動計劃", url: "https://www.change4health.gov.hk/tc/healthy_weight/bmi/", agency: "衞生署" },
+      { title: "控制體重的方法", url: "https://www.change4health.gov.hk/tc/healthy_weight/control_weight/", agency: "衞生署" },
     ],
   },
 ];

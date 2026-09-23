@@ -4,6 +4,14 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-23 14:46 — Display agency instead of article title in health tips; extend grounding check
+
+- `TipBlock.sources` gains an `agency` field ("衞生防護中心" / "衞生署" / "職業安全健康局"). Titles and URLs stay internal for grounding traceability; the UI shows only the agency.
+- AI prompt no longer sends article titles or URLs to the model. The AI now returns `{ tip, topic }` and the app maps `topic` → agencies for display.
+- `richGroundingFailure()` extended: also rejects output containing 男士 / 女士 / 長者 / 學生 — closes a leak where gendered/age-specific source titles could have been quoted by the model.
+- `/summary` tips section now shows a credit block at the top listing the government agencies that contributed to this summary (dynamic, per-generation), and each tip shows only its topic's agencies as plain text.
+- No changes to grading, storage, privacy model, or which articles the AI is grounded on.
+
 ## 2026-09-23 13:34 — Remove gender-specific content from health tips and reference leaflet
 
 - REFERENCE_LEAFLET: replaced male/female body fat percentage ranges with gender-neutral text directing users to the testing institution's chart — consistent with the app already returning 「無適用參考標準」 for body fat (no gender collected, ADR 0015).

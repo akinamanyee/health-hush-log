@@ -69,7 +69,7 @@ type  ──▶ ─┴ review form (RecordModule / TanitaRecord) ── user con
                      └─▶ exportAllToCsv() ──▶ 健康紀錄.csv (UTF-8 BOM)
 
 latest readings + grades ──▶ generateRichSummary (server fn, leaflet-grounded)
-                                ──▶ structured JSON (per-card interpretation, tips with sources, disclaimer)
+                                ──▶ structured JSON (per-card interpretation, tips tagged by topic, agencies list, disclaimer)
 ```
 
 ## Single sources of truth in code

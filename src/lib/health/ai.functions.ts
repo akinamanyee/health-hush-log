@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { generateText } from "ai";
 import { z } from "zod";
-import { REFERENCE_LEAFLET, TIPS_REFERENCE, type TipBlock } from "./charts";
+import { REFERENCE_LEAFLET, TIPS_REFERENCE, type TipBlock, type Agency } from "./charts";
 import { MODULE_BY_ID } from "./modules";
 
 const ExtractInput = z.object({
@@ -142,13 +142,16 @@ const RichSummaryOutput = z.object({
   })),
   tips: z.array(z.object({
     tip: z.string(),
-    source: z.string(),
-    url: z.string(),
+    topic: z.string(),
   })),
   disclaimer: z.string(),
 });
 
-export type RichSummaryResult = z.infer<typeof RichSummaryOutput>;
+export type RichSummaryResult = z.infer<typeof RichSummaryOutput> & {
+  agencies: Agency[];
+};
+
+const SENSITIVE_LABEL_PATTERN = /男士|女士|長者|學生/;
 
 function selectRelevantTips(cards: z.infer<typeof RichSummaryInput>["cards"]): TipBlock[] {
   const topics = new Set<string>();
@@ -180,8 +183,10 @@ function selectRelevantTips(cards: z.infer<typeof RichSummaryInput>["cards"]): T
   return TIPS_REFERENCE.filter((t) => topics.has(t.topic));
 }
 
+type RawSummary = z.infer<typeof RichSummaryOutput>;
+
 function richGroundingFailure(
-  output: RichSummaryResult,
+  output: RawSummary,
   allowedNumbers: Set<string>,
 ): string | null {
   const allText = [
@@ -193,6 +198,7 @@ function richGroundingFailure(
   const numbers = allText.match(/\d+(?:\.\d+)?/g) ?? [];
   const invented = numbers.filter((n) => !allowedNumbers.has(n));
   if (invented.length > 0) return `出現參考資料以外的數值：${invented.slice(0, 5).join("、")}`;
+  if (SENSITIVE_LABEL_PATTERN.test(allText)) return "出現不適用的性別或群體字眼";
   if (!output.disclaimer.includes("醫生")) return "缺少就醫提醒";
   return null;
 }
@@ -208,7 +214,7 @@ export const generateRichSummary = createServerFn({ method: "POST" })
     const gateway = createGateway();
     const relevantTips = selectRelevantTips(data.cards);
     const tipsText = relevantTips
-      .map((t) => `【${t.topic}】\n${t.tips}\n來源：${t.sources.map((s) => s.title).join("、")}`)
+      .map((t) => `【${t.topic}】\n${t.tips}`)
       .join("\n\n");
 
     const cardsText = data.cards
@@ -225,8 +231,7 @@ export const generateRichSummary = createServerFn({ method: "POST" })
       ]),
     ]);
 
-    const validUrls = new Set(relevantTips.flatMap((t) => t.sources.map((s) => s.url)));
-    const validSources = new Map(relevantTips.flatMap((t) => t.sources.map((s) => [s.title, s.url])));
+    const validTopics = new Set(relevantTips.map((t) => t.topic));
 
     const basePrompt = `你是一位健康紀錄的摘要助手，為50歲以上的繁體中文讀者撰寫易讀的健康報告。請用JSON格式回覆。
 
@@ -236,12 +241,12 @@ export const generateRichSummary = createServerFn({ method: "POST" })
 ${cardsText}
 
 第二部分：健康貼士
-根據以上結果的整體情況，從以下參考資料中挑選最相關的3至5個具體可行的健康建議。每個建議須：(1) 具體到可以明天就做，(2) 用一句話說完，(3) 標明來源的文章標題和網址。不可加入參考資料以外的建議。
+根據以上結果的整體情況，從以下參考資料中挑選最相關的3至5個具體可行的健康建議。每個建議須：(1) 具體到可以明天就做，(2) 用一句話說完，(3) 於 topic 欄位填上對應的主題名稱（【】內的字串）。不可加入參考資料以外的建議。撰寫時請使用中性字詞，避免「男士、女士、長者、學生」等特定群體用語。
 
 ${tipsText}
 
 請用以下JSON格式回覆（不要輸出其他文字）：
-{"cards":[{"name":"項目名稱","interpretation":"解讀文字"}],"tips":[{"tip":"建議內容","source":"來源文章標題","url":"來源網址"}],"disclaimer":"提醒文字，須包含「醫生」二字"}`;
+{"cards":[{"name":"項目名稱","interpretation":"解讀文字"}],"tips":[{"tip":"建議內容","topic":"主題名稱"}],"disclaimer":"提醒文字，須包含「醫生」二字"}`;
 
     const run = async (prompt: string) => {
       const result = await generateText({
@@ -251,22 +256,15 @@ ${tipsText}
       return result.text.trim();
     };
 
-    const parseOutput = (text: string): RichSummaryResult => {
+    const parseOutput = (text: string): RawSummary => {
       const raw = extractJson(text);
       const parsed = RichSummaryOutput.parse(raw);
-      parsed.tips = parsed.tips.filter((t) => {
-        if (validSources.has(t.source)) {
-          t.url = validSources.get(t.source)!;
-          return true;
-        }
-        if (validUrls.has(t.url)) return true;
-        return false;
-      });
+      parsed.tips = parsed.tips.filter((t) => validTopics.has(t.topic));
       return parsed;
     };
 
     let text = await run(basePrompt);
-    let output: RichSummaryResult;
+    let output: RawSummary;
     try {
       output = parseOutput(text);
     } catch {
@@ -279,7 +277,7 @@ ${tipsText}
     let failure = richGroundingFailure(output, allowedNumbers);
     if (failure) {
       text = await run(
-        `${basePrompt}\n\n【重要】上一次生成不合規（原因：${failure}）。請完全不要寫出任何參考資料沒有出現過的數字，並必須提醒不能取代醫生診斷。`,
+        `${basePrompt}\n\n【重要】上一次生成不合規（原因：${failure}）。請完全不要寫出任何參考資料沒有出現過的數字，並必須提醒不能取代醫生診斷，避免使用「男士、女士、長者、學生」等群體字眼。`,
       );
       try {
         output = parseOutput(text);
@@ -292,6 +290,15 @@ ${tipsText}
       throw new Error(`摘要未通過內容核對（${failure}），已停止顯示。請稍後再試或參考各項評級。`);
     }
 
-    return { ok: true as const, result: output };
+    const agencies = Array.from(
+      new Set(
+        output.tips.flatMap((t) =>
+          relevantTips.find((r) => r.topic === t.topic)?.sources.map((s) => s.agency) ?? [],
+        ),
+      ),
+    );
+
+    const result: RichSummaryResult = { ...output, agencies };
+    return { ok: true as const, result };
   });
 
