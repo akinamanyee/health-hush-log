@@ -61,7 +61,7 @@ export function gradeVisceralFat(level: number): BandGrade {
 // Bundled reference-leaflet text: the ONLY material the AI summary may use.
 export const REFERENCE_LEAFLET = `
 【血壓參考】正常：收縮壓低於120且舒張壓低於80。正常偏高：收縮壓120–139或舒張壓80–89。高血壓第一期：收縮壓140–159或舒張壓90–99。高血壓第二期：收縮壓160–179或舒張壓100–109。嚴重偏高：收縮壓180或以上，或舒張壓110或以上，應即時就醫。單純收縮期高血壓指收縮壓140或以上而舒張壓低於90，常見於年長人士。建議：少鹽飲食、規律運動、維持健康體重、按時量度。
-【身體成份分析儀參考】體脂率過高與心血管疾病風險相關。BMI（亞洲標準）：低於18.5屬過輕，18.5至22.9屬正常，23至24.9屬偏高，25或以上屬過高。體脂率：男性11%至22%屬正常，23%至27%屬偏高，超過27%屬過高；女性21%至33%屬正常，34%至39%屬偏高，超過39%屬過高。內臟脂肪等級9或以下屬健康範圍，10至14屬偏高，15或以上屬過高。維持肌肉量有助長者保持活動能力。
+【身體成份分析儀參考】體脂率過高與心血管疾病風險相關。BMI（亞洲標準）：低於18.5屬過輕，18.5至22.9屬正常，23至24.9屬偏高，25或以上屬過高。體脂率：正常範圍因性別而異，需對照檢查機構提供的性別對照表。體脂率過高與心血管疾病及代謝綜合症風險相關。內臟脂肪等級9或以下屬健康範圍，10至14屬偏高，15或以上屬過高。維持肌肉量有助長者保持活動能力。
 【身體水分參考】成年人身體水分一般佔體重的45%至65%，充足的水分有助維持代謝功能及器官運作。水分率偏低可能與脫水或肌肉量不足有關。
 【基礎代謝率參考】基礎代謝率是指身體在完全靜止狀態下維持生命所需的最低熱量消耗。肌肉量較高者一般基礎代謝率亦較高。基礎代謝率可用千卡（kcal）或千焦（kJ）表示，1千卡約等於4.184千焦。
 【手握力參考】手握力是長者肌力與整體健康的重要指標，手握力偏弱與活動能力下降相關。可透過握力球、阻力帶等簡單訓練改善。
@@ -118,7 +118,7 @@ export const TIPS_REFERENCE: TipBlock[] = [
       { title: "預防肥胖與飲食建議", url: "https://www.change4health.gov.hk/tc/healthy_diet/preventive_diet/" },
       { title: "均衡飲食FAQ", url: "https://www.change4health.gov.hk/tc/healthy_diet/faq/" },
       { title: "當外出用膳時", url: "https://www.change4health.gov.hk/tc/healthy_diet/facts/eat_smart/eating_out/index.html" },
-      { title: "控制膽固醇：吃出心臟健康", url: "https://www.fhs.gov.hk/tc_chi/health_info/woman/30105.pdf" },
+      { title: "高血壓", url: "https://www.chp.gov.hk/tc/healthtopics/content/25/35390.html" },
     ],
   },
   {
@@ -126,8 +126,8 @@ export const TIPS_REFERENCE: TipBlock[] = [
     tips: `運動建議：(1) 每天累積至少30分鐘中等強度運動（如急步行、踏單車、游泳），可分段進行，每段最少10分鐘。(2) 日常增加活動量：行樓梯代替電梯、午飯步行10分鐘、看電視時站起伸展。(3) 運動三類型均衡：耐力運動（步行、游泳）、伸展運動（太極、瑜珈）、重力運動（行樓梯、掌上壓）。(4) 跑步前2小時進食，以碳水化合物為主，避免空腹或飽腹運動。(5) 運動前先熱身3至5分鐘，伸展時維持10至30秒。(6) 運動後慢跑或步行3至5分鐘作緩和。(7) 隨時補充水分，避免含酒精或咖啡因飲料。(8) 感到不適應立即停止，如有健康問題先諮詢醫生。`,
     sources: [
       { title: "有關跑步的健康建議", url: "https://www.chp.gov.hk/tc/static/101307.html" },
-      { title: "男士健康——注意運動的習慣", url: "https://www.chp.gov.hk/tc/static/80077.html" },
-      { title: "男士健康——我為何要注意過重或肥胖的問題", url: "https://www.chp.gov.hk/tc/static/80077.html" },
+      { title: "體重管理行動計劃", url: "https://www.change4health.gov.hk/tc/healthy_weight/bmi/" },
+      { title: "控制體重的方法", url: "https://www.change4health.gov.hk/tc/healthy_weight/control_weight/" },
     ],
   },
 ];

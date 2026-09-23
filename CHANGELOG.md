@@ -4,6 +4,14 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-23 13:34 — Remove gender-specific content from health tips and reference leaflet
+
+- REFERENCE_LEAFLET: replaced male/female body fat percentage ranges with gender-neutral text directing users to the testing institution's chart — consistent with the app already returning 「無適用參考標準」 for body fat (no gender collected, ADR 0015).
+- TIPS_REFERENCE 健康飲食: replaced `fhs.gov.hk` women's-health cholesterol PDF with the gender-neutral 高血壓 article already used in other topics.
+- TIPS_REFERENCE 日常運動: replaced two「男士健康」sources with 體重管理行動計劃 and 控制體重的方法 (already used in the BMI topic).
+- All replacement URLs are reused from other topics — no new external sources introduced.
+- No changes to grading logic, storage, privacy model, or app behaviour.
+
 ## 2026-09-22 23:42 — Deploy M19 + SSOT fix to Cloud Run (heartcaring.fit)
 
 - Deployed `cloud-run-prep` branch to Cloud Run service `heartcaring-app` (revision 17), region `asia-east1`.
