@@ -4,6 +4,12 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-24 17:21 — Deploy M26 to Cloud Run (rev 27)
+
+- Deployed `cloud-run-prep` HEAD (commit `3911446`) to Cloud Run service `heartcaring-app`, region `asia-east1`, project `gen-lang-client-0014480564`. New active revision: `heartcaring-app-00027-wwc` serving 100% of traffic on heartcaring.fit.
+- Ships live: 體脂率 summary card no longer renders the 「無適用參考標準」 grade badge chip (M26). The card still shows value, date, AI interpretation, TANITA disclosure with ★ overlay from M25, and the legend. Other cards' badges unchanged.
+- Cloud Shell auth trap from rev 26 did not recur — cached `gh` credentials worked first try.
+
 ## 2026-09-24 17:15 — M26 delivered: drop grade badge on 體脂率 card
 
 - `src/routes/summary.tsx` — `<GradeBadge>` render gated with `card.name !== "體脂率"`. Inline comment explains the rationale and points to ADR 0025 + PRD L51 footnote. `match.value`, `match.recordedAt`, `card.interpretation`, `<BodyFatStandardTable />` — all still render.
