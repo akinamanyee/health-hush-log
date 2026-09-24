@@ -41,6 +41,62 @@ const CARD_ICONS: Record<string, typeof Heart> = {
   "坐地前伸": StretchHorizontal,
 };
 
+// Static reference table from HA (醫管局) 「我的體重是否在健康範圍內呢？」.
+// Gender/age labels here are INTENTIONAL per ADR 0025 — this is static
+// authoritative reference material, not AI-generated advice. Do NOT remove
+// under the sensitive-word rule (ADR 0024 applies to AI output only).
+// Athlete row from the source deliberately omitted per M23 scope decision.
+const BODY_FAT_STANDARD_ROWS: { age: string; female: string; male: string }[] = [
+  { age: "18-29歲", female: "17-24%", male: "14-20%" },
+  { age: ">30歲",   female: "20-27%", male: "17-23%" },
+];
+const BODY_FAT_STANDARD_URL = "https://www3.ha.org.hk/dic/gn_06_04.html";
+
+function BodyFatStandardTable() {
+  return (
+    <details className="mt-3 rounded-xl border border-border bg-muted/30 p-3 text-sm">
+      <summary className="cursor-pointer font-medium text-foreground">
+        查看標準脂肪量對照表（醫管局）
+      </summary>
+      <div className="mt-3 overflow-x-auto">
+        <table className="w-full border-collapse text-center">
+          <caption className="mb-2 text-xs text-muted-foreground">
+            標準脂肪量（%）
+          </caption>
+          <thead>
+            <tr className="border-b border-border">
+              <th className="p-2 text-left font-medium text-foreground"></th>
+              <th className="p-2 font-medium text-foreground">女士</th>
+              <th className="p-2 font-medium text-foreground">男士</th>
+            </tr>
+          </thead>
+          <tbody>
+            {BODY_FAT_STANDARD_ROWS.map((row) => (
+              <tr key={row.age} className="border-b border-border/50 last:border-b-0">
+                <td className="p-2 text-left font-medium text-foreground">{row.age}</td>
+                <td className="p-2 text-muted-foreground">{row.female}</td>
+                <td className="p-2 text-muted-foreground">{row.male}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p className="mt-3 text-xs text-muted-foreground">
+          資料來源：醫管局〈
+          <a
+            href={BODY_FAT_STANDARD_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline decoration-dotted"
+          >
+            我的體重是否在健康範圍內呢？
+          </a>
+          〉。體脂率標準因性別及年齡而異，本應用程式因不收集性別及年齡而不進行分級，用家可對照上表自行參考。
+        </p>
+      </div>
+    </details>
+  );
+}
+
 interface PreviewItem {
   moduleId: string;
   moduleTitle: string;
@@ -247,6 +303,7 @@ function Summary() {
                           <p className="mt-2 text-base leading-relaxed text-muted-foreground">
                             {card.interpretation}
                           </p>
+                          {card.name === "體脂率" && <BodyFatStandardTable />}
                         </div>
                       </div>
                     </div>

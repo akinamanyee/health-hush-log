@@ -4,6 +4,17 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-24 11:35 — M23 delivered: 體脂率 grounded source + static HA reference table
+
+- Added `醫管局` to `Agency` union; new `TIPS_REFERENCE` topic `體脂率參考標準` sourced from the Hospital Authority article 「我的體重是否在健康範圍內呢？」 (https://www3.ha.org.hk/dic/gn_06_04.html). Gender-neutral tips text points to the table under the card.
+- `REFERENCE_LEAFLET` body-fat line rewritten to reference the static table without quoting any gendered percentages — keeps `allowedNumbers` clean so the AI cannot cite ranges like 14-20% without the gender qualifier the sensitive-word filter would catch.
+- `selectRelevantTips` gains an `n === "體脂率"` branch — body-fat cards now always pull the new topic.
+- `/summary` renders a collapsible `<details>` 「查看標準脂肪量對照表（醫管局）」 under 體脂率 cards. Two age rows (18-29歲, >30歲) × two genders (女士, 男士); 運動員 row from the source is deliberately omitted per this milestone's scope. Source line credits 醫管局 with a clickable link to the article.
+- **New ADR 0025 (`adr/0025-static-reference-vs-ai-advice.md`)** formalizes the principle: static reference material from an authoritative source may be gender/age structured; AI-generated content may not. Explains the JSX comment marking the table as intentional and protects it from being removed by a future contributor under the wrong ADR.
+- Verified: type-check clean, build ✓; runtime exercised — new topic fires for 體脂率-only and all-Tanita, does not fire for BMI-only (fallback unchanged); tips text contains no sensitive words; leaflet contains no gendered specific ranges.
+- No storage change, no AI prompt shape change, no wire payload change. `SENSITIVE_LABEL_PATTERN` continues to apply only to AI output (per ADR 0025 clarification).
+- Full plan: `plan/24-m23-body-fat-reference-source.md`. Awaiting Cloud Run redeploy.
+
 ## 2026-09-24 00:00 — Deploy M22 to Cloud Run (rev 24)
 
 - Deployed `cloud-run-prep` HEAD (commit `ac92b7b`) to Cloud Run service `heartcaring-app`, region `asia-east1`. New active revision: `heartcaring-app-00024-fzf` serving 100% of traffic on heartcaring.fit.

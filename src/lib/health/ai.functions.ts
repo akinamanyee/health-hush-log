@@ -172,6 +172,9 @@ function selectRelevantTips(cards: z.infer<typeof RichSummaryInput>["cards"]): T
       topics.add("內臟脂肪問題與預防");
       topics.add("心腦血管病、中風及預防");
     }
+    if (n === "體脂率") {
+      topics.add("體脂率參考標準");
+    }
     if (n === "手握力" || n === "坐地前伸") {
       topics.add("日常運動（針對預防過重）");
     }

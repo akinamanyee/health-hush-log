@@ -61,7 +61,7 @@ export function gradeVisceralFat(level: number): BandGrade {
 // Bundled reference-leaflet text: the ONLY material the AI summary may use.
 export const REFERENCE_LEAFLET = `
 【血壓參考】正常：收縮壓低於120且舒張壓低於80。正常偏高：收縮壓120–139或舒張壓80–89。高血壓第一期：收縮壓140–159或舒張壓90–99。高血壓第二期：收縮壓160–179或舒張壓100–109。嚴重偏高：收縮壓180或以上，或舒張壓110或以上，應即時就醫。單純收縮期高血壓指收縮壓140或以上而舒張壓低於90，常見於年長人士。建議：少鹽飲食、規律運動、維持健康體重、按時量度。
-【身體成份分析儀參考】體脂率過高與心血管疾病風險相關。BMI（亞洲標準）：低於18.5屬過輕，18.5至22.9屬正常，23至24.9屬偏高，25或以上屬過高。體脂率：正常範圍因性別而異，需對照檢查機構提供的性別對照表。體脂率過高與心血管疾病及代謝綜合症風險相關。內臟脂肪等級9或以下屬健康範圍，10至14屬偏高，15或以上屬過高。維持肌肉量有助長者保持活動能力。
+【身體成份分析儀參考】體脂率過高與心血管疾病風險相關。BMI（亞洲標準）：低於18.5屬過輕，18.5至22.9屬正常，23至24.9屬偏高，25或以上屬過高。體脂率：正常範圍因性別及年齡而異，本應用程式在體脂率卡片下方展示醫管局公開的標準脂肪量對照表供用家自行對照，但因不收集性別及年齡而不進行分級。體脂率過高與心血管疾病及代謝綜合症風險相關。內臟脂肪等級9或以下屬健康範圍，10至14屬偏高，15或以上屬過高。維持肌肉量有助長者保持活動能力。
 【身體水分參考】成年人身體水分一般佔體重的45%至65%，充足的水分有助維持代謝功能及器官運作。水分率偏低可能與脫水或肌肉量不足有關。
 【基礎代謝率參考】基礎代謝率是指身體在完全靜止狀態下維持生命所需的最低熱量消耗。肌肉量較高者一般基礎代謝率亦較高。基礎代謝率可用千卡（kcal）或千焦（kJ）表示，1千卡約等於4.184千焦。
 【手握力參考】手握力是長者肌力與整體健康的重要指標，手握力偏弱與活動能力下降相關。可透過握力球、阻力帶等簡單訓練改善。
@@ -73,7 +73,7 @@ export const REFERENCE_LEAFLET = `
 // traceability; only the agency appears in the UI, so that source names like
 // 男士健康、學生健康 (which some Hong Kong government articles carry) never
 // leak into the summary, and the credibility signal reads as government-issued.
-export type Agency = "衞生防護中心" | "衞生署" | "職業安全健康局";
+export type Agency = "衞生防護中心" | "衞生署" | "職業安全健康局" | "醫管局";
 
 export interface TipBlock {
   topic: string;
@@ -140,6 +140,13 @@ export const TIPS_REFERENCE: TipBlock[] = [
       { title: "有關跑步的健康建議", url: "https://www.chp.gov.hk/tc/static/101307.html", agency: "衞生防護中心" },
       { title: "體重管理行動計劃", url: "https://www.change4health.gov.hk/tc/healthy_weight/bmi/", agency: "衞生署" },
       { title: "控制體重的方法", url: "https://www.change4health.gov.hk/tc/healthy_weight/control_weight/", agency: "衞生署" },
+    ],
+  },
+  {
+    topic: "體脂率參考標準",
+    tips: `體脂率健康範圍要點：(1) 體脂率的健康範圍會因性別及年齡而異，並非單一數值；醫管局及世衞太平洋建議提供性別和年齡分組的參考範圍，宜對照醫管局提供的對照表（本應用程式已在體脂率卡片下方展示）。(2) 體脂率過高與心血管疾病及代謝綜合症風險相關。(3) 中央肥胖（腰腹脂肪多）比整體超重對心血管及糖尿病風險更高，宜同時留意腰圍。(4) 每天最少30分鐘中等強度運動、少油少糖飲食有助控制體脂。`,
+    sources: [
+      { title: "我的體重是否在健康範圍內呢？", url: "https://www3.ha.org.hk/dic/gn_06_04.html", agency: "醫管局" },
     ],
   },
 ];
