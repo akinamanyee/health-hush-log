@@ -4,6 +4,12 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-24 16:58 — Living docs sync after M23-M25 deploy
+
+- `ARCHITECTURE.md` — added a new SSOT bullet under 「Single sources of truth in code」 for **static reference tables** (currently the TANITA 標準脂肪量 matrix under 體脂率). Documents the ADR 0025 rule (JSX only, never enters `REFERENCE_LEAFLET`/`TIPS_REFERENCE`), the source-neutral AI pointer requirement, and the M25 value-overlay mechanism (`parseBodyFatValue` → `BodyFatStandardTable` highlights user's cell without grading).
+- `CLAUDE.md` — deploy runbook's incident-references line extended with today's Cloud-Shell-auth trap (session-fresh Cloud Shell had no cached `gh` state; `git pull` silently prompted for username; if operator paste-typed through it, deploy shipped stale local `HEAD` — first rev 00025-sjv today was M22-era for this exact reason). Fix procedure written inline.
+- CHANGELOG already carried all delivery entries (M23 11:35, M24 13:00, M25 14:00) and the rev-26 deploy entry (15:15). No new ADR this session (0025 was M23's, updated for M24). Roadmap already lists M23-M25 with plan links. DECISIONS.md already indexes ADR 0025. PRD.md unchanged — no deviations.
+
 ## 2026-09-24 15:15 — Deploy M23 + M24 + M25 to Cloud Run (rev 26)
 
 - Deployed `cloud-run-prep` HEAD (commit `032723a`) to Cloud Run service `heartcaring-app`, region `asia-east1`, project `gen-lang-client-0014480564`. New active revision: `heartcaring-app-00026-tgg` serving 100% of traffic on heartcaring.fit.

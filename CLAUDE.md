@@ -34,7 +34,7 @@ gcloud run deploy heartcaring-app --source . --region asia-east1 --allow-unauthe
 - Verify active revision: `gcloud run services describe heartcaring-app --region asia-east1 --format="value(status.traffic[].revisionName,status.traffic[].percent)"`
 - Verify content: `curl -sL https://heartcaring.fit/ | grep -c "<expected-string>"`
 - Rollback: `gcloud run services update-traffic heartcaring-app --to-revisions=<prev-rev>=100 --region asia-east1`
-- Incident references: see CHANGELOG entries `2026-09-22 23:42` (wrong-service-name trap) and `2026-09-23 17:01` (stale-Cloud-Shell trap).
+- Incident references: see CHANGELOG entries `2026-09-22 23:42` (wrong-service-name trap), `2026-09-23 17:01` (stale-Cloud-Shell trap) and `2026-09-24 15:15` (Cloud-Shell-auth trap — session-fresh Cloud Shell lost cached GitHub credentials, so `git pull` silently failed and the deploy shipped stale local `HEAD`; fix: `gh auth status` first, if not logged in `gh auth login` via device flow + `gh auth setup-git`, then `git pull --ff-only` and confirm `git rev-parse HEAD` matches expected commit before `gcloud run deploy`).
 
 ## Coding Principles
 
