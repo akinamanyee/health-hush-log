@@ -144,4 +144,18 @@ Value: users get an authoritative pointer instead of silence around a card the a
 by design cannot classify.
 Traces: NORTHSTAR (trustworthy — authoritative pointer, not silence) · HARD CONSTRAINTS (Grounded AI Advice — extending the bundled leaflet) · USER JOURNEY 7 · ADR 0025 (new — static reference vs AI advice principle).
 
+## M24 — 對齊磅面的體脂分級: TANITA 5-tier static reference
+The static 標準脂肪量 table under the 體脂率 summary card switches source
+from HA (醫管局, 2-tier × 2-age) to TANITA〈身體組成數據參考指標〉 —
+the same 5-tier scheme (消瘦 / 標準健康型 / 標準警戒型 / 微胖 / 肥胖) ×
+3 age buckets × gender that the user's own 身體組成分析儀 displays. AI
+grounding for 體脂率 tips remains sourced from HA (ADR 0025 permits
+divergent sources for static vs generated content). No storage, grading,
+AI-prompt or sensitive-word logic changes; the card grade badge still
+shows 「無適用參考標準」 because the app collects no gender/age.
+Value: what the user reads off their own scale (「標準健康型」, 「微胖」,
+…) maps directly onto a cell in the app's reference table — no
+cross-scheme translation.
+Traces: NORTHSTAR (trustworthy — the reference matches the device) · HARD CONSTRAINTS (no gender/age collection, deterministic grading unchanged) · USER JOURNEY 7 · ADR 0025 (Source change history).
+
 Each milestone ends with a live, usable product: M1 is a shell you can look at, M2 a working logbook, and every later step adds magic without breaking what's there.

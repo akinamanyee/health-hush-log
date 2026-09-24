@@ -4,6 +4,16 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-24 13:00 — M24 delivered: TANITA 5-tier static reference replaces HA table under 體脂率
+
+- `src/routes/summary.tsx` — swapped the static 標準脂肪量 table's data source from HA (醫管局 2-tier × 2-age) to TANITA〈身體組成數據參考指標〉 (5-tier × 3-age × gender). New constants `TANITA_AGE_BUCKETS`, `TANITA_TIERS`, `BODY_FAT_MALE`, `BODY_FAT_FEMALE` typed as `BodyFatMatrix`. `BodyFatStandardTable` now renders two stacked matrix tables (男性, 女性) inside the same `<details>` shell. `<summary>` text now reads 「查看標準脂肪量對照表（TANITA）」; footer credit line is plain text (no external link — TANITA's reference sheet has no stable public URL). Old `BODY_FAT_STANDARD_ROWS` and `BODY_FAT_STANDARD_URL` constants removed.
+- `adr/0025-static-reference-vs-ai-advice.md` — appended a Source change history section recording the 2026-09-24 static-source move to TANITA, with rationale (users log with a Tanita scale whose on-screen classification is Tanita's own 5-tier scheme; the reference table now matches the device). ADR principle itself unchanged.
+- Rationale: users' 身體組成分析儀 shows the 5-tier Tanita classification directly (消瘦 / 標準健康型 / 標準警戒型 / 微胖 / 肥胖). Prior HA-sourced 2-tier table (健康 / 偏高) could not map 1:1 onto what the scale displays. Now what the user reads off their scale maps directly onto a cell.
+- Untouched by design: `TIPS_REFERENCE` 「體脂率參考標準」 (HA article still grounds AI tips) · `REFERENCE_LEAFLET` body-fat line · `Agency` union · `selectRelevantTips` mapping · `SENSITIVE_LABEL_PATTERN` · `allowedNumbers` · `richGroundingFailure` · `gradeEntry`/`interpretCard` (badge still 「無適用參考標準」) · storage, CSV export, logbook.
+- ADR 0025's Source-may-diverge clause explicitly covers this: AI cites 醫管局; static table cites TANITA. Both sources are authoritative for their respective use.
+- Verified: type-check clean, build ✓; JSX renders two 5×3 tables under the disclosure, dark mode borders correct, footer disclaimer intact. No wire-payload change (verify by inspection: static table is client-side JSX only).
+- Full plan: `plan/25-m24-tanita-body-fat-reference.md`. Awaiting Cloud Run redeploy.
+
 ## 2026-09-24 11:35 — M23 delivered: 體脂率 grounded source + static HA reference table
 
 - Added `醫管局` to `Agency` union; new `TIPS_REFERENCE` topic `體脂率參考標準` sourced from the Hospital Authority article 「我的體重是否在健康範圍內呢？」 (https://www3.ha.org.hk/dic/gn_06_04.html). Gender-neutral tips text points to the table under the card.

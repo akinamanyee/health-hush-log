@@ -77,3 +77,20 @@ Concretely:
 - ADRs 0023 and 0024 are unchanged in scope — they continue to describe how
   AI-generated content is neutralized. This ADR only adds the parallel rule
   for static reference material.
+
+## Source change history
+
+- **2026-09-24 (M24)** — The static 標準脂肪量 table under the 體脂率 card
+  moved from HA (醫管局 2-tier × 2-age) to TANITA `身體組成數據參考指標`
+  (5-tier × 3-age × gender). Rationale: users log with a Tanita
+  身體組成分析儀 whose on-screen classification is Tanita's own 5-tier
+  scheme (消瘦 / 標準健康型 / 標準警戒型 / 微胖 / 肥胖); matching the
+  reference table to the scale's own scheme lets users self-classify by
+  reading their scale's label directly, without translating between
+  classification systems. **AI grounding for 體脂率 tips remains HA**
+  (`TIPS_REFERENCE`「體脂率參考標準」 unchanged); the two sources may
+  diverge — this ADR's principle explicitly permits static and generated
+  content to draw from different authoritative sources. TANITA is cited
+  in-place as the reference vendor; no external URL because TANITA
+  publishes the reference indicator sheet as product documentation, not
+  as a stable public article.

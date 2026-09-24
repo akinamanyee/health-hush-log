@@ -41,58 +41,76 @@ const CARD_ICONS: Record<string, typeof Heart> = {
   "坐地前伸": StretchHorizontal,
 };
 
-// Static reference table from HA (醫管局) 「我的體重是否在健康範圍內呢？」.
-// Gender/age labels here are INTENTIONAL per ADR 0025 — this is static
-// authoritative reference material, not AI-generated advice. Do NOT remove
-// under the sensitive-word rule (ADR 0024 applies to AI output only).
-// Athlete row from the source deliberately omitted per M23 scope decision.
-const BODY_FAT_STANDARD_ROWS: { age: string; female: string; male: string }[] = [
-  { age: "18-29歲", female: "17-24%", male: "14-20%" },
-  { age: ">30歲",   female: "20-27%", male: "17-23%" },
-];
-const BODY_FAT_STANDARD_URL = "https://www3.ha.org.hk/dic/gn_06_04.html";
+// Static reference table from TANITA 「身體組成數據參考指標」 — the same
+// classification the user's own 身體組成分析儀 displays. Gender/age labels
+// here are INTENTIONAL per ADR 0025 — this is static authoritative reference
+// material, not AI-generated advice. Do NOT remove under the sensitive-word
+// rule (ADR 0024 applies to AI output only). AI grounding for 體脂率 tips
+// continues to source from HA (醫管局) via TIPS_REFERENCE; the two sources
+// may diverge — see ADR 0025 Source change history.
+const TANITA_AGE_BUCKETS = ["18-39歲", "40-59歲", "≥60歲"] as const;
+const TANITA_TIERS = ["消瘦", "標準健康型", "標準警戒型", "微胖", "肥胖"] as const;
+
+type BodyFatMatrix = Record<
+  (typeof TANITA_TIERS)[number],
+  Record<(typeof TANITA_AGE_BUCKETS)[number], string>
+>;
+
+const BODY_FAT_MALE: BodyFatMatrix = {
+  "消瘦":       { "18-39歲": "<10%",  "40-59歲": "<11%",  "≥60歲": "<13%" },
+  "標準健康型": { "18-39歲": "10-20%", "40-59歲": "11-21%", "≥60歲": "13-24%" },
+  "標準警戒型": { "18-39歲": "21-23%", "40-59歲": "22-24%", "≥60歲": "25-27%" },
+  "微胖":       { "18-39歲": "24-27%", "40-59歲": "25-28%", "≥60歲": "28-30%" },
+  "肥胖":       { "18-39歲": "≥28%",  "40-59歲": "≥29%",  "≥60歲": "≥31%" },
+};
+
+const BODY_FAT_FEMALE: BodyFatMatrix = {
+  "消瘦":       { "18-39歲": "<20%",  "40-59歲": "<21%",  "≥60歲": "<22%" },
+  "標準健康型": { "18-39歲": "20-27%", "40-59歲": "21-28%", "≥60歲": "22-29%" },
+  "標準警戒型": { "18-39歲": "28-34%", "40-59歲": "29-35%", "≥60歲": "30-36%" },
+  "微胖":       { "18-39歲": "35-39%", "40-59歲": "36-40%", "≥60歲": "37-41%" },
+  "肥胖":       { "18-39歲": "≥40%",  "40-59歲": "≥41%",  "≥60歲": "≥42%" },
+};
+
+function BodyFatMatrixTable({ title, data }: { title: string; data: BodyFatMatrix }) {
+  return (
+    <div className="mt-3 overflow-x-auto">
+      <table className="w-full border-collapse text-center">
+        <caption className="mb-2 text-xs text-muted-foreground">{title}</caption>
+        <thead>
+          <tr className="border-b border-border">
+            <th className="p-2 text-left font-medium text-foreground"></th>
+            {TANITA_AGE_BUCKETS.map((age) => (
+              <th key={age} className="p-2 font-medium text-foreground">{age}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {TANITA_TIERS.map((tier) => (
+            <tr key={tier} className="border-b border-border/50 last:border-b-0">
+              <td className="p-2 text-left font-medium text-foreground">{tier}</td>
+              {TANITA_AGE_BUCKETS.map((age) => (
+                <td key={age} className="p-2 text-muted-foreground">{data[tier][age]}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
 
 function BodyFatStandardTable() {
   return (
     <details className="mt-3 rounded-xl border border-border bg-muted/30 p-3 text-sm">
       <summary className="cursor-pointer font-medium text-foreground">
-        查看標準脂肪量對照表（醫管局）
+        查看標準脂肪量對照表（TANITA）
       </summary>
-      <div className="mt-3 overflow-x-auto">
-        <table className="w-full border-collapse text-center">
-          <caption className="mb-2 text-xs text-muted-foreground">
-            標準脂肪量（%）
-          </caption>
-          <thead>
-            <tr className="border-b border-border">
-              <th className="p-2 text-left font-medium text-foreground"></th>
-              <th className="p-2 font-medium text-foreground">女士</th>
-              <th className="p-2 font-medium text-foreground">男士</th>
-            </tr>
-          </thead>
-          <tbody>
-            {BODY_FAT_STANDARD_ROWS.map((row) => (
-              <tr key={row.age} className="border-b border-border/50 last:border-b-0">
-                <td className="p-2 text-left font-medium text-foreground">{row.age}</td>
-                <td className="p-2 text-muted-foreground">{row.female}</td>
-                <td className="p-2 text-muted-foreground">{row.male}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <p className="mt-3 text-xs text-muted-foreground">
-          資料來源：醫管局〈
-          <a
-            href={BODY_FAT_STANDARD_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline decoration-dotted"
-          >
-            我的體重是否在健康範圍內呢？
-          </a>
-          〉。體脂率標準因性別及年齡而異，本應用程式因不收集性別及年齡而不進行分級，用家可對照上表自行參考。
-        </p>
-      </div>
+      <BodyFatMatrixTable title="男性 標準脂肪量（%）" data={BODY_FAT_MALE} />
+      <BodyFatMatrixTable title="女性 標準脂肪量（%）" data={BODY_FAT_FEMALE} />
+      <p className="mt-3 text-xs text-muted-foreground">
+        資料來源：TANITA〈身體組成數據參考指標〉。體脂率標準因性別及年齡而異，本應用程式因不收集性別及年齡而不進行分級，用家可對照上表自行參考。
+      </p>
     </details>
   );
 }
