@@ -72,7 +72,42 @@ const BODY_FAT_FEMALE: BodyFatMatrix = {
   "肥胖":       { "18-39歲": "≥40%",  "40-59歲": "≥41%",  "≥60歲": "≥42%" },
 };
 
-function BodyFatMatrixTable({ title, data }: { title: string; data: BodyFatMatrix }) {
+// Range-string predicates. Cell display strings look like "<10%", "10-20%", "≥28%".
+// Boundary rule: integer upper bound belongs to the lower tier (向下取), matching
+// TANITA convention — a reading of exactly 20% highlights "10-20%" not "21-23%".
+// Non-integer readings that fall in a gap between tiers highlight neither; fails
+// safe (no highlight rather than wrong highlight).
+function matchesCell(value: number, cellDisplay: string): boolean {
+  const lt = /^<(\d+)%$/.exec(cellDisplay);
+  if (lt?.[1]) return value < parseInt(lt[1], 10);
+  const ge = /^≥(\d+)%$/.exec(cellDisplay);
+  if (ge?.[1]) return value >= parseInt(ge[1], 10);
+  const range = /^(\d+)-(\d+)%$/.exec(cellDisplay);
+  if (range?.[1] && range[2]) {
+    const lo = parseInt(range[1], 10);
+    const hi = parseInt(range[2], 10);
+    return value >= lo && value <= hi;
+  }
+  return false;
+}
+
+function parseBodyFatValue(display: string | undefined): number | undefined {
+  if (!display) return undefined;
+  const m = /(\d+(?:\.\d+)?)/.exec(display);
+  if (!m?.[1]) return undefined;
+  const n = parseFloat(m[1]);
+  return Number.isFinite(n) ? n : undefined;
+}
+
+function BodyFatMatrixTable({
+  title,
+  data,
+  userValue,
+}: {
+  title: string;
+  data: BodyFatMatrix;
+  userValue: number | undefined;
+}) {
   return (
     <div className="mt-3 overflow-x-auto">
       <table className="w-full border-collapse text-center">
@@ -89,9 +124,18 @@ function BodyFatMatrixTable({ title, data }: { title: string; data: BodyFatMatri
           {TANITA_TIERS.map((tier) => (
             <tr key={tier} className="border-b border-border/50 last:border-b-0">
               <td className="p-2 text-left font-medium text-foreground">{tier}</td>
-              {TANITA_AGE_BUCKETS.map((age) => (
-                <td key={age} className="p-2 text-muted-foreground">{data[tier][age]}</td>
-              ))}
+              {TANITA_AGE_BUCKETS.map((age) => {
+                const cell = data[tier][age];
+                const hit = userValue !== undefined && matchesCell(userValue, cell);
+                return (
+                  <td
+                    key={age}
+                    className={hit ? "p-2 bg-primary/10 font-semibold text-foreground" : "p-2 text-muted-foreground"}
+                  >
+                    {cell}{hit ? " ★" : ""}
+                  </td>
+                );
+              })}
             </tr>
           ))}
         </tbody>
@@ -100,14 +144,19 @@ function BodyFatMatrixTable({ title, data }: { title: string; data: BodyFatMatri
   );
 }
 
-function BodyFatStandardTable() {
+function BodyFatStandardTable({ userValue }: { userValue: number | undefined }) {
   return (
     <details className="mt-3 rounded-xl border border-border bg-muted/30 p-3 text-sm">
       <summary className="cursor-pointer font-medium text-foreground">
         查看標準脂肪量對照表（TANITA）
       </summary>
-      <BodyFatMatrixTable title="男性 標準脂肪量（%）" data={BODY_FAT_MALE} />
-      <BodyFatMatrixTable title="女性 標準脂肪量（%）" data={BODY_FAT_FEMALE} />
+      <BodyFatMatrixTable title="男性 標準脂肪量（%）" data={BODY_FAT_MALE} userValue={userValue} />
+      <BodyFatMatrixTable title="女性 標準脂肪量（%）" data={BODY_FAT_FEMALE} userValue={userValue} />
+      {userValue !== undefined && (
+        <p className="mt-3 text-xs text-foreground">
+          ★ = 你的 {userValue}% 落於此區間。請於男性／女性表中，找你性別及年齡對應的欄，欄中★格即為你的參考分級。
+        </p>
+      )}
       <p className="mt-3 text-xs text-muted-foreground">
         資料來源：TANITA〈身體組成數據參考指標〉。體脂率標準因性別及年齡而異，本應用程式因不收集性別及年齡而不進行分級，用家可對照上表自行參考。
       </p>
@@ -321,7 +370,9 @@ function Summary() {
                           <p className="mt-2 text-base leading-relaxed text-muted-foreground">
                             {card.interpretation}
                           </p>
-                          {card.name === "體脂率" && <BodyFatStandardTable />}
+                          {card.name === "體脂率" && (
+                            <BodyFatStandardTable userValue={parseBodyFatValue(match?.value)} />
+                          )}
                         </div>
                       </div>
                     </div>

@@ -158,4 +158,22 @@ Value: what the user reads off their own scale (「標準健康型」, 「微胖
 cross-scheme translation.
 Traces: NORTHSTAR (trustworthy — the reference matches the device) · HARD CONSTRAINTS (no gender/age collection, deterministic grading unchanged) · USER JOURNEY 7 · ADR 0025 (Source change history).
 
+## M25 — 體脂率讀數視覺定位: your reading, marked on the TANITA chart
+The 體脂率 static reference table gains a value-overlay: each of the 30
+cells (5 tiers × 3 age × 2 gender) lights up (subtle background + ★) when
+the user's latest recorded 體脂率 falls within that cell's range. The user
+then eyeballs the column matching their own gender + age and reads their
+tier from the marked cell. The app never asks for gender or age — the
+overlay just shows "your reading falls here in each column"; the user
+self-identifies which column is theirs. The AI-side pointer strings in
+`REFERENCE_LEAFLET` and the 體脂率 tip become source-neutral («卡片下方
+之對照表»), fixing a M24 peer-review blocker where the AI was directing
+users to a 醫管局 table while the JSX now renders TANITA. Grade badge
+still shows 「無適用參考標準」 (PRD L51 preserved); no gender/age
+collected (PRD L13/L50 preserved).
+Value: users find their tier in one glance instead of scanning a 30-cell
+matrix; the AI stops pointing at a source that doesn't match the visible
+table.
+Traces: NORTHSTAR (trustworthy — pointer matches what's shown, reading is easy to locate) · HARD CONSTRAINTS (no gender/age collection, deterministic grading unchanged) · USER JOURNEY 7 · ADR 0025 (numbers-in-JSX-only preserved).
+
 Each milestone ends with a live, usable product: M1 is a shell you can look at, M2 a working logbook, and every later step adds magic without breaking what's there.

@@ -4,6 +4,15 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-24 14:00 — M25 delivered: value overlay on TANITA chart + AI pointer fix
+
+- `src/routes/summary.tsx` — `BodyFatMatrixTable` and `BodyFatStandardTable` now take a `userValue` prop. When the user has a recorded 體脂率, each of the 30 cells (across both matrix tables) whose range contains that value renders with `bg-primary/10 font-semibold text-foreground` + trailing ★. A legend line reads 「★ = 你的 X% 落於此區間。請於男性／女性表中，找你性別及年齡對應的欄，欄中★格即為你的參考分級。」 Added helpers `matchesCell` (parses `<N%` / `N-M%` / `≥N%` display strings; integer-inclusive bounds; 向下取 boundary rule) and `parseBodyFatValue` (extracts the leading number from the card's display string). Call site passes `parseBodyFatValue(match?.value)` — undefined when no reading exists, in which case the table renders in M24-style with no highlights and no legend.
+- `src/lib/health/charts.ts` — fixed the M24 peer-review blocker: `REFERENCE_LEAFLET` body-fat sentence and the 體脂率參考標準 tip no longer name the on-screen table as 醫管局's. Leaflet: 「本應用程式在體脂率卡片下方展示標準脂肪量對照表」 (was: 「醫管局公開的標準脂肪量對照表」). Tip: 「宜對照卡片下方之對照表」 (was: 「宜對照醫管局提供的對照表」). The tip's factual attribution 「醫管局及世衞太平洋建議提供性別和年齡分組的參考範圍」 is preserved — this credits HA for a recommendation, not for the table. `sources` array still points at the HA article (grounding source for the abstract principle).
+- Untouched: `Agency` union, `SENSITIVE_LABEL_PATTERN`, `allowedNumbers`, `richGroundingFailure`, `selectRelevantTips`, `gradeEntry`/`interpretCard` (badge stays 「無適用參考標準」), storage, CSV, wire payload, ADR 0019/0023/0024/0025 principles.
+- Zero user input added — no dropdown, no form, no gender/age collected. The overlay uses only the body-fat value the app already stores; user self-identifies which column applies to them by looking at the row that matches their own demographic.
+- Verified: `tsc --noEmit` clean, `bun run build` clean (1.37s). Regex-based cell matching hardened against `noUncheckedIndexedAccess` (uses `.exec()` + optional-chaining guards).
+- Full plan: `plan/26-m25-body-fat-value-highlight.md`. Awaiting Cloud Run redeploy.
+
 ## 2026-09-24 13:00 — M24 delivered: TANITA 5-tier static reference replaces HA table under 體脂率
 
 - `src/routes/summary.tsx` — swapped the static 標準脂肪量 table's data source from HA (醫管局 2-tier × 2-age) to TANITA〈身體組成數據參考指標〉 (5-tier × 3-age × gender). New constants `TANITA_AGE_BUCKETS`, `TANITA_TIERS`, `BODY_FAT_MALE`, `BODY_FAT_FEMALE` typed as `BodyFatMatrix`. `BodyFatStandardTable` now renders two stacked matrix tables (男性, 女性) inside the same `<details>` shell. `<summary>` text now reads 「查看標準脂肪量對照表（TANITA）」; footer credit line is plain text (no external link — TANITA's reference sheet has no stable public URL). Old `BODY_FAT_STANDARD_ROWS` and `BODY_FAT_STANDARD_URL` constants removed.
