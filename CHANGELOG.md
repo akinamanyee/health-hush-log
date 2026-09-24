@@ -4,6 +4,12 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-24 17:51 — Living-docs sync after M26 deploy + post-deploy investigation trail
+
+- `ARCHITECTURE.md` — static-reference-tables SSOT bullet extended: notes that after M26 the summary card omits the grade-badge chip for cards carrying such tables (the CardInterpretation payload still carries `"無適用參考標準"`; only the visual chip is skipped). Points at PRD L51 Exception.
+- `CHANGELOG.md` — this entry captures the post-deploy investigation trail: after rev 27 shipped, user reported still seeing 「無適用參考標準」 on the body-fat card. Bundle-level verification (curl of `summary-DfDGdCpq.js`) confirmed the summary bundle contains zero occurrences of the string — the badge chip cannot be rendered from the summary route. The phrase persists only in `modules-CV-1ehYH.js` (where `grade.ts` is bundled — expected, `interpretCard` still populates the field per M26 SSOT preservation). Remaining user sighting is therefore one of: (a) browser cache holding pre-M26 bundle on the phone, or (b) AI-generated prose echoing the phrase — the wire payload still sends `體脂率：25%（無適用參考標準）` in the prompt, plus a `note` field `"無適用參考標準（需要年齡及性別）"`, so Gemini has the phrase twice in its input and may paraphrase it back. Pending user screenshot to determine A vs B; if B, a follow-up milestone will sanitize what the AI sees for 體脂率 (drop the negative grade + note from that card's wire payload, or replace with source-neutral text).
+- No new ADR this session. PRD, Roadmap, ADR 0025 all already synced from prior turns. `DECISIONS.md` index needs no change.
+
 ## 2026-09-24 17:21 — Deploy M26 to Cloud Run (rev 27)
 
 - Deployed `cloud-run-prep` HEAD (commit `3911446`) to Cloud Run service `heartcaring-app`, region `asia-east1`, project `gen-lang-client-0014480564`. New active revision: `heartcaring-app-00027-wwc` serving 100% of traffic on heartcaring.fit.
