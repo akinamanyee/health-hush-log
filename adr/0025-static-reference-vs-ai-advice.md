@@ -80,6 +80,18 @@ Concretely:
 
 ## Source change history
 
+- **2026-09-24 (M26)** — The 體脂率 summary card no longer renders the
+  「無適用參考標準」 grade badge chip. Rationale: after M23-M25 introduced
+  the in-app TANITA reference matrix with per-cell value overlay directly
+  under the card, showing a badge that says 「no applicable reference
+  standard」 next to those very reference numbers is self-contradictory
+  and confuses users. PRD L51 is amended in-place with an Exception clause
+  for cards carrying an in-app self-lookup reference table. `gradeEntry`,
+  `interpretCard`, `BandGrade`, `note` fields — all unchanged; the grader
+  still refuses to classify without gender/age (PRD L13/L50 preserved).
+  Only the visual chip is skipped in `summary.tsx`, guarded by
+  `card.name !== "體脂率"`.
+
 - **2026-09-24 (M24)** — The static 標準脂肪量 table under the 體脂率 card
   moved from HA (醫管局 2-tier × 2-age) to TANITA `身體組成數據參考指標`
   (5-tier × 3-age × gender). Rationale: users log with a Tanita

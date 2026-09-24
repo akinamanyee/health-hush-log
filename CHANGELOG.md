@@ -4,6 +4,16 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-24 17:15 — M26 delivered: drop grade badge on 體脂率 card
+
+- `src/routes/summary.tsx` — `<GradeBadge>` render gated with `card.name !== "體脂率"`. Inline comment explains the rationale and points to ADR 0025 + PRD L51 footnote. `match.value`, `match.recordedAt`, `card.interpretation`, `<BodyFatStandardTable />` — all still render.
+- `PRD.md` L51 — Exception clause added: cards carrying an in-app static self-lookup reference table may omit the visual badge. Grader itself unchanged; only the chip is skipped.
+- `adr/0025-static-reference-vs-ai-advice.md` — new Source change history entry recording the M26 badge omission and the corresponding PRD L51 amendment.
+- Rationale: after M23-M25, the 體脂率 card carries a full TANITA reference matrix with per-cell value overlay directly below the card. Showing a 「無適用參考標準」 chip above those very reference numbers was visually confusing; the AI-generated card interpretation text already carries the「目前無單一適用標準」message in prose.
+- Untouched by design: `gradeEntry` / `interpretCard` (still returns `"無適用參考標準"` in the payload) · `BandGrade` union · `note` field · other cards' badges (BP, BMI, 內臟脂肪, 手握力, 坐地前伸, other Tanita metrics — all render badges as before) · storage · CSV · wire payload · AI grounding · sensitive-word filter · `allowedNumbers`.
+- Verified: type-check clean, build ✓. Change is a single conditional in JSX; downstream data (`match.grade`, `match.tone`) remains populated on the CardInterpretation object for future callers.
+- Full plan: `plan/27-m26-drop-body-fat-badge.md`. Awaiting Cloud Run redeploy.
+
 ## 2026-09-24 16:58 — Living docs sync after M23-M25 deploy
 
 - `ARCHITECTURE.md` — added a new SSOT bullet under 「Single sources of truth in code」 for **static reference tables** (currently the TANITA 標準脂肪量 matrix under 體脂率). Documents the ADR 0025 rule (JSX only, never enters `REFERENCE_LEAFLET`/`TIPS_REFERENCE`), the source-neutral AI pointer requirement, and the M25 value-overlay mechanism (`parseBodyFatValue` → `BodyFatStandardTable` highlights user's cell without grading).

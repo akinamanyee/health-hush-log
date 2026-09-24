@@ -176,4 +176,19 @@ matrix; the AI stops pointing at a source that doesn't match the visible
 table.
 Traces: NORTHSTAR (trustworthy — pointer matches what's shown, reading is easy to locate) · HARD CONSTRAINTS (no gender/age collection, deterministic grading unchanged) · USER JOURNEY 7 · ADR 0025 (numbers-in-JSX-only preserved).
 
+## M26 — 體脂率卡片略去 grade badge: no more self-contradiction
+The 體脂率 summary card stops rendering the 「無適用參考標準」 grade
+badge chip. After M23-M25 the same card carries a full TANITA
+reference matrix directly below, with each cell containing the user's
+recorded value visually highlighted — showing a chip that says 「no
+applicable reference standard」 above those very reference numbers is
+self-contradictory. The grader itself is unchanged (`gradeEntry`
+still refuses to classify body-fat without gender/age, PRD L13/L50
+preserved); only the visual chip is skipped in `summary.tsx`. PRD L51
+gains an Exception clause covering in-app self-lookup reference
+tables.
+Value: users stop seeing 「no reference exists」 two lines above a
+reference table they can look themselves up in.
+Traces: NORTHSTAR (trustworthy — no self-contradiction) · HARD CONSTRAINTS (no gender/age collected, deterministic grading unchanged) · USER JOURNEY 7 · ADR 0025 (Source change history: M26 badge omission + PRD L51 Exception).
+
 Each milestone ends with a live, usable product: M1 is a shell you can look at, M2 a working logbook, and every later step adds magic without breaking what's there.

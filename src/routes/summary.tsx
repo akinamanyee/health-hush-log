@@ -358,7 +358,13 @@ function Summary() {
                             {match && (
                               <>
                                 <span className="text-base text-muted-foreground">{match.value}</span>
-                                <GradeBadge label={match.grade} tone={match.tone} />
+                                {/* Skip grade badge for cards whose card body carries an in-app self-lookup reference table
+                                    (currently 體脂率 with the TANITA matrix). The AI interpretation + the reference table
+                                    together convey the "app does not classify" message; rendering 「無適用參考標準」 next to
+                                    a chart the user can look themselves up in would be self-contradictory. `gradeEntry` is
+                                    unchanged — the app still refuses to programmatically grade the reading; only the visual
+                                    badge is omitted. See ADR 0025 Source change history + PRD L51 footnote. */}
+                                {card.name !== "體脂率" && <GradeBadge label={match.grade} tone={match.tone} />}
                               </>
                             )}
                           </div>
