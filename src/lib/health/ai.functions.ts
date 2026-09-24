@@ -133,7 +133,7 @@ const RichSummaryInput = z.object({
     range: z.string().max(120),
     action: z.string().max(100),
     note: z.string().max(100).optional(),
-  })).max(6),
+  })).max(12),
 });
 
 const RichSummaryOutput = z.object({

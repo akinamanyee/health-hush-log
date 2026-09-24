@@ -4,6 +4,15 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-24 18:45 — M27a delivered: wire-payload card cap 6 → 12 (hotfix)
+
+- `src/lib/health/ai.functions.ts` — `RichSummaryInput.cards.max(6)` → `.max(12)`.
+- `ARCHITECTURE.md` L103 — cap number updated in-place from 6 to 12, with rationale noting the M27 additions.
+- Caught in M27 peer review: after M27 added 3 potential Tanita cards (BMR + 體內水分 + SMI), worst-case card count reached 9 (6 Tanita + BP + grip + sitreach). Zod `.max(6)` rejected the payload → `/summary` generate silently failed with a toast error for any user with a full Tanita reading plus another module recorded. Cap raised to 12 (9 needed + 3 slack) so every card the user recorded reaches the AI without truncation.
+- Untouched: storage, wire shape (per-card fields still `.max(20/80/40/120/100/100`), grounding, sanitize, per-card sanity limits.
+- Verified: `bunx tsc --noEmit` clean, `bun run build` clean.
+- Plan: `plan/29-m27a-card-cap.md`. Ships as part of the same deploy as M27 (both awaiting Cloud Run redeploy).
+
 ## 2026-09-24 18:15 — M27 delivered: TANITA reference completion (BMR + 體內水分 + SMI)
 
 - `src/lib/health/modules.ts` — new field `smi` (`肌少症指數（SMI）`, `kg/m²`, optional, 3-12 range, 0.01 step) in the Tanita fields array; added to the `muscle` screen's per-screen extraction fields.

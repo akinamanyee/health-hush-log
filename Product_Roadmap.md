@@ -208,4 +208,16 @@ tables now get the same trustworthy user experience as body-fat did after
 M25/M26, plus SMI is captured for the first time.
 Traces: NORTHSTAR (trustworthy — reference matches the device) · HARD CONSTRAINTS (no gender/age collection, deterministic grading unchanged, grounded leaflet unchanged) · USER JOURNEY 3-4 (SMI in record flow), 7 (summary) · ADR 0025 (Source change history: M27 extension + wire-sanitize).
 
+## M27a — 摘要 wire payload cap: 6 → 12 (hotfix)
+Server-side Zod schema `RichSummaryInput.cards.max(6)` was rejecting
+payloads with >6 cards, so any user who recorded a full Tanita reading
+(6 cards after M27) plus BP or another module (7-9 cards total) had
+`/summary` generate fail silently with a toast error. Cap raised to 12
+— covers today's worst case (9) plus 3 slack for future additions
+without another cap discussion. ARCHITECTURE.md L103 updated in-place.
+No storage or wire-shape change; only the size limit.
+Value: users with rich data on multiple modules can generate summaries
+again.
+Traces: NORTHSTAR (trustworthy — generate button works) · SUCCESS (blood-pressure demo path unblocked) · caught in M27 peer review, fixed here.
+
 Each milestone ends with a live, usable product: M1 is a shell you can look at, M2 a working logbook, and every later step adds magic without breaking what's there.

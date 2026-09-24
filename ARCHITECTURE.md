@@ -100,7 +100,7 @@ The protection that matters is **what leaves the device**, enforced at the two c
 
 - `extractFromImage` receives a downscaled image and a module id — nothing else.
 - `generateRichSummary` receives the latest readings with their grade labels
-  (`{ name, value, grade, range, action }[]`, capped at 6 cards).
+  (`{ name, value, grade, range, action }[]`, capped at 12 cards — raised from 6 in M27a to accommodate the M27 additions BMR + 體內水分 + 肌少症指數 on top of BMI + 體脂率 + 內臟脂肪 + BP + grip + sitreach; every card the user has recorded reaches the AI without truncation).
   No dates; age and gender are not collected.
 - Both server functions are stateless: no logging of payloads, no persistence, `store: false`.
 - The AI credential is read inside the handler from the server environment; the browser
