@@ -191,4 +191,21 @@ Value: users stop seeing 「no reference exists」 two lines above a
 reference table they can look themselves up in.
 Traces: NORTHSTAR (trustworthy — no self-contradiction) · HARD CONSTRAINTS (no gender/age collected, deterministic grading unchanged) · USER JOURNEY 7 · ADR 0025 (Source change history: M26 badge omission + PRD L51 Exception).
 
+## M27 — TANITA 參考完整化: BMR + 體內水分 + SMI
+The self-lookup card pattern extends from 1 to 4 cards. 基礎代謝率 (BMR),
+體內水分, and 肌少症指數 (SMI, 骨骼肌指數) each gain in-app TANITA static
+reference tables with M25-style value overlay. SMI is a new Tanita field
+extractable from the muscle-screen photo. Wire payload to the AI is
+sanitized for all four self-lookup cards ("請自行對照下方對照表" replaces
+"無適用參考標準" for these cards' `grade` field), reducing AI prose echo
+of the negative label the summary UI already hides. `CARDS_WITH_SELF_LOOKUP`
+Set in `summary.tsx` drives both the M26 badge-omission gate and the
+wire-sanitize. PRD L51 Exception clause updated to name all four cards.
+No new AI grounding numbers, no gender/age collection, no storage-schema
+version bump (SMI joins as nullable field; old records show blank in CSV).
+Value: the three remaining TANITA reference metrics that had no self-lookup
+tables now get the same trustworthy user experience as body-fat did after
+M25/M26, plus SMI is captured for the first time.
+Traces: NORTHSTAR (trustworthy — reference matches the device) · HARD CONSTRAINTS (no gender/age collection, deterministic grading unchanged, grounded leaflet unchanged) · USER JOURNEY 3-4 (SMI in record flow), 7 (summary) · ADR 0025 (Source change history: M27 extension + wire-sanitize).
+
 Each milestone ends with a live, usable product: M1 is a shell you can look at, M2 a working logbook, and every later step adds magic without breaking what's there.

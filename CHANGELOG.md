@@ -4,6 +4,19 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-24 18:15 — M27 delivered: TANITA reference completion (BMR + 體內水分 + SMI)
+
+- `src/lib/health/modules.ts` — new field `smi` (`肌少症指數（SMI）`, `kg/m²`, optional, 3-12 range, 0.01 step) in the Tanita fields array; added to the `muscle` screen's per-screen extraction fields.
+- `src/lib/health/ai.functions.ts` — `TANITA_SCHEMA` gains `smi: z.number().nullable()`. Added wire-payload sanitize: `SELF_LOOKUP_CARD_NAMES` set mirrors `summary.tsx`'s `CARDS_WITH_SELF_LOOKUP`; for cards in the set, `cardsText` transforms `grade` → `"請自行對照下方對照表"` and drops `note`. Preserves local `CardInterpretation` (SSOT); only the transient wire form changes. Reduces AI-prose echo of `「無適用參考標準」` from the 4 self-lookup cards.
+- `src/lib/health/grade.ts` — three new card producers in the Tanita case, all following the body-fat shape (grade `"無適用參考標準"`, action `"請對照下方 TANITA 參考表自行對照"`): 基礎代謝率 (value `${bmrKcal.toLocaleString()} kcal`), 體內水分 (value `${bodyWaterPct}%`), 肌少症指數 (value `${smi} kg/m²`, only when `smi != null`). Each only produced when the underlying value exists.
+- `src/routes/summary.tsx` — new `CARDS_WITH_SELF_LOOKUP` Set with 4 card names drives both the M26 badge-omission gate and (mirrored in `ai.functions.ts`) the wire-sanitize. `matchesCell` generalized to accept decimals and any trailing unit text (regex no longer anchors on `%$`). Added components `BmrStandardTable` (per-cell delta rather than tier overlay — BMR is TANITA point values, not ranges), `WaterStandardTable` (男/女 2-tier with ★ overlay), `SmiStandardTable` (男/女 2-tier with ★ overlay). Consolidated 4 numeric parsers to shared `parseLeadingNumber` (aliased as `parseBodyFatValue`/`parseWaterPercentValue`/`parseSmiValue`/`parseKcalValue`; also handles thousands separator for BMR kcal values). Four new render gates: one per self-lookup card. Old M25 body-fat behaviour preserved verbatim.
+- `src/lib/health/charts.ts` — leaflet 【身體水分參考】 and 【基礎代謝率參考】 sentences append a source-neutral pointer to their new tables. Added new 【肌少症指數參考】 block describing SMI at leaflet level. No specific numbers enter leaflet (ADR 0025 preserved).
+- `PRD.md` L51 Exception clause updated: list now names 體脂率, 基礎代謝率, 體內水分, 肌少症指數 (was: 「currently only 體脂率」).
+- `adr/0025-static-reference-vs-ai-advice.md` — two new Source change history entries: extension of self-lookup pattern to 4 cards + M27 wire-payload sanitize. ADR 0025 principle statement unchanged.
+- Storage: no schema version bump. `smi` field is nullable; old records read `values["smi"]` as undefined, interpretCard skips the card, CSV shows blank in the new column. Zero migration.
+- Verified: `bunx tsc --noEmit` clean, `bun run build` clean. TANITA numbers used are the widely-published defaults; user should verify against their specific TANITA sheet post-deploy.
+- Full plan: `plan/28-m27-tanita-reference-completion.md`. Awaiting Cloud Run redeploy.
+
 ## 2026-09-24 17:51 — Living-docs sync after M26 deploy + post-deploy investigation trail
 
 - `ARCHITECTURE.md` — static-reference-tables SSOT bullet extended: notes that after M26 the summary card omits the grade-badge chip for cards carrying such tables (the CardInterpretation payload still carries `"無適用參考標準"`; only the visual chip is skipped). Points at PRD L51 Exception.

@@ -80,6 +80,29 @@ Concretely:
 
 ## Source change history
 
+- **2026-09-24 (M27)** — The self-lookup card pattern is extended from
+  1 to 4 cards: 基礎代謝率 (BMR, TANITA age×gender kcal reference),
+  體內水分 (TANITA gendered % threshold), and 肌少症指數 (SMI, TANITA
+  男 ≥7.0 / 女 ≥5.7 kg/m² threshold) all gain in-app static self-lookup
+  reference tables with the M25 value-overlay pattern (BMR uses per-cell
+  delta rather than tier ★ since TANITA publishes point values, not
+  ranges). SMI joins the Tanita record flow as a new optional field on
+  the muscle screen (extractable from photo, manually enterable). The
+  `CARDS_WITH_SELF_LOOKUP` Set in `summary.tsx` now names all four card
+  names, driving both the M26 badge-omission gate and the M27
+  wire-payload sanitize (below). PRD L51 Exception clause updated to
+  list all four. No specific TANITA numbers enter `REFERENCE_LEAFLET`
+  (Option 4 in this ADR still stands).
+- **2026-09-24 (M27) — wire-payload sanitize.** For cards in
+  `SELF_LOOKUP_CARD_NAMES` (mirrors the client-side Set), the AI wire
+  payload's `grade` field is transformed from `"無適用參考標準"` to
+  `"請自行對照下方對照表"` and the `note` field is cleared before
+  `cardsText` is assembled in `generateRichSummary`. Local
+  `CardInterpretation` payload is unchanged (SSOT preserved) — only the
+  transient wire representation is sanitized. Reason: with 4 self-lookup
+  cards, `「無適用參考標準」` appearing 4× in the AI prompt made prose
+  echoes likely, undermining the M26 badge-omission goal on the summary.
+
 - **2026-09-24 (M26)** — The 體脂率 summary card no longer renders the
   「無適用參考標準」 grade badge chip. Rationale: after M23-M25 introduced
   the in-app TANITA reference matrix with per-cell value overlay directly

@@ -72,32 +72,56 @@ const BODY_FAT_FEMALE: BodyFatMatrix = {
   "肥胖":       { "18-39歲": "≥40%",  "40-59歲": "≥41%",  "≥60歲": "≥42%" },
 };
 
-// Range-string predicates. Cell display strings look like "<10%", "10-20%", "≥28%".
-// Boundary rule: integer upper bound belongs to the lower tier (向下取), matching
-// TANITA convention — a reading of exactly 20% highlights "10-20%" not "21-23%".
-// Non-integer readings that fall in a gap between tiers highlight neither; fails
-// safe (no highlight rather than wrong highlight).
+// Cards whose summary body carries an in-app TANITA static self-lookup reference
+// table. Per PRD L51 Exception (M26) the grade badge chip is omitted for these
+// cards, since the reference table below the card + the AI interpretation
+// together convey the "app does not classify" message; a badge saying
+// 「無適用參考標準」 next to a reference table the user can look themselves up in
+// would be self-contradictory. The wire payload to the AI (`ai.functions.ts`)
+// mirrors this Set to sanitize the grade string sent to Gemini for these cards.
+const CARDS_WITH_SELF_LOOKUP = new Set([
+  "體脂率",
+  "基礎代謝率",
+  "體內水分",
+  "肌少症指數",
+]);
+
+// Range-string predicates. Cell display strings look like "<10%", "10-20%", "≥28%",
+// "<55%", "≥55%", "<7.0 kg/m²", "≥7.0 kg/m²". Boundary rule: numeric upper bound
+// belongs to the lower tier (向下取), matching TANITA convention — a reading of
+// exactly 20% highlights "10-20%" not "21-23%". Non-numeric readings in a gap
+// between tiers highlight neither; fails safe. Trailing unit text is ignored by
+// only anchoring the numeric prefix.
 function matchesCell(value: number, cellDisplay: string): boolean {
-  const lt = /^<(\d+)%$/.exec(cellDisplay);
-  if (lt?.[1]) return value < parseInt(lt[1], 10);
-  const ge = /^≥(\d+)%$/.exec(cellDisplay);
-  if (ge?.[1]) return value >= parseInt(ge[1], 10);
-  const range = /^(\d+)-(\d+)%$/.exec(cellDisplay);
+  const lt = /^<(\d+(?:\.\d+)?)/.exec(cellDisplay);
+  if (lt?.[1]) return value < parseFloat(lt[1]);
+  const ge = /^≥(\d+(?:\.\d+)?)/.exec(cellDisplay);
+  if (ge?.[1]) return value >= parseFloat(ge[1]);
+  const range = /^(\d+(?:\.\d+)?)-(\d+(?:\.\d+)?)/.exec(cellDisplay);
   if (range?.[1] && range[2]) {
-    const lo = parseInt(range[1], 10);
-    const hi = parseInt(range[2], 10);
+    const lo = parseFloat(range[1]);
+    const hi = parseFloat(range[2]);
     return value >= lo && value <= hi;
   }
   return false;
 }
 
-function parseBodyFatValue(display: string | undefined): number | undefined {
+// Extract the first numeric token from a display string (e.g. "25%", "1,520 kcal",
+// "55%", "7.2 kg/m²"). Handles thousands separators for BMR kcal values.
+function parseLeadingNumber(display: string | undefined): number | undefined {
   if (!display) return undefined;
-  const m = /(\d+(?:\.\d+)?)/.exec(display);
+  const cleaned = display.replace(/,/g, "");
+  const m = /(\d+(?:\.\d+)?)/.exec(cleaned);
   if (!m?.[1]) return undefined;
   const n = parseFloat(m[1]);
   return Number.isFinite(n) ? n : undefined;
 }
+
+// Alias kept for readability at call sites; delegates to the shared parser.
+const parseBodyFatValue = parseLeadingNumber;
+const parseWaterPercentValue = parseLeadingNumber;
+const parseSmiValue = parseLeadingNumber;
+const parseKcalValue = parseLeadingNumber;
 
 function BodyFatMatrixTable({
   title,
@@ -159,6 +183,236 @@ function BodyFatStandardTable({ userValue }: { userValue: number | undefined }) 
       )}
       <p className="mt-3 text-xs text-muted-foreground">
         資料來源：TANITA〈身體組成數據參考指標〉。體脂率標準因性別及年齡而異，本應用程式因不收集性別及年齡而不進行分級，用家可對照上表自行參考。
+      </p>
+    </details>
+  );
+}
+
+// ── BMR reference: TANITA publishes single kcal reference values by age × gender,
+// not tier ranges. So the table shows the reference number per cell, and (when the
+// user has a reading) each cell renders a delta line 「你的 X kcal 較此參考值 +Y / -Y」.
+// The user picks which age×gender cell applies. No tier overlay — this is a
+// point-value reference, not a tier lookup. See ADR 0025 (M27 extension).
+const BMR_AGE_BUCKETS = ["18-29歲", "30-49歲", "50-69歲", "≥70歲"] as const;
+type BmrReference = Record<(typeof BMR_AGE_BUCKETS)[number], number>;
+
+const BMR_MALE: BmrReference = {
+  "18-29歲": 1550,
+  "30-49歲": 1500,
+  "50-69歲": 1350,
+  "≥70歲": 1220,
+};
+const BMR_FEMALE: BmrReference = {
+  "18-29歲": 1210,
+  "30-49歲": 1170,
+  "50-69歲": 1110,
+  "≥70歲": 1010,
+};
+
+function BmrReferenceTable({
+  title,
+  data,
+  userValue,
+}: {
+  title: string;
+  data: BmrReference;
+  userValue: number | undefined;
+}) {
+  return (
+    <div className="mt-3 overflow-x-auto">
+      <table className="w-full border-collapse text-center">
+        <caption className="mb-2 text-xs text-muted-foreground">{title}</caption>
+        <thead>
+          <tr className="border-b border-border">
+            {BMR_AGE_BUCKETS.map((age) => (
+              <th key={age} className="p-2 font-medium text-foreground">{age}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          <tr className="border-b border-border/50 last:border-b-0">
+            {BMR_AGE_BUCKETS.map((age) => (
+              <td key={age} className="p-2 text-muted-foreground">
+                <div className="font-medium text-foreground">{data[age].toLocaleString()} kcal</div>
+                {userValue !== undefined && (
+                  <div className="mt-1 text-xs">
+                    你的{userValue > data[age] ? `+${Math.round(userValue - data[age])}` : Math.round(userValue - data[age])}
+                  </div>
+                )}
+              </td>
+            ))}
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function BmrStandardTable({ userValue }: { userValue: number | undefined }) {
+  return (
+    <details className="mt-3 rounded-xl border border-border bg-muted/30 p-3 text-sm">
+      <summary className="cursor-pointer font-medium text-foreground">
+        查看基礎代謝率參考表（TANITA）
+      </summary>
+      <BmrReferenceTable title="男性 基礎代謝率參考值" data={BMR_MALE} userValue={userValue} />
+      <BmrReferenceTable title="女性 基礎代謝率參考值" data={BMR_FEMALE} userValue={userValue} />
+      {userValue !== undefined && (
+        <p className="mt-3 text-xs text-foreground">
+          你的 {userValue.toLocaleString()} kcal 與參考值的差距顯示於各欄下方。請找你性別及年齡對應的欄自行對照。
+        </p>
+      )}
+      <p className="mt-3 text-xs text-muted-foreground">
+        資料來源：TANITA〈身體組成數據參考指標〉。基礎代謝率因性別及年齡而異，本應用程式因不收集性別及年齡而不進行分級，用家可對照上表自行參考。
+      </p>
+    </details>
+  );
+}
+
+// ── 體內水分 reference: TANITA gendered 2-tier per PRD L51 Exception (M27).
+// Reuses matchesCell for the ★ overlay because cell displays are `≥55%` / `<55%`.
+const WATER_TIERS = ["適當", "偏低"] as const;
+type WaterMatrix = Record<(typeof WATER_TIERS)[number], string>;
+
+const WATER_MALE: WaterMatrix = {
+  "適當": "≥55%",
+  "偏低": "<55%",
+};
+const WATER_FEMALE: WaterMatrix = {
+  "適當": "≥50%",
+  "偏低": "<50%",
+};
+
+function WaterMatrixTable({
+  title,
+  data,
+  userValue,
+}: {
+  title: string;
+  data: WaterMatrix;
+  userValue: number | undefined;
+}) {
+  return (
+    <div className="mt-3 overflow-x-auto">
+      <table className="w-full border-collapse text-center">
+        <caption className="mb-2 text-xs text-muted-foreground">{title}</caption>
+        <thead>
+          <tr className="border-b border-border">
+            {WATER_TIERS.map((tier) => (
+              <th key={tier} className="p-2 font-medium text-foreground">{tier}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          <tr className="border-b border-border/50 last:border-b-0">
+            {WATER_TIERS.map((tier) => {
+              const cell = data[tier];
+              const hit = userValue !== undefined && matchesCell(userValue, cell);
+              return (
+                <td
+                  key={tier}
+                  className={hit ? "p-2 bg-primary/10 font-semibold text-foreground" : "p-2 text-muted-foreground"}
+                >
+                  {cell}{hit ? " ★" : ""}
+                </td>
+              );
+            })}
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function WaterStandardTable({ userValue }: { userValue: number | undefined }) {
+  return (
+    <details className="mt-3 rounded-xl border border-border bg-muted/30 p-3 text-sm">
+      <summary className="cursor-pointer font-medium text-foreground">
+        查看體內水分參考表（TANITA）
+      </summary>
+      <WaterMatrixTable title="男性 體內水分比例" data={WATER_MALE} userValue={userValue} />
+      <WaterMatrixTable title="女性 體內水分比例" data={WATER_FEMALE} userValue={userValue} />
+      {userValue !== undefined && (
+        <p className="mt-3 text-xs text-foreground">
+          ★ = 你的 {userValue}% 落於此區間。請於男性／女性表中，找你性別對應的欄，欄中★格即為你的參考類別。
+        </p>
+      )}
+      <p className="mt-3 text-xs text-muted-foreground">
+        資料來源：TANITA〈身體組成數據參考指標〉。體內水分適當比例因性別而異，本應用程式因不收集性別而不進行分級，用家可對照上表自行參考。
+      </p>
+    </details>
+  );
+}
+
+// ── SMI reference: TANITA 2-tier per gender (男 ≥7.0 kg/m² 正常 / <7.0 風險；
+// 女 ≥5.7 正常 / <5.7 風險). Reuses matchesCell (now decimal-aware).
+const SMI_TIERS = ["正常", "肌少症風險"] as const;
+type SmiMatrix = Record<(typeof SMI_TIERS)[number], string>;
+
+const SMI_MALE: SmiMatrix = {
+  "正常": "≥7.0 kg/m²",
+  "肌少症風險": "<7.0 kg/m²",
+};
+const SMI_FEMALE: SmiMatrix = {
+  "正常": "≥5.7 kg/m²",
+  "肌少症風險": "<5.7 kg/m²",
+};
+
+function SmiMatrixTable({
+  title,
+  data,
+  userValue,
+}: {
+  title: string;
+  data: SmiMatrix;
+  userValue: number | undefined;
+}) {
+  return (
+    <div className="mt-3 overflow-x-auto">
+      <table className="w-full border-collapse text-center">
+        <caption className="mb-2 text-xs text-muted-foreground">{title}</caption>
+        <thead>
+          <tr className="border-b border-border">
+            {SMI_TIERS.map((tier) => (
+              <th key={tier} className="p-2 font-medium text-foreground">{tier}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          <tr className="border-b border-border/50 last:border-b-0">
+            {SMI_TIERS.map((tier) => {
+              const cell = data[tier];
+              const hit = userValue !== undefined && matchesCell(userValue, cell);
+              return (
+                <td
+                  key={tier}
+                  className={hit ? "p-2 bg-primary/10 font-semibold text-foreground" : "p-2 text-muted-foreground"}
+                >
+                  {cell}{hit ? " ★" : ""}
+                </td>
+              );
+            })}
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function SmiStandardTable({ userValue }: { userValue: number | undefined }) {
+  return (
+    <details className="mt-3 rounded-xl border border-border bg-muted/30 p-3 text-sm">
+      <summary className="cursor-pointer font-medium text-foreground">
+        查看肌少症指數（SMI）參考表（TANITA）
+      </summary>
+      <SmiMatrixTable title="男性 肌少症指數" data={SMI_MALE} userValue={userValue} />
+      <SmiMatrixTable title="女性 肌少症指數" data={SMI_FEMALE} userValue={userValue} />
+      {userValue !== undefined && (
+        <p className="mt-3 text-xs text-foreground">
+          ★ = 你的 {userValue} kg/m² 落於此區間。請於男性／女性表中，找你性別對應的欄，欄中★格即為你的參考類別。
+        </p>
+      )}
+      <p className="mt-3 text-xs text-muted-foreground">
+        資料來源：TANITA〈身體組成數據參考指標〉。肌少症指數閾值因性別而異，本應用程式因不收集性別而不進行分級，用家可對照上表自行參考。
       </p>
     </details>
   );
@@ -358,13 +612,13 @@ function Summary() {
                             {match && (
                               <>
                                 <span className="text-base text-muted-foreground">{match.value}</span>
-                                {/* Skip grade badge for cards whose card body carries an in-app self-lookup reference table
-                                    (currently 體脂率 with the TANITA matrix). The AI interpretation + the reference table
-                                    together convey the "app does not classify" message; rendering 「無適用參考標準」 next to
-                                    a chart the user can look themselves up in would be self-contradictory. `gradeEntry` is
-                                    unchanged — the app still refuses to programmatically grade the reading; only the visual
-                                    badge is omitted. See ADR 0025 Source change history + PRD L51 footnote. */}
-                                {card.name !== "體脂率" && <GradeBadge label={match.grade} tone={match.tone} />}
+                                {/* Skip grade badge for cards whose card body carries an in-app self-lookup reference
+                                    table. The AI interpretation + the reference table together convey the "app does not
+                                    classify" message; rendering 「無適用參考標準」 next to a chart the user can look
+                                    themselves up in would be self-contradictory. `gradeEntry` is unchanged — the app
+                                    still refuses to programmatically grade the reading; only the visual badge is omitted.
+                                    See CARDS_WITH_SELF_LOOKUP definition + ADR 0025 Source change history + PRD L51. */}
+                                {!CARDS_WITH_SELF_LOOKUP.has(card.name) && <GradeBadge label={match.grade} tone={match.tone} />}
                               </>
                             )}
                           </div>
@@ -378,6 +632,15 @@ function Summary() {
                           </p>
                           {card.name === "體脂率" && (
                             <BodyFatStandardTable userValue={parseBodyFatValue(match?.value)} />
+                          )}
+                          {card.name === "基礎代謝率" && (
+                            <BmrStandardTable userValue={parseKcalValue(match?.value)} />
+                          )}
+                          {card.name === "體內水分" && (
+                            <WaterStandardTable userValue={parseWaterPercentValue(match?.value)} />
+                          )}
+                          {card.name === "肌少症指數" && (
+                            <SmiStandardTable userValue={parseSmiValue(match?.value)} />
                           )}
                         </div>
                       </div>

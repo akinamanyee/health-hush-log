@@ -70,10 +70,11 @@ export const MODULES: ModuleDef[] = [
       { key: "muscleArmL", label: "左臂肌肉量", unit: "公斤", min: 0.1, max: 15, step: "0.1", optional: true, group: "部位肌肉量" },
       { key: "muscleLegR", label: "右腿肌肉量", unit: "公斤", min: 0.5, max: 30, step: "0.1", optional: true, group: "部位肌肉量" },
       { key: "muscleLegL", label: "左腿肌肉量", unit: "公斤", min: 0.5, max: 30, step: "0.1", optional: true, group: "部位肌肉量" },
+      { key: "smi", label: "肌少症指數（SMI）", unit: "kg/m²", min: 3, max: 12, step: "0.01", optional: true, group: "肌肉" },
     ],
     screens: [
       { id: "bodyFat", label: "體脂率", fields: ["bodyFat", "fatMass", "weight", "fatTrunk", "fatArmR", "fatArmL", "fatLegR", "fatLegL"] },
-      { id: "muscle", label: "肌肉量", fields: ["muscleMass", "muscleRatio", "weight", "muscleTrunk", "muscleArmR", "muscleArmL", "muscleLegR", "muscleLegL"] },
+      { id: "muscle", label: "肌肉量", fields: ["muscleMass", "muscleRatio", "smi", "weight", "muscleTrunk", "muscleArmR", "muscleArmL", "muscleLegR", "muscleLegL"] },
       { id: "water", label: "身體水分", fields: ["bodyWaterPct", "bodyWaterKg", "weight"] },
       { id: "visceral", label: "內臟脂肪", fields: ["visceralFat", "weight"] },
       { id: "bmr", label: "基礎代謝率（BMR）", fields: ["bmrKcal", "bmrKj", "weight"] },

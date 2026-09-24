@@ -190,6 +190,42 @@ function interpretCardCore(
           action: g?.label === "正常" ? "繼續維持健康生活習慣" : "建議注意飲食及增加運動，減少腰腹脂肪",
         });
       }
+      const bmrKcal = values["bmrKcal"];
+      if (bmrKcal != null) {
+        cards.push({
+          name: "基礎代謝率",
+          value: `${bmrKcal.toLocaleString()} kcal`,
+          grade: "無適用參考標準",
+          tone: "neutral",
+          range: "需要年齡及性別才能對照標準",
+          action: "請對照下方 TANITA 參考表自行對照",
+          note: "無適用參考標準（需要年齡及性別）",
+        });
+      }
+      const bodyWaterPct = values["bodyWaterPct"];
+      if (bodyWaterPct != null) {
+        cards.push({
+          name: "體內水分",
+          value: `${bodyWaterPct}%`,
+          grade: "無適用參考標準",
+          tone: "neutral",
+          range: "需要性別才能對照標準",
+          action: "請對照下方 TANITA 參考表自行對照",
+          note: "無適用參考標準（需要性別）",
+        });
+      }
+      const smi = values["smi"];
+      if (smi != null) {
+        cards.push({
+          name: "肌少症指數",
+          value: `${smi} kg/m²`,
+          grade: "無適用參考標準",
+          tone: "neutral",
+          range: "需要性別才能對照標準",
+          action: "請對照下方 TANITA 參考表自行對照",
+          note: "無適用參考標準（需要性別）",
+        });
+      }
       return cards;
     }
     case "grip": {

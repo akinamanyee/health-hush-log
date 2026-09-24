@@ -33,6 +33,7 @@ const TANITA_SCHEMA = z.object({
   muscleArmL: z.number().nullable(),
   muscleLegR: z.number().nullable(),
   muscleLegL: z.number().nullable(),
+  smi: z.number().nullable(),
 });
 
 const BP_SCHEMA = z.object({
@@ -231,8 +232,20 @@ export const generateRichSummary = createServerFn({ method: "POST" })
       .map((t) => `【${t.topic}】\n${t.tips}`)
       .join("\n\n");
 
+    // Wire-payload sanitize for self-lookup cards (M27): cards whose summary body
+    // carries an in-app TANITA reference table for user self-classification. Local
+    // CardInterpretation still carries `"無適用參考標準"` (SSOT preserved); only the
+    // transient wire form sent to Gemini is transformed to a source-neutral phrase
+    // so the AI's paraphrase doesn't echo the negative label the summary UI hides.
+    // See ADR 0025 Source change history (M27) + PRD L51 Exception.
+    const SELF_LOOKUP_CARD_NAMES = new Set(["體脂率", "基礎代謝率", "體內水分", "肌少症指數"]);
     const cardsText = data.cards
-      .map((c) => `${c.name}：${c.value}（${c.grade}）\n範圍：${c.range}\n建議：${c.action}${c.note ? `\n備註：${c.note}` : ""}`)
+      .map((c) => {
+        const isSelfLookup = SELF_LOOKUP_CARD_NAMES.has(c.name);
+        const grade = isSelfLookup ? "請自行對照下方對照表" : c.grade;
+        const notePart = !isSelfLookup && c.note ? `\n備註：${c.note}` : "";
+        return `${c.name}：${c.value}（${grade}）\n範圍：${c.range}\n建議：${c.action}${notePart}`;
+      })
       .join("\n\n");
 
     const allowedNumbers = new Set([
