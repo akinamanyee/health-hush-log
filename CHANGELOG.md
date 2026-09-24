@@ -4,6 +4,13 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-24 15:15 — Deploy M23 + M24 + M25 to Cloud Run (rev 26)
+
+- Deployed `cloud-run-prep` HEAD (commit `032723a`) to Cloud Run service `heartcaring-app`, region `asia-east1`, project `gen-lang-client-0014480564`. New active revision: `heartcaring-app-00026-tgg` serving 100% of traffic on heartcaring.fit.
+- Ships live: M23 (體脂率 grounded HA source + static reference table under card), M24 (static table source swapped from HA to TANITA — 5-tier × 3-age × gender matrix), M25 (user-value overlay on the TANITA chart + AI pointer strings neutralized so leaflet/tip no longer name a specific agency for the on-screen table).
+- Three milestones shipped in one deploy after Cloud Shell auth trap: the first deploy attempt (rev 00025-sjv) went out from a stale local checkout (HEAD at `ac92b7b`, M22 era) because `git pull` failed silently — Cloud Shell's cached HTTPS credentials were gone. Root cause: session-fresh Cloud Shell no longer had `gh auth` state. Fix: `gh auth login` via device flow + `gh auth setup-git`, then `git pull --ff-only` to fast-forward from `ac92b7b` → `032723a`, then re-deploy. Rev 00025 was M22-era; rev 00026 is the real M23+M24+M25.
+- Verified: `git rev-parse HEAD` = `032723a...` matches source-of-truth commit locally in Cloud Shell.
+
 ## 2026-09-24 14:00 — M25 delivered: value overlay on TANITA chart + AI pointer fix
 
 - `src/routes/summary.tsx` — `BodyFatMatrixTable` and `BodyFatStandardTable` now take a `userValue` prop. When the user has a recorded 體脂率, each of the 30 cells (across both matrix tables) whose range contains that value renders with `bg-primary/10 font-semibold text-foreground` + trailing ★. A legend line reads 「★ = 你的 X% 落於此區間。請於男性／女性表中，找你性別及年齡對應的欄，欄中★格即為你的參考分級。」 Added helpers `matchesCell` (parses `<N%` / `N-M%` / `≥N%` display strings; integer-inclusive bounds; 向下取 boundary rule) and `parseBodyFatValue` (extracts the leading number from the card's display string). Call site passes `parseBodyFatValue(match?.value)` — undefined when no reading exists, in which case the table renders in M24-style with no highlights and no legend.
