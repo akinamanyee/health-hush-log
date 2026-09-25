@@ -32,6 +32,24 @@ bun run dev
 
 The AI features need a server-side credential in the environment; the browser never sees it.
 
+## Deploying to Cloud Run (self-hosting)
+
+The repo includes a `Dockerfile` that builds the app as a plain Node server
+(`NITRO_PRESET=node-server`, output in `.output/`). The default Lovable build is
+untouched — it still targets Lovable hosting.
+
+```sh
+gcloud run deploy health-logbook --source . --region asia-east1 --allow-unauthenticated
+```
+
+Cloud Run injects `PORT` automatically; the server honours it. Set the
+`LOVABLE_API_KEY` env var (Cloud Run → Edit & deploy → Variables & secrets) if you
+want the photo-reading and AI summary features to work there — everything else is
+local-first and runs without it.
+
+Code flow: edit in Lovable (or anywhere) → push to GitHub `main` → deploy to
+Cloud Run. Never force-push or rebase `main`; it breaks the Lovable sync.
+
 ## Built with
 
 TanStack Start · React · TypeScript · Tailwind CSS · AI SDK

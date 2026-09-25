@@ -12,4 +12,8 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  // Default stays cloudflare-module (Lovable hosting). For self-hosting on
+  // Cloud Run / plain Node, build with NITRO_PRESET=node-server so the output
+  // is a Node listener (dist/server/index.mjs) instead of a Workers module.
+  nitro: process.env["NITRO_PRESET"] ? { preset: process.env["NITRO_PRESET"] } : undefined,
 });
