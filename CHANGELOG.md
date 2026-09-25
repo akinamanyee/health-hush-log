@@ -4,6 +4,13 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-25 13:56 — Cloud Run self-hosting path added
+- Added a root `Dockerfile` (multi-stage: bun install → `NITRO_PRESET=node-server bun run build` → `node .output/server/index.mjs`) and `.dockerignore` so the repo can deploy to Google Cloud Run directly from GitHub.
+- `vite.config.ts` now honours a `NITRO_PRESET` env var: default builds still target `cloudflare-module` (Lovable hosting untouched); outside the Lovable sandbox, `NITRO_PRESET=node-server` produces a plain Node listener.
+- Verified the node-server build serves `/` and `/logbook` (HTTP 200, real content) under plain Node.
+- README gained a "Deploying to Cloud Run" section: deploy command, `PORT` handling, `LOVABLE_API_KEY` env var note, and the no-force-push rule for the Lovable↔GitHub sync.
+- No app feature, UI, or data-logic changes.
+
 ## 2026-09-20 23:03 — ARCHITECTURE.md reconciled with PRs #22–24
 - Updated "Last reconciled" timestamp to 2026-09-20 23:03 HKT.
 - Documented the optional `infoText` field on `ModuleDef` in the Modules table.
