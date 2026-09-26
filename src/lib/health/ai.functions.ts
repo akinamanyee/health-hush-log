@@ -84,6 +84,7 @@ export const extractFromImage = createServerFn({ method: "POST" })
       ? `這是身體組成分析儀「${screenMeta.label}」畫面的照片。`
       : "這是一張健康儀器屏幕的照片。";
 
+    const extractT0 = Date.now();
     let result;
     try {
       result = await generateText({
@@ -101,8 +102,9 @@ export const extractFromImage = createServerFn({ method: "POST" })
           },
         ],
       });
+      console.log(`[extractFromImage] ai ok ${Date.now() - extractT0}ms module=${data.module} screen=${data.screen ?? "all"}`);
     } catch (err) {
-      console.error("[extractFromImage] AI call failed:", err);
+      console.error(`[extractFromImage] ai failed ${Date.now() - extractT0}ms:`, err);
       throw new Error("圖片讀取暫時未能連線，請稍後再試或手動輸入。");
     }
 
@@ -217,6 +219,8 @@ function richGroundingFailure(
 export const generateRichSummary = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => RichSummaryInput.parse(input))
   .handler(async ({ data }) => {
+    const handlerT0 = Date.now();
+    try {
     const { createGateway, serverCapOk } = await import("@/lib/ai-gateway.server");
     const req = getRequest();
     const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "anon";
@@ -273,14 +277,16 @@ ${tipsText}
 {"cards":[{"name":"項目名稱","interpretation":"解讀文字"}],"tips":[{"tip":"建議內容","topic":"主題名稱"}],"disclaimer":"提醒文字，須包含「醫生」二字"}`;
 
     const run = async (prompt: string, phase: string) => {
+      const t0 = Date.now();
       try {
         const result = await generateText({
           model: gateway("gemini-3.6-flash"),
           messages: [{ role: "user", content: prompt }],
         });
+        console.log(`[generateRichSummary] ${phase} ok ${Date.now() - t0}ms`);
         return result.text.trim();
       } catch (err) {
-        console.error(`[generateRichSummary] ${phase} failed:`, err);
+        console.error(`[generateRichSummary] ${phase} failed ${Date.now() - t0}ms:`, err);
         throw new Error(`摘要生成暫時未能連線（${phase}）。請稍後再試。`);
       }
     };
@@ -333,6 +339,11 @@ ${tipsText}
     );
 
     const result: RichSummaryResult = { ...output, agencies };
+    console.log(`[generateRichSummary] total ${Date.now() - handlerT0}ms cards=${data.cards.length}`);
     return { ok: true as const, result };
+    } catch (err) {
+      console.log(`[generateRichSummary] total ${Date.now() - handlerT0}ms cards=${data.cards.length} (errored)`);
+      throw err;
+    }
   });
 

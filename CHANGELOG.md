@@ -4,6 +4,18 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-27 00:55 — M34 delivered: summary handler wall-clock diagnostics
+
+- `src/lib/health/ai.functions.ts` — timing wrappers added to both AI handlers.
+  - `generateRichSummary`: handler-level `handlerT0 = Date.now()` bookend; try/finally-shaped structure logs `[generateRichSummary] total <ms> cards=<N>` on success, `[generateRichSummary] total <ms> cards=<N> (errored)` on throw. Inner `run(prompt, phase)` helper (M33 wrapper) gains `t0 = Date.now()`: success path logs `[generateRichSummary] <phase> ok <ms>`; the M33 `console.error` gets a `failed <ms>:` prefix. One line per fired phase (初次 always; 格式重試 and 合規重試 conditionally per the existing retry cascade).
+  - `extractFromImage`: same treatment on the single `generateText(...)` call. Success logs `[extractFromImage] ai ok <ms> module=<mod> screen=<id|all>`; failure logs `[extractFromImage] ai failed <ms>:` prefix on the M33 `console.error`.
+- Rationale: M33 landed the try/catch so a server-side throw would surface as a 繁中 toast, but the M33-live test showed something more surprising — three consecutive POST 200 lines in Cloud Run logs against one user's live 「Load failed」 report. Server returned OK every time; the connection died mid-flight (mobile carrier / intermediate proxy dropped TCP before the response body finished arriving; Cloud Run happily wrote 200 into a socket the client had already closed). We can't fix latency without measuring it, and we can't measure it without the handler telling us. M34 makes the handler tell us.
+- Design: `console.log` for success, `console.error` for failure (M33 convention preserved). `Date.now()` integer ms — sufficient granularity for 15–60s spans, no `perf_hooks` import. Log shape: handler name, phase, ms, and (for summary) card count / (for extract) module + screen. **No prompt, no card value, no AI response text ever logged** — PRD L47/L48/L50 preserved.
+- Untouched: `REFERENCE_LEAFLET`, `TIPS_REFERENCE`, `allowedNumbers`, `SENSITIVE_LABEL_PATTERN`, `TANITA_SCHEMA` (M32), `RichSummaryInput`, `interpretCard`, `SELF_LOOKUP_CARD_NAMES`, `CARDS_WITH_SELF_LOOKUP`, grounding failure logic, JSON-parse fallback, retry cascade, wire payload, `summary.tsx` client, storage envelope v1, all other modules and pages. Zero user-visible change — happy path identical; failure toasts still read the M33 繁中 messages.
+- PRD alignment: L13/L47 anonymous ✓, L48 local-only ✓, L50 wire payload byte-identical ✓, L52 failed-generation real error preserved ✓, L55 繁中 (user-facing text unchanged) ✓.
+- Verified: `bunx tsc --noEmit` clean, `bun run build` clean.
+- Full plan: `plan/37-m34-summary-latency-diagnosis.md`. Next-step M35 gated on the numbers this milestone will surface. Awaiting Cloud Run redeploy + one summary attempt to capture the diagnostic.
+
 ## 2026-09-27 00:15 — M33 hotfix delivered: AI 呼叫失敗顯示繁中錯誤
 
 - `src/lib/health/ai.functions.ts` — wrap both `generateText(...)` call sites in `try/catch`:

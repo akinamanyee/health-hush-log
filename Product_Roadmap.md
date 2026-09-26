@@ -290,6 +290,35 @@ Value: 50+ readers see where to go next at the exact scroll position
 they've reached after recording, without hunting.
 Traces: NORTHSTAR (trustworthy — the app guides its user) · USER JOURNEY 5 (「can return directly to 「健康紀錄簿」 without replaying the cover」) · USER JOURNEY 7 (path to health summary explicit) · HARD CONSTRAINTS (50+ friendly touch targets, Traditional Chinese, disclaimer footer preserved).
 
+## M34 — 摘要延時可見: server-side wall-clock diagnostics
+After M33 confirmed the summary handler returns HTTP 200 successfully
+every time (three consecutive POST 200 lines in Cloud Run logs for
+one live 「Load failed」 report), yet iPhone Safari still shows the
+network-layer 「Load failed」 toast, the failure is provably
+mid-flight: the mobile carrier / intermediate proxy drops the TCP
+connection before the response body finishes arriving; the server
+never learns the client walked away. Latency-reduction fixes are
+gated on measurement — a fix aimed at the wrong phase (base call vs
+JSON-retry vs grounding-retry) would waste the round. M34 adds
+per-phase and total wall-clock duration logs to
+`src/lib/health/ai.functions.ts` so one deployed 生成 attempt names
+the actual number and one photo drop names the extract-side number.
+`generateRichSummary` logs `[generateRichSummary] <phase> ok|failed
+<ms>` for each of 初次 / 格式重試 / 合規重試 plus a
+`[generateRichSummary] total <ms> cards=<N>` bookend (with
+`(errored)` suffix on throw). `extractFromImage` logs
+`[extractFromImage] ai ok|failed <ms> module=<mod> screen=<id|all>`.
+Logs contain durations, counts, module and screen IDs only — never
+card values, prompts, or AI outputs (PRD L47/L48/L50 preserved). No
+latency change, no timeout change, no model change, no client change
+in M34 — the diagnostic IS the deliverable, and M35 picks the right
+Step-2 fix from the numbers.
+Full plan: [plan/37-m34-summary-latency-diagnosis.md](plan/37-m34-summary-latency-diagnosis.md).
+Value: replaces guesswork with named ms per phase; the next latency
+milestone can target the phase actually costing time instead of
+firing blind at three candidate causes.
+Traces: NORTHSTAR (trustworthy — real numbers rather than mystery timeouts) · HARD CONSTRAINTS L52 (failed generation must show a real error) · debugging support for the sole open user bug on `/summary`.
+
 ## M33 — hotfix: AI 呼叫失敗顯示 Chinese 錯誤而非「Load failed」
 Two `generateText(...)` call sites in `src/lib/health/ai.functions.ts`
 (`generateRichSummary` inner `run()` and `extractFromImage`'s image
