@@ -238,7 +238,7 @@ export const generateRichSummary = createServerFn({ method: "POST" })
     // transient wire form sent to Gemini is transformed to a source-neutral phrase
     // so the AI's paraphrase doesn't echo the negative label the summary UI hides.
     // See ADR 0025 Source change history (M27) + PRD L51 Exception.
-    const SELF_LOOKUP_CARD_NAMES = new Set(["體脂率", "基礎代謝率", "體內水分", "肌少症指數", "手握力"]);
+    const SELF_LOOKUP_CARD_NAMES = new Set(["體脂率", "基礎代謝率", "體內水分", "肌少症指數", "手握力", "坐地前伸"]);
     const cardsText = data.cards
       .map((c) => {
         const isSelfLookup = SELF_LOOKUP_CARD_NAMES.has(c.name);

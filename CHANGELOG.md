@@ -4,6 +4,19 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-26 19:20 — M29 delivered: 坐地前伸 self-lookup card (職安局 5-tier)
+
+- **NEW** `src/lib/health/sitreach.ts` — 職安局 5-tier × 5-age × 2-gender norms encoded verbatim from source. Exports `SIT_REACH_CATEGORIES`, `SIT_REACH_AGE_BANDS`, `SIT_REACH_NORMS` matrix, `ageToSitReachBand`, `classifySitReach(age, gender, distanceCm)`. Runtime callers = none (ADR 0025); function ships as boundary-logic SSOT for future PRD-authorised paths or build-time tests. Header comment documents the 2 verbatim source gaps (男 30-39 @ 30 cm; 男 60-69 @ 22 cm). Classifier explicitly returns `undefined` for the gap values (fails safe).
+- `src/lib/health/grade.ts` — `case "sitreach":` returns `[]` (matches M28a grip pattern; label removed from record/logbook/CSV). Interpretation card's `action` string updated from 「規律伸展可改善柔軟度…」 to 「請對照下方 職安局 參考表自行對照」. Interpretation branch preserves `grades[0]?.label ?? "無適用參考標準"` fallback → summary payload byte-identical → wire-sanitize (M27) unchanged. Also collapsed the shared grip/sitreach case's `if (mod.id === "grip") return []; return [{...}]` to just `return []` since both branches now return the same thing — one-line simplification.
+- `src/lib/health/ai.functions.ts` — `SELF_LOOKUP_CARD_NAMES` grows to 6 (adds 「坐地前伸」). Wire payload for sit-reach cards now sends `"請自行對照下方對照表"` in place of `"無適用參考標準"`.
+- `src/lib/health/charts.ts` — 【坐地前伸測試參考】 leaflet sentence appends source-neutral pointer 「本應用程式在坐地前伸卡片下方展示 職安局 標準參考供用家自行對照。」 No specific numbers enter leaflet (ADR 0025).
+- `src/routes/summary.tsx` — imports `SIT_REACH_NORMS`/`SIT_REACH_AGE_BANDS`/`SIT_REACH_CATEGORIES`. `CARDS_WITH_SELF_LOOKUP` grows to 6. `parseSitReachValue = parseLeadingNumber` alias. `buildSitReachDisplay(gender)` derives display cells (欠佳 → `≤N cm`, 尚可/常/良好 → `lo-hi cm`, 優異 → `≥N cm`) from source-of-truth `SIT_REACH_NORMS`. New `SitReachMatrixTable` + `SitReachStandardTable` components structurally mirror the handgrip pair. New render gate `{card.name === "坐地前伸" && <SitReachStandardTable userValue={parseSitReachValue(match?.value)} />}`. Footer: 「數值以厘米（cm）為單位，可為負數」 + 20-69 coverage + 2-gap note + 「資料來源：職業安全健康局（職安局）」.
+- `PRD.md` L51 Exception clause extended: 6 cards now listed (adds 坐地前伸 alongside 手握力 under 職安局).
+- `adr/0025-static-reference-vs-ai-advice.md` — new M29 Source change history entry recording the extension, the classifier's non-runtime-caller policy, and the 2 verbatim source gaps.
+- Untouched: `Agency` union (職安局 already present) · `SENSITIVE_LABEL_PATTERN` · `allowedNumbers` (leaflet numbers byte-identical; new pointer sentence contains no digits) · `richGroundingFailure` · `selectRelevantTips` · storage envelope v1 · `distance` field key + numeric shape · CSV export path · wire cap 12 (M27a — sit-reach already counted).
+- Verified: `bunx tsc --noEmit` clean, `bun run build` clean.
+- Full plan: `plan/32-m29-sitreach-self-lookup.md`. Awaiting Cloud Run redeploy.
+
 ## 2026-09-26 18:58 — Living-docs sync after M28 + M28a
 
 - `ARCHITECTURE.md` static-reference-tables SSOT bullet extended from 4 cards to 5. Names 手握力 + 職安局 as the 5th self-lookup card and its dedicated `src/lib/health/handgrip.ts` home. Names all 4 `matchesCell` display formats (`<N`, `≤N`, `≥N`, `N-M`). Documents the M28a `gradeEntry` split: grip now returns `[]` so its 「無適用參考標準」 label disappears from record/logbook/CSV while summary-card payload stays byte-identical via `interpretCard`'s hardcoded fallback (wire-sanitize preserved). Documents the M28a `min-w-0` layout fix on the summary card's flex child.

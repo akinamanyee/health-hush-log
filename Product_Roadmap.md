@@ -256,4 +256,23 @@ Value: consistent「app doesn't grade this」message across pages for
 grip; matrix tables stay within card boundaries on mobile.
 Traces: NORTHSTAR (trustworthy — no more contradictory labels) · HARD CONSTRAINTS (grader still refuses to classify; SSOT preserved) · caught in M28 phone testing, fixed here.
 
+## M29 — 坐地前伸 self-lookup card: 職安局 5-tier reference with value overlay
+The 坐地前伸 summary card gains an in-app self-lookup reference table
+from 職安局 — 5 tiers (欠佳 / 尚可 / 常 / 良好 / 優異) × 5 age bands
+(20-29 through 60-69) × 2 genders — with a ★ overlay on cells containing
+the user's recorded distance (cm, can be negative). Same M25/M27/M28
+pattern extended to a 6th card. `gradeEntry` for sit-reach now returns
+`[]` (mirrors M28a grip), removing the misleading 「無適用參考標準」
+label from record/logbook/CSV; summary-card payload byte-identical via
+`interpretCard`'s hardcoded fallback (wire-sanitize preserved). Grade
+badge omitted per M26 Exception (list now 6 cards). No `matchesCell`
+regex change needed (M28's branches already cover). Two verbatim source
+gaps (男 30-39 @ 30 cm; 男 60-69 @ 22 cm) preserved as-provided with
+footer note. No storage schema bump, no new agency, no new AI grounding
+numbers.
+Value: 坐地前伸 gains the same trustworthy self-lookup UX as the other
+5 cards; last of the initial four modules closes the loop on the
+reference-completion program.
+Traces: NORTHSTAR (trustworthy — reference matches user's own reading path) · HARD CONSTRAINTS (no age/gender collection, deterministic grading unchanged) · USER JOURNEY 7 · ADR 0019 (職安局 accepted source) · ADR 0025 (Source change history: M29 extension).
+
 Each milestone ends with a live, usable product: M1 is a shell you can look at, M2 a working logbook, and every later step adds magic without breaking what's there.

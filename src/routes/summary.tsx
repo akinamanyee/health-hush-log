@@ -15,6 +15,7 @@ import { agenciesForTopic } from "@/lib/health/charts";
 import { formatChineseDate } from "@/lib/health/calendar";
 import { interpretCard, type CardInterpretation } from "@/lib/health/grade";
 import { HAND_GRIP_NORMS, HAND_GRIP_AGE_BANDS, HAND_GRIP_CATEGORIES } from "@/lib/health/handgrip";
+import { SIT_REACH_NORMS, SIT_REACH_AGE_BANDS, SIT_REACH_CATEGORIES } from "@/lib/health/sitreach";
 import { Button } from "@/components/ui/button";
 import { GradeBadge } from "@/components/health/GradeBadge";
 import { PrivacyNotice } from "@/components/health/PrivacyNotice";
@@ -86,6 +87,7 @@ const CARDS_WITH_SELF_LOOKUP = new Set([
   "體內水分",
   "肌少症指數",
   "手握力",
+  "坐地前伸",
 ]);
 
 // Range-string predicates. Cell display strings look like "<10%", "10-20%", "≥28%",
@@ -127,6 +129,7 @@ const parseWaterPercentValue = parseLeadingNumber;
 const parseSmiValue = parseLeadingNumber;
 const parseKcalValue = parseLeadingNumber;
 const parseHandGripValue = parseLeadingNumber;
+const parseSitReachValue = parseLeadingNumber;
 
 function BodyFatMatrixTable({
   title,
@@ -514,6 +517,99 @@ function HandGripStandardTable({ userValue }: { userValue: number | undefined })
   );
 }
 
+// ── 坐地前伸 reference: 職安局 5-tier × 5-age × 2-gender norms for
+// reach distance in cm (can be negative). Cell display strings use
+// "≤N cm" / "lo-hi cm" / "≥N cm" — matchesCell handles all three
+// (no regex change needed after M28). Source data + classifier live
+// in sitreach.ts. Two verbatim source gaps documented in that file's
+// header: 男 30-39 @ 30; 男 60-69 @ 22 — surface via a footer note.
+type SitReachDisplayMatrix = Record<
+  (typeof SIT_REACH_CATEGORIES)[number],
+  Record<(typeof SIT_REACH_AGE_BANDS)[number], string>
+>;
+
+function buildSitReachDisplay(gender: "male" | "female"): SitReachDisplayMatrix {
+  const out = {} as SitReachDisplayMatrix;
+  for (const tier of SIT_REACH_CATEGORIES) out[tier] = {} as Record<(typeof SIT_REACH_AGE_BANDS)[number], string>;
+  for (const age of SIT_REACH_AGE_BANDS) {
+    const n = SIT_REACH_NORMS[gender][age];
+    out["欠佳"][age] = `≤${n.poor_max} cm`;
+    out["尚可"][age] = `${n.fair[0]}-${n.fair[1]} cm`;
+    out["常"][age] = `${n.normal[0]}-${n.normal[1]} cm`;
+    out["良好"][age] = `${n.good[0]}-${n.good[1]} cm`;
+    out["優異"][age] = `≥${n.excellent_min} cm`;
+  }
+  return out;
+}
+
+const SIT_REACH_MALE_DISPLAY: SitReachDisplayMatrix = buildSitReachDisplay("male");
+const SIT_REACH_FEMALE_DISPLAY: SitReachDisplayMatrix = buildSitReachDisplay("female");
+
+function SitReachMatrixTable({
+  title,
+  data,
+  userValue,
+}: {
+  title: string;
+  data: SitReachDisplayMatrix;
+  userValue: number | undefined;
+}) {
+  return (
+    <div className="mt-3 overflow-x-auto">
+      <table className="w-full border-collapse text-center">
+        <caption className="mb-2 text-xs text-muted-foreground">{title}</caption>
+        <thead>
+          <tr className="border-b border-border">
+            <th className="p-2 text-left font-medium text-foreground"></th>
+            {SIT_REACH_AGE_BANDS.map((age) => (
+              <th key={age} className="p-2 font-medium text-foreground">{age}歲</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {SIT_REACH_CATEGORIES.map((tier) => (
+            <tr key={tier} className="border-b border-border/50 last:border-b-0">
+              <td className="p-2 text-left font-medium text-foreground">{tier}</td>
+              {SIT_REACH_AGE_BANDS.map((age) => {
+                const cell = data[tier][age];
+                const hit = userValue !== undefined && matchesCell(userValue, cell);
+                return (
+                  <td
+                    key={age}
+                    className={hit ? "p-2 bg-primary/10 font-semibold text-foreground" : "p-2 text-muted-foreground"}
+                  >
+                    {cell}{hit ? " ★" : ""}
+                  </td>
+                );
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function SitReachStandardTable({ userValue }: { userValue: number | undefined }) {
+  return (
+    <details className="mt-3 rounded-xl border border-border bg-muted/30 p-3 text-sm">
+      <summary className="cursor-pointer font-medium text-foreground">
+        查看坐地前伸標準參考表（職安局）
+      </summary>
+      <SitReachMatrixTable title="男性 坐地前伸（cm）" data={SIT_REACH_MALE_DISPLAY} userValue={userValue} />
+      <SitReachMatrixTable title="女性 坐地前伸（cm）" data={SIT_REACH_FEMALE_DISPLAY} userValue={userValue} />
+      {userValue !== undefined && (
+        <p className="mt-3 text-xs text-foreground">
+          ★ = 你的 {userValue} cm 落於此區間。請於男性／女性表中，找你性別及年齡對應的欄，欄中★格即為你的參考分級。
+        </p>
+      )}
+      <p className="mt-3 text-xs text-muted-foreground">
+        資料來源：職業安全健康局（職安局）。數值以厘米（cm）為單位，可為負數。本表涵蓋 20-69 歲；70 歲或以上請以 60-69 歲欄作參考並諮詢醫生。若讀數為 30 cm（男 30-39 歲）或 22 cm（男 60-69 歲），屬跨級中間值，請自行參考鄰近欄位。本應用程式因不收集性別及年齡而不進行分級，用家可對照上表自行參考。
+      </p>
+    </details>
+  );
+}
+
 interface PreviewItem {
   moduleId: string;
   moduleTitle: string;
@@ -745,6 +841,9 @@ function Summary() {
                           )}
                           {card.name === "手握力" && (
                             <HandGripStandardTable userValue={parseHandGripValue(match?.value)} />
+                          )}
+                          {card.name === "坐地前伸" && (
+                            <SitReachStandardTable userValue={parseSitReachValue(match?.value)} />
                           )}
                         </div>
                       </div>

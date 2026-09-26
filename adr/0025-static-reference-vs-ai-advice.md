@@ -80,6 +80,23 @@ Concretely:
 
 ## Source change history
 
+- **2026-09-26 (M29)** — The self-lookup pattern extends to 坐地前伸
+  (6th card). Source: 職安局 5-tier × 5 age bands × 2 genders reach-
+  distance norms (cm). Data encoded verbatim in a new file
+  `src/lib/health/sitreach.ts`. Same non-runtime-caller policy as
+  handgrip (M28) — the classifier `classifySitReach(age, gender,
+  distanceCm)` ships but is never called at runtime; the summary card
+  renders the full matrix and the user self-identifies. `matchesCell`
+  needed no change (its M28 `≤N` / `N-M` / `≥N` branches already cover).
+  `gradeEntry` for sit-reach now returns `[]` (mirrors M28a's grip
+  pattern), removing the misleading 「無適用參考標準」 label from
+  `/sitreach` record page, `/logbook` rows, and CSV grade column;
+  `interpretCard`'s sit-reach branch keeps the hardcoded fallback so
+  summary-card payload + wire-sanitize are byte-identical. Verbatim
+  transcription preserves 2 documented source gaps (男 30-39 @ 30 cm;
+  男 60-69 @ 22 cm) which the footer explicitly names. `CARDS_WITH_SELF_LOOKUP`
+  and `SELF_LOOKUP_CARD_NAMES` grow from 5 to 6.
+
 - **2026-09-26 (M28)** — The self-lookup pattern extends to 手握力 (5th
   card). Source: **職安局** (Occupational Safety and Health Council) 5-tier
   × 5 age bands × 2 genders norms for combined L+R hand grip (kg). Data

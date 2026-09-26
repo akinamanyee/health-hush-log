@@ -54,15 +54,14 @@ export function gradeEntry(
       const key = mod.id === "grip" ? "grip" : "distance";
       const v = values[key];
       if (v == null) return [];
-      // Grip has an in-app 職安局 self-lookup reference under its summary card
-      // (M28; PRD L51 Exception; ADR 0025 Source change history). Returning
-      // no grade here keeps record-form + logbook + CSV from carrying the now-
-      // misleading 「無適用參考標準」 label. Summary's interpretCard branch
-      // still hard-codes the string as its `grade` payload (via
-      // `grades[0]?.label ?? "無適用參考標準"` fallback), so wire-sanitize
-      // and card SSOT behaviour are byte-identical to M28.
-      if (mod.id === "grip") return [];
-      return [{ label: "無適用參考標準", tone: "neutral" }];
+      // Grip (M28) and sit-reach (M29) both have in-app 職安局 self-lookup
+      // reference tables under their summary cards (PRD L51 Exception; ADR
+      // 0025 Source change history). Returning no grade here keeps record-form
+      // + logbook + CSV from carrying the now-misleading 「無適用參考標準」
+      // label. Summary's interpretCard branches still hard-code the string as
+      // their `grade` payload (via `grades[0]?.label ?? "無適用參考標準"`
+      // fallback), so wire-sanitize and card SSOT behaviour are byte-identical.
+      return [];
     }
     case "tanita": {
       const out: GradeResult[] = [];
@@ -258,7 +257,7 @@ function interpretCardCore(
         grade: grades[0]?.label ?? "無適用參考標準",
         tone: grades[0]?.tone ?? "neutral",
         range: "需要年齡及性別才能對照標準",
-        action: "規律伸展可改善柔軟度，減少跌倒與腰背痛風險",
+        action: "請對照下方 職安局 參考表自行對照",
         note: "無適用參考標準（需要年齡及性別）",
       }];
     }
