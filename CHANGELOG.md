@@ -4,6 +4,21 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-26 11:30 — M28 delivered: 手握力 self-lookup card (職安局 5-tier)
+
+- **NEW** `src/lib/health/handgrip.ts` — 職安局 5-tier × 5-age × 2-gender norms encoded verbatim from source JSON. Exports `HAND_GRIP_CATEGORIES` (`["欠佳","尚可","常","良好","優異"]`), `HAND_GRIP_AGE_BANDS` (`["20-29",...,"60-69"]`), `HAND_GRIP_NORMS` matrix, `ageToHandGripBand`, `classifyHandGrip(age, gender, combinedKg)`. Header comment: **runtime callers = none** (PRD L13/L50 forbid programmatic classification without collected age/gender); function kept as boundary-logic SSOT for a future PRD-authorised path or build-time tests.
+- `src/lib/health/modules.ts` — grip field label 「手握力」 → 「手握力（左右合計）」; max bumped 100 → 200 kg to accommodate elite combined values (male 20-29 excellent ≥92; realistic combined ceilings well above 100). Storage key and numeric shape unchanged.
+- `src/lib/health/ai.functions.ts` — extraction hint 「grip（手握力 kg）」 → 「grip（手握力 kg，左右手合計數值）」 so photo/voice extraction sums both hands. `SELF_LOOKUP_CARD_NAMES` grows to 5 entries (adds 「手握力」).
+- `src/lib/health/grade.ts` — grip card's `action` 「可透過握力球、阻力帶等訓練改善手握力」 → 「請對照下方 職安局 參考表自行對照」. Grade/range/note unchanged; wire-sanitize (M27) transforms grade before Gemini sees it.
+- `src/lib/health/charts.ts` — 【手握力參考】 leaflet sentence appends source-neutral pointer 「本應用程式在手握力卡片下方展示 職安局 標準參考供用家自行對照。」 No specific numbers enter leaflet (ADR 0025 preserved).
+- `src/routes/summary.tsx` — `matchesCell` gains new `≤N` branch (before existing `<N` branch); no existing table cell used `≤`, so zero regression risk. `CARDS_WITH_SELF_LOOKUP` grows to 5 entries. Import `HAND_GRIP_NORMS`/`HAND_GRIP_AGE_BANDS`/`HAND_GRIP_CATEGORIES` from `handgrip.ts`. `buildHandGripDisplay(gender)` derives the display matrix (欠佳 → `≤N kg`, 尚可/常/良好 → `lo-hi kg`, 優異 → `≥N kg`) from the source-of-truth `HAND_GRIP_NORMS`. New `HandGripMatrixTable` + `HandGripStandardTable` components mirror the SMI structure; new render gate `{card.name === "手握力" && <HandGripStandardTable userValue={parseHandGripValue(match?.value)} />}`. `parseHandGripValue` = alias of `parseLeadingNumber`. Footer: L+R clarification + 「本表涵蓋 20-69 歲；70 歲或以上請以 60-69 歲欄作參考並諮詢醫生」 + 「資料來源：職業安全健康局（職安局）」.
+- `PRD.md` L51 Exception clause extended: list now names 5 cards (adds 「手握力」 with 職安局 attribution alongside the 4 TANITA cards).
+- `adr/0025-static-reference-vs-ai-advice.md` — new M28 Source change history entry recording the extension + the design decisions (utility ships without runtime caller; `≤N` regex branch; L+R label change; two Sets grow to 5).
+- Untouched: `Agency` union (職安局 already present per ADR 0019) · `SENSITIVE_LABEL_PATTERN` · `allowedNumbers` (leaflet numbers byte-identical) · `richGroundingFailure` · `selectRelevantTips` · storage envelope (v1; grip field key + numeric shape unchanged) · CSV export path · wire cap (M27a's 12 still enough — grip already counted).
+- Migration note: old records with single-hand grip values (before this milestone the field was ambiguous) remain valid numeric data and export cleanly. Users who entered single-hand values will visually land in 欠佳 against L+R norms; footer + this changelog document the L+R expectation so users can re-record combined values if desired. Nothing dropped.
+- Verified: `bunx tsc --noEmit` clean, `bun run build` clean.
+- Full plan: `plan/30-m28-handgrip-self-lookup.md`. Awaiting Cloud Run redeploy.
+
 ## 2026-09-26 11:16 — Living-docs sync after M27 + M27a deploy
 
 - `ARCHITECTURE.md` — static-reference-tables SSOT bullet updated: was 「currently: the TANITA 標準脂肪量 matrix under the 體脂率 summary card」 (M26-era). Now names all 4 cards (體脂率, 基礎代謝率, 體內水分, 肌少症指數), the split between `matchesCell`-based ★ overlay (body-fat / water / SMI) vs BMR per-cell delta (TANITA publishes BMR as point values not tier ranges), the split between cards where `gradeEntry` returns `"無適用參考標準"` (體脂率) vs is silent (BMR / water / SMI produce cards directly in `interpretCard`), and the mirrored Sets `CARDS_WITH_SELF_LOOKUP` (client) + `SELF_LOOKUP_CARD_NAMES` (server, wire-sanitize).

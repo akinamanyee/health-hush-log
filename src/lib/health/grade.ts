@@ -237,7 +237,7 @@ function interpretCardCore(
         grade: grades[0]?.label ?? "無適用參考標準",
         tone: grades[0]?.tone ?? "neutral",
         range: "需要年齡及性別才能對照標準",
-        action: "可透過握力球、阻力帶等訓練改善手握力",
+        action: "請對照下方 職安局 參考表自行對照",
         note: "無適用參考標準（需要年齡及性別）",
       }];
     }

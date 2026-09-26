@@ -14,6 +14,7 @@ import { generateRichSummary, type RichSummaryResult } from "@/lib/health/ai.fun
 import { agenciesForTopic } from "@/lib/health/charts";
 import { formatChineseDate } from "@/lib/health/calendar";
 import { interpretCard, type CardInterpretation } from "@/lib/health/grade";
+import { HAND_GRIP_NORMS, HAND_GRIP_AGE_BANDS, HAND_GRIP_CATEGORIES } from "@/lib/health/handgrip";
 import { Button } from "@/components/ui/button";
 import { GradeBadge } from "@/components/health/GradeBadge";
 import { PrivacyNotice } from "@/components/health/PrivacyNotice";
@@ -84,6 +85,7 @@ const CARDS_WITH_SELF_LOOKUP = new Set([
   "基礎代謝率",
   "體內水分",
   "肌少症指數",
+  "手握力",
 ]);
 
 // Range-string predicates. Cell display strings look like "<10%", "10-20%", "≥28%",
@@ -95,6 +97,8 @@ const CARDS_WITH_SELF_LOOKUP = new Set([
 function matchesCell(value: number, cellDisplay: string): boolean {
   const lt = /^<(\d+(?:\.\d+)?)/.exec(cellDisplay);
   if (lt?.[1]) return value < parseFloat(lt[1]);
+  const le = /^≤(\d+(?:\.\d+)?)/.exec(cellDisplay);
+  if (le?.[1]) return value <= parseFloat(le[1]);
   const ge = /^≥(\d+(?:\.\d+)?)/.exec(cellDisplay);
   if (ge?.[1]) return value >= parseFloat(ge[1]);
   const range = /^(\d+(?:\.\d+)?)-(\d+(?:\.\d+)?)/.exec(cellDisplay);
@@ -122,6 +126,7 @@ const parseBodyFatValue = parseLeadingNumber;
 const parseWaterPercentValue = parseLeadingNumber;
 const parseSmiValue = parseLeadingNumber;
 const parseKcalValue = parseLeadingNumber;
+const parseHandGripValue = parseLeadingNumber;
 
 function BodyFatMatrixTable({
   title,
@@ -418,6 +423,97 @@ function SmiStandardTable({ userValue }: { userValue: number | undefined }) {
   );
 }
 
+// ── 手握力 reference: 職安局 5-tier × 5-age × 2-gender norms for
+// combined L+R hand grip (kg). Cell display strings use "≤N kg" (poor),
+// "lo-hi kg" (middle 3 tiers), "≥N kg" (excellent) — all handled by
+// matchesCell for the ★ overlay. Source data + classifier live in handgrip.ts.
+type HandGripDisplayMatrix = Record<
+  (typeof HAND_GRIP_CATEGORIES)[number],
+  Record<(typeof HAND_GRIP_AGE_BANDS)[number], string>
+>;
+
+function buildHandGripDisplay(gender: "male" | "female"): HandGripDisplayMatrix {
+  const out = {} as HandGripDisplayMatrix;
+  for (const tier of HAND_GRIP_CATEGORIES) out[tier] = {} as Record<(typeof HAND_GRIP_AGE_BANDS)[number], string>;
+  for (const age of HAND_GRIP_AGE_BANDS) {
+    const n = HAND_GRIP_NORMS[gender][age];
+    out["欠佳"][age] = `≤${n.poor_max} kg`;
+    out["尚可"][age] = `${n.fair[0]}-${n.fair[1]} kg`;
+    out["常"][age] = `${n.normal[0]}-${n.normal[1]} kg`;
+    out["良好"][age] = `${n.good[0]}-${n.good[1]} kg`;
+    out["優異"][age] = `≥${n.excellent_min} kg`;
+  }
+  return out;
+}
+
+const HAND_GRIP_MALE_DISPLAY: HandGripDisplayMatrix = buildHandGripDisplay("male");
+const HAND_GRIP_FEMALE_DISPLAY: HandGripDisplayMatrix = buildHandGripDisplay("female");
+
+function HandGripMatrixTable({
+  title,
+  data,
+  userValue,
+}: {
+  title: string;
+  data: HandGripDisplayMatrix;
+  userValue: number | undefined;
+}) {
+  return (
+    <div className="mt-3 overflow-x-auto">
+      <table className="w-full border-collapse text-center">
+        <caption className="mb-2 text-xs text-muted-foreground">{title}</caption>
+        <thead>
+          <tr className="border-b border-border">
+            <th className="p-2 text-left font-medium text-foreground"></th>
+            {HAND_GRIP_AGE_BANDS.map((age) => (
+              <th key={age} className="p-2 font-medium text-foreground">{age}歲</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {HAND_GRIP_CATEGORIES.map((tier) => (
+            <tr key={tier} className="border-b border-border/50 last:border-b-0">
+              <td className="p-2 text-left font-medium text-foreground">{tier}</td>
+              {HAND_GRIP_AGE_BANDS.map((age) => {
+                const cell = data[tier][age];
+                const hit = userValue !== undefined && matchesCell(userValue, cell);
+                return (
+                  <td
+                    key={age}
+                    className={hit ? "p-2 bg-primary/10 font-semibold text-foreground" : "p-2 text-muted-foreground"}
+                  >
+                    {cell}{hit ? " ★" : ""}
+                  </td>
+                );
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function HandGripStandardTable({ userValue }: { userValue: number | undefined }) {
+  return (
+    <details className="mt-3 rounded-xl border border-border bg-muted/30 p-3 text-sm">
+      <summary className="cursor-pointer font-medium text-foreground">
+        查看手握力標準參考表（職安局）
+      </summary>
+      <HandGripMatrixTable title="男性 手握力（左右合計 kg）" data={HAND_GRIP_MALE_DISPLAY} userValue={userValue} />
+      <HandGripMatrixTable title="女性 手握力（左右合計 kg）" data={HAND_GRIP_FEMALE_DISPLAY} userValue={userValue} />
+      {userValue !== undefined && (
+        <p className="mt-3 text-xs text-foreground">
+          ★ = 你的 {userValue} kg 落於此區間。請於男性／女性表中，找你性別及年齡對應的欄，欄中★格即為你的參考分級。
+        </p>
+      )}
+      <p className="mt-3 text-xs text-muted-foreground">
+        資料來源：職業安全健康局（職安局）。數值為左右手合計 (kg)。本表涵蓋 20-69 歲；70 歲或以上請以 60-69 歲欄作參考並諮詢醫生。本應用程式因不收集性別及年齡而不進行分級，用家可對照上表自行參考。
+      </p>
+    </details>
+  );
+}
+
 interface PreviewItem {
   moduleId: string;
   moduleTitle: string;
@@ -641,6 +737,9 @@ function Summary() {
                           )}
                           {card.name === "肌少症指數" && (
                             <SmiStandardTable userValue={parseSmiValue(match?.value)} />
+                          )}
+                          {card.name === "手握力" && (
+                            <HandGripStandardTable userValue={parseHandGripValue(match?.value)} />
                           )}
                         </div>
                       </div>

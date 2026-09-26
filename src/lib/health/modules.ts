@@ -101,7 +101,7 @@ export const MODULES: ModuleDef[] = [
     path: "/grip",
     storageKey: STORAGE_KEYS.grip,
     supportsImage: true,
-    fields: [{ key: "grip", label: "手握力", unit: "公斤", min: 1, max: 100, step: "0.1" }],
+    fields: [{ key: "grip", label: "手握力（左右合計）", unit: "公斤", min: 1, max: 200, step: "0.1" }],
     infoText: {
       intro: "手握力是一項簡單且安全的日常健康指標：",
       points: [

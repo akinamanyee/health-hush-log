@@ -220,4 +220,23 @@ Value: users with rich data on multiple modules can generate summaries
 again.
 Traces: NORTHSTAR (trustworthy — generate button works) · SUCCESS (blood-pressure demo path unblocked) · caught in M27 peer review, fixed here.
 
+## M28 — 手握力 self-lookup card: 職安局 5-tier reference with value overlay
+The 手握力 summary card gains an in-app self-lookup reference table from
+職安局 (Occupational Safety and Health Council) — 5 tiers (欠佳 / 尚可 /
+常 / 良好 / 優異) × 5 age bands (20-29, 30-39, 40-49, 50-59, 60-69) × 2
+genders — with a ★ overlay on cells matching the user's recorded L+R
+combined grip value. Same M25/M27 pattern extended to a 5th card. Field
+label clarified to 「手握力（左右合計）」 and AI extraction prompt updated
+so entries are unambiguously combined. Classifier `classifyHandGrip`
+ships as a utility in a new `handgrip.ts` file but has no runtime caller
+(PRD L13/L50 forbid programmatic classification without collected
+age/gender — user self-identifies via the matrix). `matchesCell` gains a
+`≤N` branch. Grade badge omitted per M26 Exception (list now 5 cards).
+Wire-payload sanitize (M27) applies to 手握力 too. No storage schema
+bump, no new agency, no new AI grounding numbers.
+Value: 手握力 gains the same trustworthy self-lookup UX as body-fat /
+BMR / water / SMI, closing the loop for one of the two previously
+un-referenced modules.
+Traces: NORTHSTAR (trustworthy — reference matches user's own reading path) · HARD CONSTRAINTS (no age/gender collection, deterministic grading unchanged) · USER JOURNEY 7 · ADR 0019 (職安局 already an accepted source) · ADR 0025 (Source change history: M28 extension).
+
 Each milestone ends with a live, usable product: M1 is a shell you can look at, M2 a working logbook, and every later step adds magic without breaking what's there.

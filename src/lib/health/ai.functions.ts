@@ -48,7 +48,7 @@ const SIT_REACH_SCHEMA = z.object({ distance: z.number().nullable() });
 const EXTRACTION_FIELDS = {
   tanita: "weight（體重 kg）、bodyFat（體脂率 %）、muscleMass（肌肉量 kg）、bmi、visceralFat（內臟脂肪等級）、fatMass（體脂量 kg）、muscleRatio（肌肉比率 %）、bodyWaterPct（身體水分率 %）、bodyWaterKg（身體水分量 kg）、bmrKcal（基礎代謝率 kcal）、bmrKj（基礎代謝率 kJ）、fatTrunk（軀幹脂肪率 %）、fatArmR（右臂脂肪率 %）、fatArmL（左臂脂肪率 %）、fatLegR（右腿脂肪率 %）、fatLegL（左腿脂肪率 %）、muscleTrunk（軀幹肌肉量 kg）、muscleArmR（右臂肌肉量 kg）、muscleArmL（左臂肌肉量 kg）、muscleLegR（右腿肌肉量 kg）、muscleLegL（左腿肌肉量 kg）",
   bp: "systolic（收縮壓 mmHg）、diastolic（舒張壓 mmHg）、pulse（脈搏）",
-  grip: "grip（手握力 kg）",
+  grip: "grip（手握力 kg，左右手合計數值）",
   sitreach: "distance（坐地前伸距離 cm，可為負數）",
 } as const;
 
@@ -238,7 +238,7 @@ export const generateRichSummary = createServerFn({ method: "POST" })
     // transient wire form sent to Gemini is transformed to a source-neutral phrase
     // so the AI's paraphrase doesn't echo the negative label the summary UI hides.
     // See ADR 0025 Source change history (M27) + PRD L51 Exception.
-    const SELF_LOOKUP_CARD_NAMES = new Set(["體脂率", "基礎代謝率", "體內水分", "肌少症指數"]);
+    const SELF_LOOKUP_CARD_NAMES = new Set(["體脂率", "基礎代謝率", "體內水分", "肌少症指數", "手握力"]);
     const cardsText = data.cards
       .map((c) => {
         const isSelfLookup = SELF_LOOKUP_CARD_NAMES.has(c.name);

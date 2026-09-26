@@ -80,6 +80,27 @@ Concretely:
 
 ## Source change history
 
+- **2026-09-26 (M28)** — The self-lookup pattern extends to 手握力 (5th
+  card). Source: **職安局** (Occupational Safety and Health Council) 5-tier
+  × 5 age bands × 2 genders norms for combined L+R hand grip (kg). Data
+  encoded verbatim in a new file `src/lib/health/handgrip.ts`. 職安局 is
+  already in the `Agency` union (ADR 0019), so no principle change to
+  government-source grounding; it is used here purely as a static-
+  reference source. The classifier function `classifyHandGrip(age,
+  gender, combinedKg)` ships in that file but has **no runtime callers**
+  by design — PRD L13/L50 forbid programmatic classification without
+  collected age/gender, so the summary card renders the full matrix and
+  the user self-identifies. The function is kept so a future PRD-authorised
+  path (or build-time tests) can classify without re-deriving the boundary
+  logic. `matchesCell` in `summary.tsx` gains a new `≤N` branch to handle
+  the poor-tier cell format (the middle 3 tiers reuse the existing `N-M`
+  branch; excellent reuses `≥N`). Grip field label in `modules.ts` clarified
+  to 「手握力（左右合計）」 and AI extraction prompt hint updated so future
+  entries are unambiguously combined L+R (old single-hand records remain
+  valid numeric data — footer text tells users to re-record with combined
+  values if desired; nothing dropped). `CARDS_WITH_SELF_LOOKUP` /
+  `SELF_LOOKUP_CARD_NAMES` grow from 4 to 5 entries.
+
 - **2026-09-24 (M27)** — The self-lookup card pattern is extended from
   1 to 4 cards: 基礎代謝率 (BMR, TANITA age×gender kcal reference),
   體內水分 (TANITA gendered % threshold), and 肌少症指數 (SMI, TANITA
