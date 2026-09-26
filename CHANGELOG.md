@@ -4,6 +4,12 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-26 11:16 — Living-docs sync after M27 + M27a deploy
+
+- `ARCHITECTURE.md` — static-reference-tables SSOT bullet updated: was 「currently: the TANITA 標準脂肪量 matrix under the 體脂率 summary card」 (M26-era). Now names all 4 cards (體脂率, 基礎代謝率, 體內水分, 肌少症指數), the split between `matchesCell`-based ★ overlay (body-fat / water / SMI) vs BMR per-cell delta (TANITA publishes BMR as point values not tier ranges), the split between cards where `gradeEntry` returns `"無適用參考標準"` (體脂率) vs is silent (BMR / water / SMI produce cards directly in `interpretCard`), and the mirrored Sets `CARDS_WITH_SELF_LOOKUP` (client) + `SELF_LOOKUP_CARD_NAMES` (server, wire-sanitize).
+- `CLAUDE.md` — deploy runbook incident-references line extended with today's project-ID prompt trap (Cloud Shell asked `Please specify a project ID:` mid-deploy for rev 29; fix: type the project ID at the prompt, or run `gcloud config set project` once).
+- All other living docs already synced: `PRD.md` L51 lists all 4 exception cards (M27); `Product_Roadmap.md` has M27 + M27a entries; `ADR 0025` has M27 + M27a Source change history entries; `DECISIONS.md` needs no update (no new ADR file); plans 28 + 29 exist. Rev-29 deploy entry already at top of CHANGELOG.
+
 ## 2026-09-26 11:14 — Deploy M27 + M27a to Cloud Run (rev 29)
 
 - Deployed `cloud-run-prep` HEAD (commit `d463173`) to Cloud Run service `heartcaring-app`, region `asia-east1`, project `gen-lang-client-0014480564`. New active revision: `heartcaring-app-00029-qs5` serving 100% of traffic on heartcaring.fit.
