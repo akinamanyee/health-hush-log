@@ -239,4 +239,21 @@ BMR / water / SMI, closing the loop for one of the two previously
 un-referenced modules.
 Traces: NORTHSTAR (trustworthy — reference matches user's own reading path) · HARD CONSTRAINTS (no age/gender collection, deterministic grading unchanged) · USER JOURNEY 7 · ADR 0019 (職安局 already an accepted source) · ADR 0025 (Source change history: M28 extension).
 
+## M28a — hotfix: grip 「無適用參考標準」 across pages + summary card overflow
+Two post-M28 bugs caught in phone testing. (1) `gradeEntry` returned a
+「無適用參考標準」 label unconditionally for grip, so `/handgrip` record
+page + `/logbook` rows + CSV grade column all showed the label — now
+factually wrong because M28 gave grip a 職安局 self-lookup table.
+`gradeEntry` for grip now returns `[]`; label removed from record /
+logbook / CSV; summary card behaviour byte-identical (interpretCard
+falls back to hardcoded string; wire-sanitize preserved). (2) Summary
+matrix tables bled past the white card's right edge on narrow phones —
+the card's flex child lacked `min-w-0`, letting wide content expand
+past the calculated flex share and drag the `overflow-x-auto` wrapper
+outside the card border. Added `min-w-0` to the flex child; all summary
+tables now scroll inside the card.
+Value: consistent「app doesn't grade this」message across pages for
+grip; matrix tables stay within card boundaries on mobile.
+Traces: NORTHSTAR (trustworthy — no more contradictory labels) · HARD CONSTRAINTS (grader still refuses to classify; SSOT preserved) · caught in M28 phone testing, fixed here.
+
 Each milestone ends with a live, usable product: M1 is a shell you can look at, M2 a working logbook, and every later step adds magic without breaking what's there.

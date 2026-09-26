@@ -702,7 +702,12 @@ function Summary() {
                     <div key={card.name} className="rounded-2xl border border-border bg-card p-5">
                       <div className="flex items-start gap-3">
                         <Icon className="mt-0.5 size-6 shrink-0 text-accent" aria-hidden="true" />
-                        <div className="flex-1">
+                        {/* min-w-0 (M28a): flex children default to min-width:auto, which lets wide
+                            content (e.g. the M28 handgrip 5-col table) expand this div past its
+                            calculated flex share, dragging the inner overflow-x-auto wrapper outside
+                            the card's border. min-w-0 constrains the div so the wrapper properly
+                            clips and scrolls horizontally on narrow phones. */}
+                        <div className="flex-1 min-w-0">
                           <div className="flex flex-wrap items-center gap-3">
                             <span className="text-lg font-semibold">{card.name}</span>
                             {match && (

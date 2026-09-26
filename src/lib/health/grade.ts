@@ -54,6 +54,14 @@ export function gradeEntry(
       const key = mod.id === "grip" ? "grip" : "distance";
       const v = values[key];
       if (v == null) return [];
+      // Grip has an in-app 職安局 self-lookup reference under its summary card
+      // (M28; PRD L51 Exception; ADR 0025 Source change history). Returning
+      // no grade here keeps record-form + logbook + CSV from carrying the now-
+      // misleading 「無適用參考標準」 label. Summary's interpretCard branch
+      // still hard-codes the string as its `grade` payload (via
+      // `grades[0]?.label ?? "無適用參考標準"` fallback), so wire-sanitize
+      // and card SSOT behaviour are byte-identical to M28.
+      if (mod.id === "grip") return [];
       return [{ label: "無適用參考標準", tone: "neutral" }];
     }
     case "tanita": {

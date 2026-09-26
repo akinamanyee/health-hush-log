@@ -4,6 +4,18 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-26 18:53 — M28a delivered: hotfix for grip label + summary card overflow
+
+Two bugs caught in M28 phone testing.
+
+**Bug 1 — 「無適用參考標準」 across non-summary pages for grip.** `gradeEntry` for `case "grip"` unconditionally returned `[{label:"無適用參考標準"}]`. After M28 gave grip a 職安局 self-lookup table under the summary card, that label surfaced on `/handgrip` (record preview above 儲存紀錄), `/logbook` grip rows, and CSV grade column — all now factually wrong. Fix: split the shared grip/sitreach case in `src/lib/health/grade.ts` so grip returns `[]` (an absence, not a null-grade label); sit-reach unchanged. Ripple: record preview, logbook badge, and CSV grade cell for grip all become empty — consistent with "app doesn't grade this" spirit of the M28 Exception. Summary card behaviour byte-identical: `interpretCard`'s grip branch reads `grades[0]?.label ?? "無適用參考標準"`, so with `[]` it falls back to the hardcoded string; wire-sanitize (M27) still transforms it for Gemini; CardInterpretation SSOT preserved.
+
+**Bug 2 — summary matrix tables bled past white card border on narrow phones.** Card render at `src/routes/summary.tsx:~705` had a `flex-1` div wrapping the card body. Flex children default to `min-width: auto`, letting wide content (M28 handgrip 5-col × 5-age table most visibly) expand the div past its calculated flex share and drag the inner `overflow-x-auto` wrapper outside the card's `p-5` padding. Fix: add `min-w-0` to the `flex-1` div — standard Tailwind flexbox pattern that constrains the flex child so the overflow wrapper properly clips and scrolls. Applies to every summary card; any wide body-content (tables, long values, long AI prose) now scrolls inside the card boundary instead of bleeding out. Narrow content unaffected.
+
+Untouched: storage envelope (v1) · field key `grip` · numeric shape · leaflet numbers (`allowedNumbers` byte-identical) · sensitive-word filter · `Agency` union · wire cap (M27a's 12) · sit-reach behaviour · other cards' render logic. PRD L51 Exception clause needs no update (grip already listed since M28); the clause's "grader itself is unchanged" is preserved — returning empty is an absence of grade (which the Exception already promises), not a re-grading with different rules.
+
+Verified: `bunx tsc --noEmit` clean, `bun run build` clean. Plan: `plan/31-m28a-grip-badge-and-table-overflow.md`.
+
 ## 2026-09-26 11:30 — M28 delivered: 手握力 self-lookup card (職安局 5-tier)
 
 - **NEW** `src/lib/health/handgrip.ts` — 職安局 5-tier × 5-age × 2-gender norms encoded verbatim from source JSON. Exports `HAND_GRIP_CATEGORIES` (`["欠佳","尚可","常","良好","優異"]`), `HAND_GRIP_AGE_BANDS` (`["20-29",...,"60-69"]`), `HAND_GRIP_NORMS` matrix, `ageToHandGripBand`, `classifyHandGrip(age, gender, combinedKg)`. Header comment: **runtime callers = none** (PRD L13/L50 forbid programmatic classification without collected age/gender); function kept as boundary-logic SSOT for a future PRD-authorised path or build-time tests.
