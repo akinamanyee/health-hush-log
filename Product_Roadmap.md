@@ -275,4 +275,19 @@ Value: 坐地前伸 gains the same trustworthy self-lookup UX as the other
 reference-completion program.
 Traces: NORTHSTAR (trustworthy — reference matches user's own reading path) · HARD CONSTRAINTS (no age/gender collection, deterministic grading unchanged) · USER JOURNEY 7 · ADR 0019 (職安局 accepted source) · ADR 0025 (Source change history: M29 extension).
 
+## M30 — 記錄後的去向: bottom-of-page 返回紀錄簿 + 查看摘要 nav
+Every record page (`/blood-pressure`, `/grip`, `/sit-and-reach`,
+`/tanita`) gains a bottom navigation with two links (「← 返回健康紀錄簿」
++ 「查看健康摘要 →」) rendered above the privacy notice. Surfaces
+USER JOURNEY 5 and 7 destinations at the natural post-save touchpoint
+— the top-of-page back-link only helps users scrolled up at the header,
+but after saving and scrolling through 歷史紀錄, the user's thumb sits
+at the bottom of the page. Both links are large-text (`text-lg`),
+≥48px touch targets, focus-visible for keyboard, and `<nav>`-landmarked
+for screen readers. Nothing else touched — no state, no storage, no
+grading, no AI, no PRD change.
+Value: 50+ readers see where to go next at the exact scroll position
+they've reached after recording, without hunting.
+Traces: NORTHSTAR (trustworthy — the app guides its user) · USER JOURNEY 5 (「can return directly to 「健康紀錄簿」 without replaying the cover」) · USER JOURNEY 7 (path to health summary explicit) · HARD CONSTRAINTS (50+ friendly touch targets, Traditional Chinese, disclaimer footer preserved).
+
 Each milestone ends with a live, usable product: M1 is a shell you can look at, M2 a working logbook, and every later step adds magic without breaking what's there.

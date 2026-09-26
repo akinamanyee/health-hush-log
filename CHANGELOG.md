@@ -4,6 +4,20 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-26 20:41 — M30 delivered: post-record bottom navigation
+
+- `src/components/health/RecordModule.tsx` (serves `/blood-pressure`, `/grip`, `/sit-and-reach`) and `src/components/health/TanitaRecord.tsx` (serves `/tanita`) — both gain a new bottom `<nav aria-label="下一步">` block above the existing `<PrivacyNotice>` footer, containing two links:
+  - 「← 返回健康紀錄簿」 (TanStack Router `<Link to="/logbook">`)
+  - 「查看健康摘要 →」 (TanStack Router `<Link to="/summary">`)
+- Both files add `FileText` to their existing `lucide-react` import (`ArrowLeft` already imported for the top-of-page back-link).
+- Nav uses `text-lg` (50+-friendly), `py-3` (≥48px touch target), `focus-visible:ring-2 focus-visible:ring-ring` (keyboard-visible focus), `border-t border-border pt-6` (light divider from 歷史紀錄), `flex flex-wrap justify-center` (wraps to 2 lines on iPhone SE if needed). Token-based colors adapt to dark mode automatically. Icons carry `aria-hidden="true"`.
+- Inline comment names USER JOURNEY 5 and 7 as the promises this milestone serves.
+- Rationale: the top-of-page back-link only helps users scrolled up at the header. After saving and scrolling through 歷史紀錄, the user's thumb sits at the bottom of the page. This nav puts both destinations (return to logbook, jump to summary) where the user actually is at the moment of a fresh save. Bug caught in phone testing (previous investigation surfaced "no next-step prompt after saving").
+- Untouched: top back-link (kept as-is), BP 「複查安排」 panel (complementary — task vs navigation), save flow, toast, form clearing, delete-entry, `<PrivacyNotice>`, 歷史紀錄 list, all other pages, all storage, all AI, all grading, all reference tables.
+- No new state / hook / component (two call sites of an identical block; extract to a `<PostRecordNav>` component only when a 3rd caller appears).
+- Verified: `bunx tsc --noEmit` clean, `bun run build` clean.
+- Full plan: `plan/33-m30-post-record-navigation.md`. Awaiting Cloud Run redeploy.
+
 ## 2026-09-26 19:31 — Living-docs sync after M29
 
 - `ARCHITECTURE.md` static-reference-tables SSOT bullet extended from 5 → 6 cards. Names 坐地前伸 + `sitreach.ts` as the 6th self-lookup card. Adds notes: `matchesCell`'s `≤N` branch admits negative distance readings cleanly; sit-reach's silent `gradeEntry` parallels M28a's grip; the 2 verbatim source gaps (男 30-39 @ 30 cm; 男 60-69 @ 22 cm) are surfaced by footer text; M29 closes the reference-completion program for all 4 record modules.

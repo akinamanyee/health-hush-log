@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowLeft, Trash2 } from "lucide-react";
+import { ArrowLeft, FileText, Trash2 } from "lucide-react";
 import {
   Line,
   LineChart,
@@ -271,6 +271,25 @@ export function TanitaRecord({ mod }: { mod: ModuleDef }) {
           </>
         )}
       </section>
+
+      {/* M30: post-record navigation. The top-of-page back-link and this bottom nav
+          serve different scroll positions — after scrolling through 歷史紀錄 the
+          user's thumb is here, not up at the header. Two links (returns + summary)
+          honour USER JOURNEY 5 and 7 at the natural post-save touchpoint. */}
+      <nav aria-label="下一步" className="mt-10 flex flex-wrap items-center justify-center gap-6 border-t border-border pt-6 sm:gap-10">
+        <Link
+          to="/logbook"
+          className="inline-flex items-center gap-2 rounded-xl px-3 py-3 text-lg text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <ArrowLeft className="size-5" aria-hidden="true" /> 返回健康紀錄簿
+        </Link>
+        <Link
+          to="/summary"
+          className="inline-flex items-center gap-2 rounded-xl px-3 py-3 text-lg text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <FileText className="size-5" aria-hidden="true" /> 查看健康摘要
+        </Link>
+      </nav>
 
       <footer className="mt-8">
         <PrivacyNotice context="module" />
