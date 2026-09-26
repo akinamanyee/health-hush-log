@@ -290,6 +290,25 @@ Value: 50+ readers see where to go next at the exact scroll position
 they've reached after recording, without hunting.
 Traces: NORTHSTAR (trustworthy — the app guides its user) · USER JOURNEY 5 (「can return directly to 「健康紀錄簿」 without replaying the cover」) · USER JOURNEY 7 (path to health summary explicit) · HARD CONSTRAINTS (50+ friendly touch targets, Traditional Chinese, disclaimer footer preserved).
 
+## M32 — Tanita 每項必填、部位測量下架: 收支明確
+The Tanita module drops the two segmental sections (部位脂肪率 ×5 fields,
+部位肌肉量 ×5 fields) entirely, and elevates the 7 previously-optional
+fields (體脂量, 肌肉比率, 肌少症指數, 身體水分率, 身體水分量,
+基礎代謝率 kcal, 基礎代謝率 kJ) to required. Net: 22 fields → 12,
+all 必填. Removes the 選填 tag and collapsed `<details>` block from the
+Tanita record page; wire payload and Zod extraction schema trimmed to
+match. Save button now enforces every field is filled before storing
+a record (existing `!f.optional` gate in `useRecordState.submit`).
+This supersedes M17's 「16 new fields optional — a record is valid with
+just the original 5」 clause. No storage schema bump — orphan
+segmental keys in old localStorage entries stay in place, harmless
+because history / CSV read `mod.fields.filter(...)`. No AI grounding
+change; `REFERENCE_LEAFLET` / `TIPS_REFERENCE` byte-identical.
+Full plan: [plan/35-m32-tanita-required-fields.md](plan/35-m32-tanita-required-fields.md).
+Value: 50+ 繁中 readers no longer face a mixed 必填/選填 form with
+a hidden section — if a field is on the page, it belongs on the record.
+Traces: NORTHSTAR (readable — no ambiguity) · USER JOURNEY 3 (「records a reading」) · HARD CONSTRAINTS (Traditional Chinese, 50+ friendly, deterministic grading unchanged, local-only) · supersedes M17 optional-field clause.
+
 ## M31 — Tanita 6-屏加解釋文字: 用家指引
 Each of the Tanita module's 6 screens (體脂率, 肌肉量, 身體水分,
 內臟脂肪, 基礎代謝率, BMI) gains a short 繁中 description under its

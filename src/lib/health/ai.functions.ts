@@ -14,26 +14,16 @@ const ExtractInput = z.object({
 const TANITA_SCHEMA = z.object({
   weight: z.number().nullable(),
   bodyFat: z.number().nullable(),
-  muscleMass: z.number().nullable(),
-  bmi: z.number().nullable(),
-  visceralFat: z.number().nullable(),
   fatMass: z.number().nullable(),
+  muscleMass: z.number().nullable(),
   muscleRatio: z.number().nullable(),
+  smi: z.number().nullable(),
   bodyWaterPct: z.number().nullable(),
   bodyWaterKg: z.number().nullable(),
+  visceralFat: z.number().nullable(),
   bmrKcal: z.number().nullable(),
   bmrKj: z.number().nullable(),
-  fatTrunk: z.number().nullable(),
-  fatArmR: z.number().nullable(),
-  fatArmL: z.number().nullable(),
-  fatLegR: z.number().nullable(),
-  fatLegL: z.number().nullable(),
-  muscleTrunk: z.number().nullable(),
-  muscleArmR: z.number().nullable(),
-  muscleArmL: z.number().nullable(),
-  muscleLegR: z.number().nullable(),
-  muscleLegL: z.number().nullable(),
-  smi: z.number().nullable(),
+  bmi: z.number().nullable(),
 });
 
 const BP_SCHEMA = z.object({
@@ -46,7 +36,7 @@ const GRIP_SCHEMA = z.object({ grip: z.number().nullable() });
 const SIT_REACH_SCHEMA = z.object({ distance: z.number().nullable() });
 
 const EXTRACTION_FIELDS = {
-  tanita: "weight（體重 kg）、bodyFat（體脂率 %）、muscleMass（肌肉量 kg）、bmi、visceralFat（內臟脂肪等級）、fatMass（體脂量 kg）、muscleRatio（肌肉比率 %）、bodyWaterPct（身體水分率 %）、bodyWaterKg（身體水分量 kg）、bmrKcal（基礎代謝率 kcal）、bmrKj（基礎代謝率 kJ）、fatTrunk（軀幹脂肪率 %）、fatArmR（右臂脂肪率 %）、fatArmL（左臂脂肪率 %）、fatLegR（右腿脂肪率 %）、fatLegL（左腿脂肪率 %）、muscleTrunk（軀幹肌肉量 kg）、muscleArmR（右臂肌肉量 kg）、muscleArmL（左臂肌肉量 kg）、muscleLegR（右腿肌肉量 kg）、muscleLegL（左腿肌肉量 kg）",
+  tanita: "weight（體重 kg）、bodyFat（體脂率 %）、fatMass（體脂量 kg）、muscleMass（肌肉量 kg）、muscleRatio（肌肉比率 %）、smi（肌少症指數 kg/m²）、bodyWaterPct（身體水分率 %）、bodyWaterKg（身體水分量 kg）、visceralFat（內臟脂肪等級）、bmrKcal（基礎代謝率 kcal）、bmrKj（基礎代謝率 kJ）、bmi（BMI）",
   bp: "systolic（收縮壓 mmHg）、diastolic（舒張壓 mmHg）、pulse（脈搏）",
   grip: "grip（手握力 kg，左右手合計數值）",
   sitreach: "distance（坐地前伸距離 cm，可為負數）",
@@ -61,8 +51,8 @@ const EXTRACTION_SCHEMAS = {
 
 const TANITA_SCREENS = MODULE_BY_ID.tanita.screens!;
 const TANITA_SCREEN_PROMPTS: Record<string, string> = {
-  bodyFat: "weight（體重 kg）、bodyFat（體脂率 %）、fatMass（體脂量 kg）、fatTrunk（軀幹脂肪率 %）、fatArmR（右臂脂肪率 %）、fatArmL（左臂脂肪率 %）、fatLegR（右腿脂肪率 %）、fatLegL（左腿脂肪率 %）",
-  muscle: "weight（體重 kg）、muscleMass（肌肉量 kg）、muscleRatio（肌肉比率 %）、muscleTrunk（軀幹肌肉量 kg）、muscleArmR（右臂肌肉量 kg）、muscleArmL（左臂肌肉量 kg）、muscleLegR（右腿肌肉量 kg）、muscleLegL（左腿肌肉量 kg）",
+  bodyFat: "weight（體重 kg）、bodyFat（體脂率 %）、fatMass（體脂量 kg）",
+  muscle: "weight（體重 kg）、muscleMass（肌肉量 kg）、muscleRatio（肌肉比率 %）、smi（肌少症指數 kg/m²）",
   water: "weight（體重 kg）、bodyWaterPct（身體水分率 %）、bodyWaterKg（身體水分量 kg）",
   visceral: "weight（體重 kg）、visceralFat（內臟脂肪等級）",
   bmr: "weight（體重 kg）、bmrKcal（基礎代謝率 kcal）、bmrKj（基礎代謝率 kJ）",

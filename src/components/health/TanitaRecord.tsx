@@ -60,17 +60,6 @@ export function TanitaRecord({ mod }: { mod: ModuleDef }) {
       <div className="mt-6 space-y-6">
         {screens.map((screen, idx) => {
           const screenFields = mod.fields.filter((f) => screen.fields.includes(f.key));
-          const segmentalGroups = new Set(["部位脂肪率", "部位肌肉量"]);
-
-          const mainFields = screenFields.filter((f) => !f.group || !segmentalGroups.has(f.group));
-          const collapsedGroupOrder: string[] = [];
-          const collapsedGroups: Record<string, typeof screenFields> = {};
-          for (const f of screenFields) {
-            if (!f.group || !segmentalGroups.has(f.group)) continue;
-            let bucket = collapsedGroups[f.group];
-            if (!bucket) { bucket = collapsedGroups[f.group] = []; collapsedGroupOrder.push(f.group); }
-            bucket.push(f);
-          }
 
           return (
             <section key={screen.id} className="glass-card rounded-3xl p-6 sm:p-8">
@@ -91,7 +80,7 @@ export function TanitaRecord({ mod }: { mod: ModuleDef }) {
               </div>
 
               <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                {mainFields.map((f) => {
+                {screenFields.map((f) => {
                   const isWeightRepeat = f.key === "weight" && seenWeight.size > 0;
                   if (f.key === "weight") seenWeight.add(screen.id);
 
@@ -118,7 +107,6 @@ export function TanitaRecord({ mod }: { mod: ModuleDef }) {
                       <label htmlFor={`field-${f.key}`} className="text-base font-medium">
                         {f.label}
                         {f.unit && <span className="ml-1 text-muted-foreground">（{f.unit}）</span>}
-                        {f.optional && <span className="ml-1 text-sm text-muted-foreground">選填</span>}
                       </label>
                       <input
                         id={`field-${f.key}`}
@@ -137,36 +125,6 @@ export function TanitaRecord({ mod }: { mod: ModuleDef }) {
                   );
                 })}
               </div>
-
-              {collapsedGroupOrder.map((g) => (
-                <details key={g} className="mt-4 border-t border-border pt-4">
-                  <summary className="cursor-pointer text-base font-semibold">{g}</summary>
-                  <div className="mt-3 grid gap-4 sm:grid-cols-2">
-                    {collapsedGroups[g]!.map((f) => (
-                      <div key={`${screen.id}-${f.key}`}>
-                        <label htmlFor={`field-${f.key}`} className="text-base font-medium">
-                          {f.label}
-                          {f.unit && <span className="ml-1 text-muted-foreground">（{f.unit}）</span>}
-                          <span className="ml-1 text-sm text-muted-foreground">選填</span>
-                        </label>
-                        <input
-                          id={`field-${f.key}`}
-                          type="number"
-                          inputMode="decimal"
-                          step={f.step ?? "any"}
-                          min={f.min}
-                          max={f.max}
-                          value={values[f.key] ?? ""}
-                          onChange={(e) => setValues((v) => ({ ...v, [f.key]: e.target.value }))}
-                          className="mt-1 min-h-14 w-full rounded-xl border border-input bg-card px-4 text-lg"
-                          aria-invalid={Boolean(errors[f.key])}
-                        />
-                        {errors[f.key] && <p className="mt-1 text-base text-destructive">{errors[f.key]}</p>}
-                      </div>
-                    ))}
-                  </div>
-                </details>
-              ))}
             </section>
           );
         })}
