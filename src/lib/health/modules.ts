@@ -15,6 +15,10 @@ export interface ScreenDef {
   id: string;
   label: string;
   fields: string[];
+  // Optional short 繁中 description shown under the screen heading in the
+  // record UI so users know what the screen measures (M31). UI-only — never
+  // enters AI grounding (`REFERENCE_LEAFLET` / `TIPS_REFERENCE`) per ADR 0025.
+  description?: string;
 }
 
 export interface InfoPoint {
@@ -73,12 +77,12 @@ export const MODULES: ModuleDef[] = [
       { key: "smi", label: "肌少症指數（SMI）", unit: "kg/m²", min: 3, max: 12, step: "0.01", optional: true, group: "肌肉" },
     ],
     screens: [
-      { id: "bodyFat", label: "體脂率", fields: ["bodyFat", "fatMass", "weight", "fatTrunk", "fatArmR", "fatArmL", "fatLegR", "fatLegL"] },
-      { id: "muscle", label: "肌肉量", fields: ["muscleMass", "muscleRatio", "smi", "weight", "muscleTrunk", "muscleArmR", "muscleArmL", "muscleLegR", "muscleLegL"] },
-      { id: "water", label: "身體水分", fields: ["bodyWaterPct", "bodyWaterKg", "weight"] },
-      { id: "visceral", label: "內臟脂肪", fields: ["visceralFat", "weight"] },
-      { id: "bmr", label: "基礎代謝率（BMR）", fields: ["bmrKcal", "bmrKj", "weight"] },
-      { id: "bmi", label: "BMI", fields: ["bmi", "weight"] },
+      { id: "bodyFat", label: "體脂率", fields: ["bodyFat", "fatMass", "weight", "fatTrunk", "fatArmR", "fatArmL", "fatLegR", "fatLegL"], description: "脂肪佔體重的百分比。適度脂肪能保護身體，但過高會增加心血管疾病、糖尿病等風險。" },
+      { id: "muscle", label: "肌肉量", fields: ["muscleMass", "muscleRatio", "smi", "weight", "muscleTrunk", "muscleArmR", "muscleArmL", "muscleLegR", "muscleLegL"], description: "包含全身肌肉及其中水分。增加肌肉能提升基礎代謝率，增加熱量消耗並幫助減脂。" },
+      { id: "water", label: "身體水分", fields: ["bodyWaterPct", "bodyWaterKg", "weight"], description: "水分佔體重的百分比，與體脂肪呈反比。受日常作息影響波動，需長期觀察以維持機能正常運作。" },
+      { id: "visceral", label: "內臟脂肪", fields: ["visceralFat", "weight"], description: "腹腔器官周圍的脂肪，隨年齡易堆積。保持健康數值能有效降低心血管疾病與糖尿病風險。" },
+      { id: "bmr", label: "基礎代謝率（BMR）", fields: ["bmrKcal", "bmrKj", "weight"], description: "維持靜息狀態生理運作（如心跳、呼吸）的最低熱量。肌肉量越高，BMR 越高，越易消耗熱量。" },
+      { id: "bmi", label: "BMI", fields: ["bmi", "weight"], description: "身高與體重的標準化比例，是最常見的基礎健康評估指標。" },
     ],
   },
   {

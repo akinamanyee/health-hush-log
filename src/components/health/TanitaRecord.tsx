@@ -77,6 +77,11 @@ export function TanitaRecord({ mod }: { mod: ModuleDef }) {
               <h2 className="text-xl font-semibold">
                 {idx + 1}. {screen.label}
               </h2>
+              {screen.description && (
+                <p className="mt-1 text-base leading-relaxed text-muted-foreground">
+                  {screen.description}
+                </p>
+              )}
 
               <div className="mt-4">
                 <ImageDrop

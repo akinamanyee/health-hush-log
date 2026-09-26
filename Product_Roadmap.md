@@ -290,4 +290,22 @@ Value: 50+ readers see where to go next at the exact scroll position
 they've reached after recording, without hunting.
 Traces: NORTHSTAR (trustworthy — the app guides its user) · USER JOURNEY 5 (「can return directly to 「健康紀錄簿」 without replaying the cover」) · USER JOURNEY 7 (path to health summary explicit) · HARD CONSTRAINTS (50+ friendly touch targets, Traditional Chinese, disclaimer footer preserved).
 
+## M31 — Tanita 6-屏加解釋文字: 用家指引
+Each of the Tanita module's 6 screens (體脂率, 肌肉量, 身體水分,
+內臟脂肪, 基礎代謝率, BMI) gains a short 繁中 description under its
+numbered heading, telling users what the screen measures before they
+record a reading. Fills the info gap that grip and sit-reach already
+close via their module-level `infoText` popover — Tanita has 6 screens
+so each gets an inline description instead. Descriptions live on
+`ScreenDef.description` (new optional field) in `modules.ts`;
+`TanitaRecord.tsx` renders them under `<h2>` before the photo-drop.
+UI-only — text never enters `REFERENCE_LEAFLET` or `TIPS_REFERENCE`, so
+`allowedNumbers` and AI grounding math are byte-identical. Zero storage
+schema change; per-screen photo extraction (M19) unaffected because
+`ScreenDef.fields[]` is untouched. Sensitive-word audit + numbers audit
+(ADR 0024 / 0025) both green.
+Value: 50+ 繁中 readers now understand what each Tanita screen measures
+before recording, without having to guess or leave the page.
+Traces: NORTHSTAR (trustworthy — the app teaches its own vocabulary) · USER JOURNEY 3 (「records a reading」) · HARD CONSTRAINTS (Traditional Chinese, 50+ friendly, no AI grounding change) · ADR 0025 (UI text stays out of AI grounding).
+
 Each milestone ends with a live, usable product: M1 is a shell you can look at, M2 a working logbook, and every later step adds magic without breaking what's there.

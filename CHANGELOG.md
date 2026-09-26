@@ -4,6 +4,24 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-26 22:55 — M31 delivered: Tanita 6-screen descriptions
+
+- `src/lib/health/modules.ts` — `ScreenDef` interface gains `description?: string` (optional, UI-only, ADR 0025 forbids these strings entering AI grounding). All 6 tanita screens get a short 繁中 description:
+  - **bodyFat 體脂率**: 「脂肪佔體重的百分比。適度脂肪能保護身體，但過高會增加心血管疾病、糖尿病等風險。」
+  - **muscle 肌肉量**: 「包含全身肌肉及其中水分。增加肌肉能提升基礎代謝率，增加熱量消耗並幫助減脂。」
+  - **water 身體水分**: 「水分佔體重的百分比，與體脂肪呈反比。受日常作息影響波動，需長期觀察以維持機能正常運作。」
+  - **visceral 內臟脂肪**: 「腹腔器官周圍的脂肪，隨年齡易堆積。保持健康數值能有效降低心血管疾病與糖尿病風險。」
+  - **bmr 基礎代謝率（BMR）**: 「維持靜息狀態生理運作（如心跳、呼吸）的最低熱量。肌肉量越高，BMR 越高，越易消耗熱量。」
+  - **bmi BMI**: 「身高與體重的標準化比例，是最常見的基礎健康評估指標。」
+- `src/components/health/TanitaRecord.tsx` — renders `{screen.description && <p className="mt-1 text-base leading-relaxed text-muted-foreground">{screen.description}</p>}` directly under the numbered `<h2>` heading, above the `<ImageDrop>`. Optional guard keeps future ScreenDef consumers without descriptions unaffected.
+- Fills the info-gap that grip and sit-reach already close via their module-level `infoText` popover — Tanita has 6 screens so each gets its own inline description instead of a single popover.
+- Rationale: users reported no guidance on what each screen measured before recording; investigation confirmed 6 screens had zero explanation text anywhere in the UI (only a numbered title + input). This milestone populates the existing `ScreenDef` shape (extended with optional `description`) with your approved verbatim wording.
+- Untouched: `REFERENCE_LEAFLET`, `TIPS_REFERENCE`, `allowedNumbers`, `SENSITIVE_LABEL_PATTERN`, `Agency` union, `SELF_LOOKUP_CARD_NAMES`, `CARDS_WITH_SELF_LOOKUP`, `TANITA_SCHEMA`, AI extraction prompt hints, per-screen photo extraction (M19; reads `ScreenDef.fields[]` only, never `description`), storage envelope v1, all other modules and pages, grader logic for BMI + 內臟脂肪.
+- Audits (both green): sensitive-word — zero 男士/女士/長者/學生 hits in any of the 6 texts. Numbers-in-JSX-only — zero digits in any of the 6 texts after the visceral text was amended (「（等級 1-59）」 suffix dropped mid-plan on user's request).
+- No new ADR (populates an existing optional interface field — not a new principle).
+- Verified: `bunx tsc --noEmit` clean, `bun run build` clean.
+- Full plan: `plan/34-m31-tanita-screen-descriptions.md`. Awaiting Cloud Run redeploy.
+
 ## 2026-09-26 21:20 — Living-docs sync after M30
 
 - `ARCHITECTURE.md` — appended one sentence to the routes/navigation paragraph naming the M30 post-record bottom `<nav>` block (「返回健康紀錄簿」 + 「查看健康摘要」) rendered by `RecordModule.tsx` and `TanitaRecord.tsx` above the privacy footer. Notes it is JSX-only, reads no state, and honours USER JOURNEY 5 + 7 at the natural post-save touchpoint. Top back-link kept for scrolled-up users.
