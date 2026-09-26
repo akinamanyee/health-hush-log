@@ -4,6 +4,16 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-26 21:20 — Living-docs sync after M30
+
+- `ARCHITECTURE.md` — appended one sentence to the routes/navigation paragraph naming the M30 post-record bottom `<nav>` block (「返回健康紀錄簿」 + 「查看健康摘要」) rendered by `RecordModule.tsx` and `TanitaRecord.tsx` above the privacy footer. Notes it is JSX-only, reads no state, and honours USER JOURNEY 5 + 7 at the natural post-save touchpoint. Top back-link kept for scrolled-up users.
+- No new ADR file this session (M30 is not a new principle — it extends existing PRD USER JOURNEY promises).
+- No PRD change (M30's behaviour is already implied by USER JOURNEY 5 「can return directly to 「健康紀錄簿」」 and 7 「reads a plain-language health summary」).
+- CHANGELOG delivery entry for M30 (20:41) already present at top.
+- Roadmap M30 entry already appended with plan link (`plan/33-*.md`).
+- DECISIONS.md needs no update.
+- CLAUDE.md deploy runbook current — no new deploy incident (M28 + M28a + M29 + M30 all committed but still awaiting Cloud Run redeploy after rev 29 shipped M27+M27a).
+
 ## 2026-09-26 20:41 — M30 delivered: post-record bottom navigation
 
 - `src/components/health/RecordModule.tsx` (serves `/blood-pressure`, `/grip`, `/sit-and-reach`) and `src/components/health/TanitaRecord.tsx` (serves `/tanita`) — both gain a new bottom `<nav aria-label="下一步">` block above the existing `<PrivacyNotice>` footer, containing two links:

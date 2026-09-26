@@ -44,7 +44,11 @@ six labelled sections matching the physical analyser's screens, each with its ow
 for per-screen photo extraction. Both components consume the `useRecordState` hook, which holds
 all record state and behaviour once.
 The cover remains `/`; the stable dashboard destination is `/logbook`, so module, summary and
-error returns do not replay the cover.
+error returns do not replay the cover. Every record page (M30) carries a bottom `<nav>` with two
+links — 「← 返回健康紀錄簿」 (`/logbook`) and 「查看健康摘要 →」 (`/summary`) — rendered above the
+`<PrivacyNotice>` footer inside `RecordModule.tsx` and `TanitaRecord.tsx`. The nav is JSX-only,
+reads no state, and honours USER JOURNEY 5 + 7 at the natural post-save touchpoint (bottom of
+page after scrolling through 歷史紀錄). Top-of-page back-link is kept for scrolled-up users.
 
 ## Data flow
 
