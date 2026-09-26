@@ -4,6 +4,15 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-26 18:58 — Living-docs sync after M28 + M28a
+
+- `ARCHITECTURE.md` static-reference-tables SSOT bullet extended from 4 cards to 5. Names 手握力 + 職安局 as the 5th self-lookup card and its dedicated `src/lib/health/handgrip.ts` home. Names all 4 `matchesCell` display formats (`<N`, `≤N`, `≥N`, `N-M`). Documents the M28a `gradeEntry` split: grip now returns `[]` so its 「無適用參考標準」 label disappears from record/logbook/CSV while summary-card payload stays byte-identical via `interpretCard`'s hardcoded fallback (wire-sanitize preserved). Documents the M28a `min-w-0` layout fix on the summary card's flex child.
+- No new ADR file this session — ADR 0025's Source change history grew (M28 entry) but no new principle. DECISIONS.md index needs no update.
+- No PRD change — L51 Exception clause was extended in M28 to list 5 cards; M28a preserves that behaviour (the clause's "grader itself is unchanged" for Exception cards continues to hold — returning `[]` is an absence of grade, not a re-grade).
+- CHANGELOG delivery entries for M28 (11:30) and M28a (18:53) already present at top.
+- Roadmap M28 + M28a entries already appended with plan links (`plan/30-*.md`, `plan/31-*.md`).
+- CLAUDE.md deploy runbook current — no new deploy-time incident to record (M28 + M28a still awaiting Cloud Run redeploy after this docs sync).
+
 ## 2026-09-26 18:53 — M28a delivered: hotfix for grip label + summary card overflow
 
 Two bugs caught in M28 phone testing.
