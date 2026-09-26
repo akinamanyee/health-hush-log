@@ -4,6 +4,16 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-26 19:31 — Living-docs sync after M29
+
+- `ARCHITECTURE.md` static-reference-tables SSOT bullet extended from 5 → 6 cards. Names 坐地前伸 + `sitreach.ts` as the 6th self-lookup card. Adds notes: `matchesCell`'s `≤N` branch admits negative distance readings cleanly; sit-reach's silent `gradeEntry` parallels M28a's grip; the 2 verbatim source gaps (男 30-39 @ 30 cm; 男 60-69 @ 22 cm) are surfaced by footer text; M29 closes the reference-completion program for all 4 record modules.
+- No new ADR file this session — ADR 0025's Source change history grew with the M29 entry (already committed with the milestone).
+- No PRD change beyond L51 Exception list extension to 6 cards (already committed with M29).
+- CHANGELOG delivery entry for M29 (19:20) already present at top.
+- Roadmap M29 entry already appended with plan link (`plan/32-*.md`).
+- DECISIONS.md needs no update (no new ADR file).
+- CLAUDE.md deploy runbook current — no new deploy incident (M28 + M28a + M29 all committed but still awaiting Cloud Run redeploy after this docs sync; last deploy was rev 29 shipping M27+M27a).
+
 ## 2026-09-26 19:20 — M29 delivered: 坐地前伸 self-lookup card (職安局 5-tier)
 
 - **NEW** `src/lib/health/sitreach.ts` — 職安局 5-tier × 5-age × 2-gender norms encoded verbatim from source. Exports `SIT_REACH_CATEGORIES`, `SIT_REACH_AGE_BANDS`, `SIT_REACH_NORMS` matrix, `ageToSitReachBand`, `classifySitReach(age, gender, distanceCm)`. Runtime callers = none (ADR 0025); function ships as boundary-logic SSOT for future PRD-authorised paths or build-time tests. Header comment documents the 2 verbatim source gaps (男 30-39 @ 30 cm; 男 60-69 @ 22 cm). Classifier explicitly returns `undefined` for the gap values (fails safe).
