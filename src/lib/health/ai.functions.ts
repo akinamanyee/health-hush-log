@@ -84,21 +84,27 @@ export const extractFromImage = createServerFn({ method: "POST" })
       ? `這是身體組成分析儀「${screenMeta.label}」畫面的照片。`
       : "這是一張健康儀器屏幕的照片。";
 
-    const result = await generateText({
-      model: gateway("gemini-3.6-flash"),
-      messages: [
-        {
-          role: "user",
-          content: [
-            {
-              type: "text",
-              text: `${screenHint}請讀取以下數值：${fields}。只輸出一個 JSON 物件，鍵名用英文，讀不到的數值用 null，不要輸出任何其他文字。`,
-            },
-            { type: "image", image: data.image },
-          ],
-        },
-      ],
-    });
+    let result;
+    try {
+      result = await generateText({
+        model: gateway("gemini-3.6-flash"),
+        messages: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: `${screenHint}請讀取以下數值：${fields}。只輸出一個 JSON 物件，鍵名用英文，讀不到的數值用 null，不要輸出任何其他文字。`,
+              },
+              { type: "image", image: data.image },
+            ],
+          },
+        ],
+      });
+    } catch (err) {
+      console.error("[extractFromImage] AI call failed:", err);
+      throw new Error("圖片讀取暫時未能連線，請稍後再試或手動輸入。");
+    }
 
     const text = result.text;
     try {
@@ -266,12 +272,17 @@ ${tipsText}
 請用以下JSON格式回覆（不要輸出其他文字）：
 {"cards":[{"name":"項目名稱","interpretation":"解讀文字"}],"tips":[{"tip":"建議內容","topic":"主題名稱"}],"disclaimer":"提醒文字，須包含「醫生」二字"}`;
 
-    const run = async (prompt: string) => {
-      const result = await generateText({
-        model: gateway("gemini-3.6-flash"),
-        messages: [{ role: "user", content: prompt }],
-      });
-      return result.text.trim();
+    const run = async (prompt: string, phase: string) => {
+      try {
+        const result = await generateText({
+          model: gateway("gemini-3.6-flash"),
+          messages: [{ role: "user", content: prompt }],
+        });
+        return result.text.trim();
+      } catch (err) {
+        console.error(`[generateRichSummary] ${phase} failed:`, err);
+        throw new Error(`摘要生成暫時未能連線（${phase}）。請稍後再試。`);
+      }
     };
 
     const parseOutput = (text: string): RawSummary => {
@@ -282,13 +293,14 @@ ${tipsText}
       return parsed;
     };
 
-    let text = await run(basePrompt);
+    let text = await run(basePrompt, "初次");
     let output: RawSummary;
     try {
       output = parseOutput(text);
     } catch {
       text = await run(
         `${basePrompt}\n\n【重要】上一次回覆的JSON格式不正確。請嚴格按照指定的JSON格式回覆，不要加入任何其他文字。`,
+        "格式重試",
       );
       output = parseOutput(text);
     }
@@ -299,6 +311,7 @@ ${tipsText}
     if (failure) {
       text = await run(
         `${basePrompt}\n\n【重要】上一次生成不合規（原因：${failure}）。請完全不要寫出任何參考資料沒有出現過的數字，並必須提醒不能取代醫生診斷，避免使用「男士、女士、長者、學生」等群體字眼。tips 陣列中每項的 topic 欄位必須完整複製參考資料【】內的主題名稱，不可簡化、不可翻譯、不可加減任何標點或字符。cards 陣列中每項的 name 欄位必須完整照抄輸入的項目名稱（例如「血壓」而非「血壓及脈搏」，「BMI」而非「BMI 體重」），不可加減字元或加描述。`,
+        "合規重試",
       );
       try {
         output = parseOutput(text);

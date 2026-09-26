@@ -4,6 +4,18 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-27 00:15 — M33 hotfix delivered: AI 呼叫失敗顯示繁中錯誤
+
+- `src/lib/health/ai.functions.ts` — wrap both `generateText(...)` call sites in `try/catch`:
+  - `extractFromImage` handler: image-read `generateText` call wrapped; catch logs `console.error("[extractFromImage] AI call failed:", err)` server-side and throws `Error("圖片讀取暫時未能連線，請稍後再試或手動輸入。")` client-side. Existing inner `try/catch` around `screenSchema.parse(...)` untouched — it catches malformed AI responses, this new catch is one layer earlier at the network/API boundary.
+  - `generateRichSummary` inner `run(prompt)` helper: gains `phase: string` param and a wrapping `try/catch`. Catch logs `console.error("[generateRichSummary] ${phase} failed:", err)` and throws `Error("摘要生成暫時未能連線（${phase}）。請稍後再試。")`. Three call sites tagged: `"初次"` (line ~291), `"格式重試"` (line ~297), `"合規重試"` (line ~307).
+- Rationale: user reported 生成健康摘要 button failing with 「Load failed」 on the live M32 revision (`heartcaring-app-00035-s9n`). Investigation showed both `generateText(...)` calls previously ran without any exception handler — any Google-side failure (auth, quota, model deprecated, Cloud Run 60s timeout, transient network) threw uncaught, the server function 500'd with no CORS body, and iPhone Safari surfaced its network-layer `TypeError: Load failed` string verbatim in `toast.error(e.message)`. This violated PRD L52's 「a failed generation must show a real error rather than invented advice」 for the specific case of a network-layer failure.
+- Diagnostic path preserved: `console.error` in Cloud Run logs still carries the full underlying trace (auth error, 429 rate limit, 504 timeout, whatever the actual Google-side reason was) — only the browser-facing toast is genericised. Phase tag in the summary message narrows which of the three retries died on repeat reports.
+- Untouched: `REFERENCE_LEAFLET`, `TIPS_REFERENCE`, `allowedNumbers`, `SENSITIVE_LABEL_PATTERN`, `TANITA_SCHEMA` (M32), `RichSummaryInput` (M27a cap 12), `interpretCard`, `SELF_LOOKUP_CARD_NAMES`, `CARDS_WITH_SELF_LOOKUP`, grounding failure logic, JSON-parse fallback, `summary.tsx` client, storage envelope v1, all other modules and pages. No timeout increase, no retry-count change, no model change, no wire-payload change.
+- PRD alignment: L23 NORTHSTAR ✓, L50 wire payload (no change) ✓, L52 failed-generation real error ✓ (now honoured for the network-layer case), L55 繁中 throughout ✓.
+- Verified: `bunx tsc --noEmit` clean, `bun run build` clean.
+- Full plan: `plan/36-m33-ai-call-error-surface.md`. Awaiting Cloud Run redeploy.
+
 ## 2026-09-26 23:40 — M32 delivered: Tanita 每項必填、部位測量下架
 
 - `src/lib/health/modules.ts` — `tanita.fields[]` trimmed 22 → 12 fields. 10 segmental fields removed entirely (`fatTrunk`, `fatArmR`, `fatArmL`, `fatLegR`, `fatLegL`, `muscleTrunk`, `muscleArmR`, `muscleArmL`, `muscleLegR`, `muscleLegL`). 7 previously-optional fields elevated to required by dropping their `optional: true` and `group: …` markers: `fatMass` (體脂量), `muscleRatio` (肌肉比率), `smi` (肌少症指數), `bodyWaterPct` (身體水分率), `bodyWaterKg` (身體水分量), `bmrKcal` (基礎代謝率 kcal), `bmrKj` (基礎代謝率 kJ). Field order rewritten so each screen's metrics group together. `bodyFat` screen `fields[]` narrowed to `["bodyFat", "fatMass", "weight"]`; `muscle` screen to `["muscleMass", "muscleRatio", "smi", "weight"]`. Other 4 screens unchanged. M31 descriptions preserved verbatim.

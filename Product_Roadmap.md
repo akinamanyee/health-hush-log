@@ -290,6 +290,26 @@ Value: 50+ readers see where to go next at the exact scroll position
 they've reached after recording, without hunting.
 Traces: NORTHSTAR (trustworthy — the app guides its user) · USER JOURNEY 5 (「can return directly to 「健康紀錄簿」 without replaying the cover」) · USER JOURNEY 7 (path to health summary explicit) · HARD CONSTRAINTS (50+ friendly touch targets, Traditional Chinese, disclaimer footer preserved).
 
+## M33 — hotfix: AI 呼叫失敗顯示 Chinese 錯誤而非「Load failed」
+Two `generateText(...)` call sites in `src/lib/health/ai.functions.ts`
+(`generateRichSummary` inner `run()` and `extractFromImage`'s image
+call) previously ran without `try/catch`. Any Google-side failure
+(auth, quota, model deprecated, transient network, Cloud Run 60s
+timeout) threw uncaught, the handler 500'd with no CORS body, and
+iPhone Safari surfaced the network-layer `TypeError: Load failed` in
+`toast.error(e.message)`. M33 wraps both calls: server-side
+`console.error` preserves the full underlying trace in Cloud Run logs;
+the client toast now reads 「摘要生成暫時未能連線（初次｜格式重試｜合規重試）。請稍後再試。」
+or 「圖片讀取暫時未能連線，請稍後再試或手動輸入。」 in 繁中. Phase tag
+in the summary message narrows which retry died (base vs JSON-retry vs
+grounding-retry) for repeat reports. No timeout, retry-count, model,
+wire-payload, or grading logic change — only the failure surface.
+Full plan: [plan/36-m33-ai-call-error-surface.md](plan/36-m33-ai-call-error-surface.md).
+Value: PRD L52's promise 「a failed generation must show a real error
+rather than invented advice」 now holds in 繁中 for the case it was
+silently violating (network-layer failure surfaced as English 「Load failed」).
+Traces: NORTHSTAR (trustworthy — real errors, in the user's language) · HARD CONSTRAINTS (L52 failed-generation real error, L55 繁中 throughout).
+
 ## M32 — Tanita 每項必填、部位測量下架: 收支明確
 The Tanita module drops the two segmental sections (部位脂肪率 ×5 fields,
 部位肌肉量 ×5 fields) entirely, and elevates the 7 previously-optional
