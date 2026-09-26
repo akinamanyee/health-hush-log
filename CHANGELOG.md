@@ -4,6 +4,13 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-26 11:14 — Deploy M27 + M27a to Cloud Run (rev 29)
+
+- Deployed `cloud-run-prep` HEAD (commit `d463173`) to Cloud Run service `heartcaring-app`, region `asia-east1`, project `gen-lang-client-0014480564`. New active revision: `heartcaring-app-00029-qs5` serving 100% of traffic on heartcaring.fit.
+- Ships live: M27 (BMR + 體內水分 + SMI summary cards with TANITA reference tables + value overlay + wire-payload sanitize + M26 badge-omission extended to 4 cards) and M27a (wire-payload card cap raised 6 → 12 to accommodate the added cards without silent rejection).
+- Cloud Shell prompted for project ID this time (unlike rev 27/28) — resolved by typing `gen-lang-client-0014480564` at the prompt. `gcloud config set project` would prevent re-prompting.
+- No auth trap this time — `gh auth login` from rev 27 stayed cached.
+
 ## 2026-09-24 18:45 — M27a delivered: wire-payload card cap 6 → 12 (hotfix)
 
 - `src/lib/health/ai.functions.ts` — `RichSummaryInput.cards.max(6)` → `.max(12)`.
