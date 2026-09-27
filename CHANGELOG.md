@@ -4,6 +4,18 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-27 01:20 — M35 delivered: 體脂率 grader hotfix
+
+- `src/lib/health/grade.ts` — remove the 4-line synthetic push `out.push({metric: "體脂率", label: "無適用參考標準", tone: "neutral"})` from the `case "tanita"` block in `gradeEntry`. Add an 8-line explanatory comment above the case body mirroring the M28a (grip) / M29 (sit-reach) style — noting the 體脂率 self-lookup matrix (PRD L51 Exception, ADR 0025), the fallback path on the summary side (`gradeByMetric.get("體脂率") ?? "無適用參考標準"` in `interpretCardCore`), and the byte-identical wire-sanitize behaviour.
+- Rationale: user reported during phone testing 2026-09-27 that 體脂率 still shows 「無適用參考標準」 despite the app carrying a full TANITA reference matrix on the same card. Investigation traced the label to the synthetic grade the tanita case pushed unconditionally — same class of bug M28a and M29 fixed for grip and sit-reach. PRD L51's Exception clause names 體脂率 as one of six cards whose badge is skipped precisely because a reference IS present; the grader emitting the negative label directly contradicted what the reference matrix on the same card visibly said. M35 completes the M26/M28a/M29 pattern for the one card that was overlooked.
+- Surfaces affected: `/tanita` record page grades section (below the form), `/logbook` Tanita row badges, CSV 「等級」 column for 體脂率 — all three stop stamping 「無適用參考標準」 for 體脂率. Consistent with grip and sit-reach post-M28a/M29.
+- Summary card `/summary`: zero change. `CARDS_WITH_SELF_LOOKUP` in `summary.tsx` (M26) already hides the 體脂率 badge; `interpretCard`'s 體脂率 branch reads `gradeByMetric.get("體脂率")` and falls back to `?? "無適用參考標準"` (grade.ts:176), so the CardInterpretation payload is byte-identical. Wire-sanitize (`SELF_LOOKUP_CARD_NAMES` in `ai.functions.ts`, M27) still rewrites 體脂率's grade to 「請自行對照下方對照表」 before AI sees it — unaffected.
+- Untouched: BMI grader, 內臟脂肪等級 grader (both have real deterministic bands, not on L51 Exception list), BMR/體內水分/SMI (never had a synthetic grader push), all other modules, PRD, storage envelope, wire schema, `REFERENCE_LEAFLET`, `TIPS_REFERENCE`, `allowedNumbers`, `SENSITIVE_LABEL_PATTERN`, `RichSummaryInput` cap, M31 descriptions, M32 required-field set, M33 try/catch, M34 timing logs.
+- PRD alignment: L23 NORTHSTAR (trustworthy — no self-contradiction) ✓, L48 local-only ✓, L50 wire byte-identical ✓, L51 Exception directly honoured ✓, L52 grounded AI unchanged ✓, L55 繁中 ✓.
+- `adr/0025-static-reference-vs-ai-advice.md`: one line added to Source change history — 「M35 (2026-09-27): 體脂率 grader stop synthesising 「無適用參考標準」 across record / logbook / CSV surfaces, completing the M26 / M28a / M29 pattern.」
+- Verified: `bunx tsc --noEmit` clean, `bun run build` clean.
+- Full plan: `plan/38-m35-body-fat-grader-fix.md`. Awaiting Cloud Run redeploy.
+
 ## 2026-09-27 00:55 — M34 delivered: summary handler wall-clock diagnostics
 
 - `src/lib/health/ai.functions.ts` — timing wrappers added to both AI handlers.

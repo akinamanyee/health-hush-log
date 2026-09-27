@@ -64,15 +64,19 @@ export function gradeEntry(
       return [];
     }
     case "tanita": {
+      // 體脂率 (M35), like grip (M28a) and sit-reach (M29), has an in-app
+      // TANITA 5-tier × 3-age × 2-gender self-lookup reference matrix on its
+      // summary card (PRD L51 Exception; ADR 0025 Source change history).
+      // No synthetic 「無適用參考標準」 push here so record form, logbook and
+      // CSV stop stamping a label that contradicts the reference visible on
+      // the same card. Summary side reads gradeByMetric.get("體脂率") with
+      // `?? "無適用參考標準"` fallback (interpretCardCore), so wire-sanitize
+      // and card SSOT are byte-identical.
       const out: GradeResult[] = [];
       const bmi = values["bmi"];
       if (bmi != null) {
         const g = gradeBmi(bmi);
         out.push({ metric: "BMI", label: g, tone: bandTone(g) });
-      }
-      const fat = values["bodyFat"];
-      if (fat != null) {
-        out.push({ metric: "體脂率", label: "無適用參考標準", tone: "neutral" });
       }
       const visceral = values["visceralFat"];
       if (visceral != null) {

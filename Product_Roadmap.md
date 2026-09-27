@@ -290,6 +290,29 @@ Value: 50+ readers see where to go next at the exact scroll position
 they've reached after recording, without hunting.
 Traces: NORTHSTAR (trustworthy — the app guides its user) · USER JOURNEY 5 (「can return directly to 「健康紀錄簿」 without replaying the cover」) · USER JOURNEY 7 (path to health summary explicit) · HARD CONSTRAINTS (50+ friendly touch targets, Traditional Chinese, disclaimer footer preserved).
 
+## M35 — 體脂率 grader hotfix: no more contradictory 「無適用參考標準」 on record / logbook / CSV
+The Tanita grader in `src/lib/health/grade.ts` still pushed a
+synthetic `{metric: "體脂率", label: "無適用參考標準"}` grade
+whenever `bodyFat` was filled, so the `/tanita` record form's grades
+section, the `/logbook` row list, and the CSV grade column all
+stamped 「無適用參考標準」 next to 體脂率 — directly contradicting
+the TANITA 5-tier × 3-age × 2-gender self-lookup reference matrix
+M23–M26 landed on the 體脂率 summary card, and PRD L51's Exception
+clause that explicitly names 體脂率 as one of six cards whose badge
+is skipped precisely because a reference IS present. M35 removes the
+synthetic push, mirroring the exact pattern M28a (grip) and M29
+(sit-reach) already applied. `interpretCardCore` still reads
+`gradeByMetric.get("體脂率")` and falls back to `?? "無適用參考標準"`,
+so summary card, wire-sanitize and card SSOT are byte-identical;
+only record / logbook / CSV surfaces stop stamping the misleading
+label. Full plan:
+[plan/38-m35-body-fat-grader-fix.md](plan/38-m35-body-fat-grader-fix.md).
+Value: 50+ users no longer read 「no reference exists」 inches away
+from a reference table they can look themselves up in — the same
+self-contradiction M26 fixed for the summary side, now consistent
+across all four surfaces.
+Traces: NORTHSTAR (trustworthy — no self-contradiction) · HARD CONSTRAINTS L51 Exception · ADR 0025 (Source change history: M35 extension) · caught in user testing 2026-09-27.
+
 ## M34 — 摘要延時可見: server-side wall-clock diagnostics
 After M33 confirmed the summary handler returns HTTP 200 successfully
 every time (three consecutive POST 200 lines in Cloud Run logs for

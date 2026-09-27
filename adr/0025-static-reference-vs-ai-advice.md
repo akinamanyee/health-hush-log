@@ -80,6 +80,19 @@ Concretely:
 
 ## Source change history
 
+- **2026-09-27 (M35)** — 體脂率 grader stops synthesising 「無適用參考標準」
+  across record / logbook / CSV surfaces. `gradeEntry` no longer pushes
+  a fake grade for `bodyFat`, mirroring the M28a (grip) and M29 (sit-reach)
+  return-nothing pattern. Rationale: the 體脂率 summary card has carried
+  the TANITA 5-tier × 3-age × gender self-lookup matrix since M23-M26, and
+  PRD L51's Exception names 體脂率 as one of six cards whose badge is
+  skipped because a reference IS present — but the record form, logbook
+  and CSV kept stamping 「無適用參考標準」 next to the same card that
+  visibly carries the reference. `interpretCardCore`'s 體脂率 branch
+  still reads `gradeByMetric.get("體脂率") ?? "無適用參考標準"`, so summary
+  card + wire-sanitize behaviour are byte-identical; only the record /
+  logbook / CSV surfaces stop the misleading label.
+
 - **2026-09-26 (M29)** — The self-lookup pattern extends to 坐地前伸
   (6th card). Source: 職安局 5-tier × 5 age bands × 2 genders reach-
   distance norms (cm). Data encoded verbatim in a new file
