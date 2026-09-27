@@ -4,6 +4,18 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-27 21:49 HKT — Living-docs sync after M33 / M34 / M35
+
+- `ARCHITECTURE.md` — three targeted updates reconciling code with docs:
+  1. Static-reference-tables paragraph (§ SSOT map) — updated the enumeration of which self-lookup metrics have a silent `gradeEntry`. Was: "體脂率 either returns 「無適用參考標準」 in the CardInterpretation payload OR is silent; grip (M28a) and sit-reach (M29) are silent". Now: all 6 self-lookup metrics have silent `gradeEntry` returning `[]`, with 體脂率 (M35) explicitly named alongside grip (M28a) and sit-reach (M29). `interpretCard` fallback still supplies the string in the wire payload — summary + wire byte-identical.
+  2. Access-and-privacy model (§ what leaves the device) — the "no logging of payloads" line kept its truth but silently omitted M33/M34's server-side observability. Expanded to state that Cloud Run logs now carry `[generateRichSummary]` and `[extractFromImage]` lines with **durations, counts, phase names, module/screen IDs only** — never card values, prompts, or AI outputs. Also documented the M33 繁中 failure-surface (「摘要生成暫時未能連線（<phase>）」 / 「圖片讀取暫時未能連線」) as the fulfilment path for PRD L52's failed-generation real-error promise.
+  3. Grading-rules bullets — the "grip / sit-and-reach return 「無適用參考標準」" line was pre-M28a/M29 truth; the "body-fat returns 「無適用參考標準」" line was pre-M35 truth. Both rewritten to say `gradeEntry` returns `[]` for all three (age/gender-uncollected metrics), with the interpretCard fallback + M27 wire-sanitize path noted.
+- `Product_Roadmap.md` — already carries M33, M34, M35 entries from delivery turns. No update needed.
+- `CHANGELOG.md` — this entry plus prior M33/M34/M35 delivery entries at top. No older entries need migration to `changelog-archive.md` yet (well under 100).
+- `DECISIONS.md` / `adr/` — no new ADR this session; M35 amended `adr/0025-static-reference-vs-ai-advice.md`'s Source change history with one bullet at delivery time. M33 and M34 are hotfix + diagnostics, no new principle. DECISIONS.md index unchanged.
+- `PRD.md` — no deviation this session. M35 brought code INTO compliance with PRD L51 (which already covered the 體脂率 self-lookup exception in prose); M33 fulfils L52 for the network-layer failure case; M34 is silent server-side observability with no PRD surface. No log-of-deviation entry needed.
+- Timestamp source: container's NTP-synced system clock via `TZ=Asia/Hong_Kong date -Iseconds` → `2026-09-27T21:49:50+08:00`.
+
 ## 2026-09-27 01:20 — M35 delivered: 體脂率 grader hotfix
 
 - `src/lib/health/grade.ts` — remove the 4-line synthetic push `out.push({metric: "體脂率", label: "無適用參考標準", tone: "neutral"})` from the `case "tanita"` block in `gradeEntry`. Add an 8-line explanatory comment above the case body mirroring the M28a (grip) / M29 (sit-reach) style — noting the 體脂率 self-lookup matrix (PRD L51 Exception, ADR 0025), the fallback path on the summary side (`gradeByMetric.get("體脂率") ?? "無適用參考標準"` in `interpretCardCore`), and the byte-identical wire-sanitize behaviour.
