@@ -4,6 +4,21 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-27 22:15 HKT — M36 delivered: 儲存前一目了然 (teal-when-ready button + toast + auto-scroll)
+
+- `src/components/health/useRecordState.ts` — three additions:
+  1. `ready: boolean` memo over `values` + `mod.fields`. True iff every field carries a non-empty raw that parses inside `[min, max]`. Cost: 12 iterations per keystroke, negligible. Post-M32 no field is optional so no `f.optional` gate needed.
+  2. `submit()` failure branch expanded: after `setErrors(errs)` and before the early return, fires `toast.error(\`尚有 ${count} 項未填或超出範圍，已標紅，請補上再儲存。\`)` then `queueMicrotask(() => document.querySelector('[aria-invalid="true"]')?.scrollIntoView({behavior:"smooth", block:"center"}))`. `queueMicrotask` guarantees React has committed the new `errors` state (so `aria-invalid` is on the DOM) before the query runs.
+  3. `ready` added to the hook's return object alongside `errors`, `grades`, etc.
+- `src/components/health/TanitaRecord.tsx` — import `Check` from `lucide-react`; consume `ready`. Button className adds `${ready ? "bg-accent text-accent-foreground hover:bg-accent/90" : ""}` (teal token from PRD L57 「teal accents」 palette); children swap from 「儲存紀錄」 to `<Check className="size-5" aria-hidden="true" />` + 「儲存紀錄（已填齊）」 when ready. WCAG SC 1.4.1 satisfied by pairing colour change with icon + text swap.
+- `src/components/health/RecordModule.tsx` — same `Check` import + `ready` consumption + button className/children swap as TanitaRecord. Also drops the stale `mod.fields.some((f) => f.optional)` gate on the 「已填 N / M 項」 counter block: post-M32 every field is required so the gate always evaluated false and the counter never rendered on BP/grip/sit-reach; it now renders uniformly across all 4 record pages, matching TanitaRecord's existing behaviour.
+- Rationale: user reported during 2026-09-27 testing that on tapping 儲存紀錄 they cannot tell what's missing until they scroll up through the whole form looking for red text — especially painful on Tanita's 6 screens. M36 solves it three ways: passive teal cue before the tap so the user knows the form is saveable in advance; audible/visible toast on incomplete tap so the tap-registered signal is unmissable; auto-scroll brings the field to the thumb rather than making the user hunt.
+- Design decisions preserved from plan: `ready` = filled AND in-range (a teal button that later fails would be a worse lie than silent grey); `queueMicrotask` over `useEffect` (same tick, cleaner); `bg-accent` design-system token, not raw hex (dark-mode tuning stays a one-line CSS-variable change); no "disable button" alternative (disabled mobile buttons read as broken and block the toast/scroll educational path).
+- Untouched: `grade.ts`, `interpretCard`, `ai.functions.ts` (M33 try/catch + M34 timing logs), `summary.tsx`, `logbook`, `csv.ts`, all 4 module reference tables (M27/M28/M29), M30 bottom nav, M31 descriptions, M32 required-field set, M35 grader fix, storage envelope v1, PRD.
+- PRD alignment: L13/L47 anonymous ✓, L23 NORTHSTAR readable ✓, L35 USER JOURNEY 4 「confirms」 gains readiness cue + 「saves」 gains incomplete signal ✓, L48 local-only ✓, L50 wire byte-identical ✓, L52 grounded AI unaffected ✓, L55 繁中 (button label + suffix + toast all 繁中) ✓, L57 Japanese-minimalist (`bg-accent` = palette teal accent; `min-h-14`/`text-lg`/full-width preserved) ✓.
+- Verified: `bunx tsc --noEmit` clean, `bun run build` clean.
+- Full plan: `plan/39-m36-save-ready-ux.md`. Awaiting Cloud Run redeploy.
+
 ## 2026-09-27 21:49 HKT — Living-docs sync after M33 / M34 / M35
 
 - `ARCHITECTURE.md` — three targeted updates reconciling code with docs:

@@ -38,6 +38,21 @@ export function useRecordState(mod: ModuleDef) {
 
   const grades = gradeEntry(mod, numeric);
 
+  // M36: ready = every required field carries a non-empty raw that parses
+  // inside [min, max]. Drives the teal-when-ready button state in both
+  // record page components; a passive readiness cue that lets a 50+ user
+  // know the form is saveable before tapping. Post-M32 every field is
+  // required so no `f.optional` gate is needed.
+  const ready = useMemo(() => {
+    return mod.fields.every((f) => {
+      const raw = values[f.key];
+      if (raw == null || raw === "") return false;
+      const v = parseFloat(raw);
+      if (Number.isNaN(v)) return false;
+      return v >= f.min && v <= f.max;
+    });
+  }, [values, mod]);
+
   const onImage = async (dataUrl: string, screenId?: string) => {
     if (getAiUsageToday() >= AI_DAILY_LIMIT) {
       toast.error("今日 AI 讀取次數已達上限，請手動輸入或明天再試。");
@@ -100,7 +115,18 @@ export function useRecordState(mod: ModuleDef) {
       }
     }
     setErrors(errs);
-    if (Object.keys(errs).length > 0) return;
+    if (Object.keys(errs).length > 0) {
+      // M36: audible/visible feedback + auto-scroll to first invalid field.
+      // Toast confirms the tap registered; scroll brings the field to the
+      // user's thumb rather than making them hunt for red text.
+      toast.error(`尚有 ${Object.keys(errs).length} 項未填或超出範圍，已標紅，請補上再儲存。`);
+      queueMicrotask(() => {
+        document
+          .querySelector('[aria-invalid="true"]')
+          ?.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+      return;
+    }
     const entry = makeEntry(numeric, date);
     save((prev) => sortEntries([entry, ...prev]));
     setValues({});
@@ -146,6 +172,7 @@ export function useRecordState(mod: ModuleDef) {
     errors,
     numeric,
     grades,
+    ready,
     onImage,
     onVoice,
     submit,

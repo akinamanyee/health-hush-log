@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowLeft, FileText, Info, Trash2 } from "lucide-react";
+import { ArrowLeft, Check, FileText, Info, Trash2 } from "lucide-react";
 import {
   Line,
   LineChart,
@@ -31,6 +31,7 @@ export function RecordModule({ mod }: { mod: ModuleDef }) {
     busy,
     errors,
     grades,
+    ready,
     onImage,
     onVoice,
     submit,
@@ -188,7 +189,11 @@ export function RecordModule({ mod }: { mod: ModuleDef }) {
           </div>
         )}
 
-        {mod.fields.some((f) => f.optional) && (() => {
+        {(() => {
+          // M36: gate dropped. Post-M32 no field is optional so the previous
+          // `mod.fields.some((f) => f.optional)` gate always evaluated false
+          // and this counter never rendered on BP/grip/sit-reach. Now it
+          // renders uniformly across all 4 record pages like TanitaRecord does.
           const filledCount = mod.fields.filter((f) => {
             const raw = values[f.key];
             return raw != null && raw !== "";
@@ -204,9 +209,10 @@ export function RecordModule({ mod }: { mod: ModuleDef }) {
           type="button"
           onClick={submit}
           size="lg"
-          className="mt-6 min-h-14 w-full rounded-xl text-lg font-semibold"
+          className={`mt-6 min-h-14 w-full rounded-xl text-lg font-semibold ${ready ? "bg-accent text-accent-foreground hover:bg-accent/90" : ""}`}
         >
-          儲存紀錄
+          {ready && <Check className="size-5" aria-hidden="true" />}
+          {ready ? "儲存紀錄（已填齊）" : "儲存紀錄"}
         </Button>
       </section>
 

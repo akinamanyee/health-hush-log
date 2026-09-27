@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowLeft, FileText, Trash2 } from "lucide-react";
+import { ArrowLeft, Check, FileText, Trash2 } from "lucide-react";
 import {
   Line,
   LineChart,
@@ -28,6 +28,7 @@ export function TanitaRecord({ mod }: { mod: ModuleDef }) {
     busy,
     errors,
     grades,
+    ready,
     onImage,
     submit,
     remove,
@@ -158,9 +159,10 @@ export function TanitaRecord({ mod }: { mod: ModuleDef }) {
         type="button"
         onClick={submit}
         size="lg"
-        className="mt-6 min-h-14 w-full rounded-xl text-lg font-semibold"
+        className={`mt-6 min-h-14 w-full rounded-xl text-lg font-semibold ${ready ? "bg-accent text-accent-foreground hover:bg-accent/90" : ""}`}
       >
-        儲存紀錄
+        {ready && <Check className="size-5" aria-hidden="true" />}
+        {ready ? "儲存紀錄（已填齊）" : "儲存紀錄"}
       </Button>
 
       <section className="glass-card mt-6 rounded-3xl p-6 sm:p-8">

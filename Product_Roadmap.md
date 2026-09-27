@@ -290,6 +290,32 @@ Value: 50+ readers see where to go next at the exact scroll position
 they've reached after recording, without hunting.
 Traces: NORTHSTAR (trustworthy — the app guides its user) · USER JOURNEY 5 (「can return directly to 「健康紀錄簿」 without replaying the cover」) · USER JOURNEY 7 (path to health summary explicit) · HARD CONSTRAINTS (50+ friendly touch targets, Traditional Chinese, disclaimer footer preserved).
 
+## M36 — 儲存前一目了然: teal-when-ready button + toast + auto-scroll
+All 4 record pages (`/blood-pressure`, `/grip`, `/sit-and-reach`,
+`/tanita`) gain three coordinated save-time signals so a 50+ user knows
+both (a) whether the form is ready to save before tapping and (b) what
+to fix when it isn't. (1) The 儲存紀錄 button lives in two states:
+navy 「儲存紀錄」 while any required field is empty or out-of-range;
+teal 「✓ 儲存紀錄（已填齊）」 the moment every required field carries a
+value inside its `[min, max]`. (2) On an incomplete tap, a toast reads
+「尚有 N 項未填或超出範圍，已標紅，請補上再儲存。」. (3) On the same tap
+the first `[aria-invalid="true"]` field smooth-scrolls to viewport centre.
+Bonus: the RecordModule 「已填 N / M 項」 counter's stale
+`mod.fields.some((f) => f.optional)` gate is dropped — post-M32 no field
+is optional so the gate always evaluated false and the counter never
+rendered on BP/grip/sit-reach; it now renders uniformly across all
+4 pages like TanitaRecord's does. Ready state derived from
+`useRecordState`'s new `ready` memo (filled AND in-range). Uses the
+existing `bg-accent` design-system token (PRD L57 「teal accents」);
+Check icon + text swap honour WCAG SC 1.4.1. Zero storage / wire /
+grader / AI / summary change.
+Full plan: [plan/39-m36-save-ready-ux.md](plan/39-m36-save-ready-ux.md).
+Value: 50+ readers see readiness before tapping (passive teal cue),
+audible/visible failure signal on tap (toast), and the exact field
+needing attention appears in front of them (scroll) — three
+mechanisms each doing one job.
+Traces: NORTHSTAR (readable — the form tells its state) · USER JOURNEY 4 (「reviews and confirms … then saves」) · HARD CONSTRAINTS L55 繁中 · L57 Japanese-minimalist + 50+ friendly.
+
 ## M35 — 體脂率 grader hotfix: no more contradictory 「無適用參考標準」 on record / logbook / CSV
 The Tanita grader in `src/lib/health/grade.ts` still pushed a
 synthetic `{metric: "體脂率", label: "無適用參考標準"}` grade
