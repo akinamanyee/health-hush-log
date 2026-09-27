@@ -4,6 +4,26 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-27 22:45 HKT — M37 delivered: 儲存動作明確化 (「tap to save」 before, 「saved」 after)
+
+- `src/components/health/useRecordState.ts`:
+  - Add `justSaved: boolean` state — ephemeral UI-only flag driving the ~1.6s post-tap button reassurance beat.
+  - In `submit()` success branch (after the existing `toast.success("已儲存紀錄（只保存於此裝置）。")`): `setJustSaved(true)` + `setTimeout(() => setJustSaved(false), 1600)`. 1600ms is the read-and-comprehend budget for a 50+ user glancing at the button after tapping.
+  - Expose `justSaved` in the hook's return.
+  - Cleanup: drop the pre-M32 `hasOptional` dead branch in the photo-extraction success toast (lines 72-85 before edit). Post-M32 no field is optional so the branch was unreachable — always executed the "no optional" toast form. Kept only the branch that reports 「已讀取圖片（已填 N / M 項）」 (or 「全部 M 項已填」 when N === M), which the always-visible counter above the save button already corroborates.
+- `src/components/health/TanitaRecord.tsx` — add `Save` to lucide-react import alongside `Check`; consume `justSaved`. Button now renders three states:
+  - `justSaved`: teal `bg-accent` + `<Check />` + 「已儲存」
+  - `ready` (M36): teal `bg-accent` + `<Save />` + 「一按儲存」 (replaces M36's misleading 「儲存紀錄（已填齊）」 with imperative wording)
+  - neither: navy `bg-primary` + 「儲存紀錄」
+  className uses `ready || justSaved` for the shared teal look; children ternary orders `justSaved` first so the label wins during the 1.6s overlap.
+- `src/components/health/RecordModule.tsx` — same three-state button treatment as TanitaRecord (applies to BP / grip / sit-reach).
+- Rationale: user tested M36 and reported that the teal ✓ button read as 「saved」 rather than 「ready to save」 — ✓ + teal/green are universal completion signifiers in every UI convention, so a 50+ user assumed the record was already stored and did not tap. M36's icon choice was in the wrong state; M37 puts ✓ where it belongs (after the save) and uses the floppy-disk `<Save />` glyph pre-tap so the button says 「action pending」 not 「action completed」. The 1.6s teal 「已儲存」 beat also fixes the 「did anything happen?」 moment for 50+ users whose eyes stay on the button when the toast fires at the top of the page.
+- Design decisions preserved: teal stays for both ready + just-saved states (reverting to navy inside 1.6s would flicker); `<Save />` chosen over `<ArrowDownToLine />` / `<ArrowRight />` for universal 50+ recognition; `setTimeout` cleanup relies on React GC — dev-only unmount warning, no prod effect; no "disable button" alternative (still rejected — disabled mobile buttons read as broken and block M36's toast + scroll educational path).
+- Untouched: `grade.ts`, `interpretCard`, `ai.functions.ts` (M33 try/catch + M34 timing logs), `summary.tsx`, `logbook`, `csv.ts`, all reference tables (M27/M28/M29), M30 bottom nav, M31 descriptions, M32 required-field set, M35 grader fix, M36 toast + auto-scroll, storage envelope v1, PRD.
+- PRD alignment: L13/L47 anonymous ✓ (justSaved is in-memory UI state), L23 NORTHSTAR trustworthy ✓ (button state matches reality at every phase), L35 USER JOURNEY 4 「reviews and confirms … then saves」 ✓ (three distinct visuals for the three verbs), L48 local-only ✓, L50 wire byte-identical ✓, L52 grounded AI unchanged ✓, L55 繁中 (儲存紀錄 / 一按儲存 / 已儲存 all 繁中) ✓, L57 Japanese-minimalist + 50+ friendly (`bg-accent` teal token, `min-h-14`, `text-lg`, full-width preserved; Save/Check icons at `size-5`) ✓.
+- Verified: `bunx tsc --noEmit` clean, `bun run build` clean.
+- Full plan: `plan/40-m37-save-action-clarity.md`. Awaiting Cloud Run redeploy.
+
 ## 2026-09-27 22:15 HKT — M36 delivered: 儲存前一目了然 (teal-when-ready button + toast + auto-scroll)
 
 - `src/components/health/useRecordState.ts` — three additions:

@@ -26,6 +26,12 @@ export function useRecordState(mod: ModuleDef) {
   const [busy, setBusy] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  // M37: ephemeral "just-saved" flag drives the ~1.6s post-tap button state
+  // (teal 「✓ 已儲存」). Fixes the M36 misread where the pre-tap teal ✓ read
+  // as "saved" and users didn't tap. Now ✓ appears only after the save
+  // actually happened; the pre-tap ready state uses a Save (floppy) icon
+  // and 「一按儲存」 label, which is imperative not affirmative.
+  const [justSaved, setJustSaved] = useState(false);
 
   const numeric = useMemo(() => {
     const out: Record<string, number> = {};
@@ -69,20 +75,19 @@ export function useRecordState(mod: ModuleDef) {
       }
       setValues(filled);
       bumpAiUsage();
-      const hasOptional = mod.fields.some((f) => f.optional);
-      if (hasOptional) {
-        const filledCount = mod.fields.filter(
-          (f) => filled[f.key] != null && filled[f.key] !== "",
-        ).length;
-        const total = mod.fields.length;
-        const msg =
-          filledCount >= total
-            ? `已讀取圖片（全部 ${total} 項已填）。請核對數值後儲存。`
-            : `已讀取圖片（已填 ${filledCount} / ${total} 項）。可繼續拍攝下一個畫面，或核對後儲存。`;
-        toast.success(msg);
-      } else {
-        toast.success("已讀取圖片，請核對數值後儲存。");
-      }
+      // M37 cleanup: post-M32 no field is optional so the previous
+      // `hasOptional` branch was dead code. Single toast form now — the
+      // always-visible 「已填 N / M 項」 counter above the save button
+      // corroborates the count for the user.
+      const filledCount = mod.fields.filter(
+        (f) => filled[f.key] != null && filled[f.key] !== "",
+      ).length;
+      const total = mod.fields.length;
+      const msg =
+        filledCount >= total
+          ? `已讀取圖片（全部 ${total} 項已填）。請核對數值後儲存。`
+          : `已讀取圖片（已填 ${filledCount} / ${total} 項）。可繼續拍攝下一個畫面，或核對後儲存。`;
+      toast.success(msg);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "讀取失敗，請手動輸入。");
     } finally {
@@ -132,6 +137,12 @@ export function useRecordState(mod: ModuleDef) {
     setValues({});
     setSelectedId(entry.id);
     toast.success("已儲存紀錄（只保存於此裝置）。");
+    // M37: 1600ms reassurance beat on the save button (teal 「✓ 已儲存」)
+    // so 50+ users whose eyes are on the button — not the top-of-page
+    // toast — get a clear "the tap worked" signal before the button
+    // reverts to navy 「儲存紀錄」 as `values` clears.
+    setJustSaved(true);
+    setTimeout(() => setJustSaved(false), 1600);
   };
 
   const remove = (id: string) =>
@@ -173,6 +184,7 @@ export function useRecordState(mod: ModuleDef) {
     numeric,
     grades,
     ready,
+    justSaved,
     onImage,
     onVoice,
     submit,

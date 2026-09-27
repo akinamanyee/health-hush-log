@@ -290,6 +290,34 @@ Value: 50+ readers see where to go next at the exact scroll position
 they've reached after recording, without hunting.
 Traces: NORTHSTAR (trustworthy — the app guides its user) · USER JOURNEY 5 (「can return directly to 「健康紀錄簿」 without replaying the cover」) · USER JOURNEY 7 (path to health summary explicit) · HARD CONSTRAINTS (50+ friendly touch targets, Traditional Chinese, disclaimer footer preserved).
 
+## M37 — 儲存動作明確化: 「tap to save」 before, 「saved」 after
+Follow-up on M36's ready-state button. Phone-test feedback: the M36
+teal button with a ✓ tick reads as 「saved」 rather than 「ready to
+save」 — ✓ + teal are universal completion signifiers, so a 50+ user
+reasonably assumes the record is already stored and doesn't tap. M37
+re-vocabularises the save button into three distinct states so icon +
+text + colour reinforce the current step, not the next one:
+(1) navy 「儲存紀錄」 while any field is empty/out-of-range;
+(2) teal 「💾 一按儲存」 with a `<Save />` (floppy-disk) icon when all
+fields are ready — imperative, not affirmative;
+(3) teal 「✓ 已儲存」 with `<Check />` for ~1.6s immediately after a
+successful save, then reverts to navy 「儲存紀錄」 as `values` clears.
+The ✓ tick now earns its keep post-tap where 「done」 is true; the
+Save icon signals pending action pre-tap. Post-save reassurance beat
+prevents the 「did anything happen?」 moment for 50+ users whose eyes
+stay on the button rather than tracking to the top-of-page toast.
+Implementation: `justSaved: boolean` state in `useRecordState` (set
+true on submit success, cleared 1600ms later via `setTimeout`); both
+record page components consume it and render the three-state button.
+Bonus cleanup: the pre-M32 `hasOptional` dead branch in the photo-
+extraction success toast is dropped — post-M32 no field is optional
+so the branch was unreachable. Zero storage / wire / grader / AI /
+summary change.
+Full plan: [plan/40-m37-save-action-clarity.md](plan/40-m37-save-action-clarity.md).
+Value: button state now matches reality at every phase — 50+ users
+know when to tap and know it worked without hunting for the toast.
+Traces: NORTHSTAR (trustworthy — the button doesn't lie about state) · USER JOURNEY 4 (「reviews and confirms … then saves」 — three distinct verbs, three distinct visuals) · HARD CONSTRAINTS L55 繁中 · L57 Japanese-minimalist + 50+ friendly · caught in user testing after M36 deploy.
+
 ## M36 — 儲存前一目了然: teal-when-ready button + toast + auto-scroll
 All 4 record pages (`/blood-pressure`, `/grip`, `/sit-and-reach`,
 `/tanita`) gain three coordinated save-time signals so a 50+ user knows

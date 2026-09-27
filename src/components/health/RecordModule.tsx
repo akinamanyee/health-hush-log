@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowLeft, Check, FileText, Info, Trash2 } from "lucide-react";
+import { ArrowLeft, Check, FileText, Info, Save, Trash2 } from "lucide-react";
 import {
   Line,
   LineChart,
@@ -32,6 +32,7 @@ export function RecordModule({ mod }: { mod: ModuleDef }) {
     errors,
     grades,
     ready,
+    justSaved,
     onImage,
     onVoice,
     submit,
@@ -209,10 +210,21 @@ export function RecordModule({ mod }: { mod: ModuleDef }) {
           type="button"
           onClick={submit}
           size="lg"
-          className={`mt-6 min-h-14 w-full rounded-xl text-lg font-semibold ${ready ? "bg-accent text-accent-foreground hover:bg-accent/90" : ""}`}
+          className={`mt-6 min-h-14 w-full rounded-xl text-lg font-semibold ${(ready || justSaved) ? "bg-accent text-accent-foreground hover:bg-accent/90" : ""}`}
         >
-          {ready && <Check className="size-5" aria-hidden="true" />}
-          {ready ? "儲存紀錄（已填齊）" : "儲存紀錄"}
+          {justSaved ? (
+            <>
+              <Check className="size-5" aria-hidden="true" />
+              已儲存
+            </>
+          ) : ready ? (
+            <>
+              <Save className="size-5" aria-hidden="true" />
+              一按儲存
+            </>
+          ) : (
+            "儲存紀錄"
+          )}
         </Button>
       </section>
 
