@@ -290,6 +290,33 @@ Value: 50+ readers see where to go next at the exact scroll position
 they've reached after recording, without hunting.
 Traces: NORTHSTAR (trustworthy — the app guides its user) · USER JOURNEY 5 (「can return directly to 「健康紀錄簿」 without replaying the cover」) · USER JOURNEY 7 (path to health summary explicit) · HARD CONSTRAINTS (50+ friendly touch targets, Traditional Chinese, disclaimer footer preserved).
 
+## M40 — Re-introduce ASM inputs for AWGS-grounded SMI
+Fixes M39's SMI formula which violated PRD L51 「never extrapolates」.
+M39 computed `smi = totalMuscleMass / height²`, but the AWGS 2019
+thresholds (男 <7.0 / 女 <5.7 kg/m²) rendered on the summary card
+are defined against **appendicular skeletal muscle mass (ASM)** —
+arms + legs only, excluding trunk. Total-muscle-based SMI runs
+~1.7–2× higher than AWGS SMI, systematically misclassifying users
+against the visible thresholds. M40 re-introduces the 4 limb muscle
+inputs the user's TANITA MC-780MA displays on its segmental-muscle
+screen (`muscleArmL`, `muscleArmR`, `muscleLegL`, `muscleLegR`; trunk
+excluded because AWGS ASM excludes trunk), inserts a new 「四肢肌肉量」
+screen between muscle and water with photo extraction targeting the
+L ARM / R ARM / L LEG / R LEG readings, and rewrites the `derived`
+memo in `useRecordState`: ASM = sum of 4 limb values, SMI = ASM / (height/100)².
+Both values stored (`values.asm` and `values.smi`). Live preview on
+the ASM screen shows ASM total and computed SMI as the user types.
+Summary SMI card removes M39's misleading caveat and adds a grounded
+source line: 「SMI 由四肢骨骼肌質量（ASM＝雙臂＋雙腿肌肉量）÷ 身高平方
+推算，對應 AWGS 2019 標準」. Field count 11→15, screen count 6→7.
+Zero storage bump. Reverses the M32 segmental-muscle drop with new
+evidence — user provided the TANITA screen photo confirming the raw
+data is on the device.
+Full plan: [plan/43-m40-asm-grounded-smi.md](plan/43-m40-asm-grounded-smi.md).
+Value: PRD L51 restored; users' ★ overlay on the SMI matrix now
+matches their actual AWGS classification.
+Traces: NORTHSTAR (trustworthy — grounded derivation) · HARD CONSTRAINTS L51 (restored) · L52 grounded AI (leaflet unchanged) · ADR 0025 (Source change history: M40 replaces M39's ungrounded SMI with AWGS-based derivation).
+
 ## M39 — SMI 及 BMI 改為推算值，改而記錄身高
 TANITA displays neither SMI nor BMI on a dedicated screen on the user's
 model. Both were previously required raw fields users had to record

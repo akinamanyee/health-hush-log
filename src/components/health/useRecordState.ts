@@ -53,22 +53,32 @@ export function useRecordState(mod: ModuleDef) {
     return out;
   }, [values, mod]);
 
-  // M39: BMI and SMI are derived from raw inputs (weight + height for BMI,
-  // muscleMass + height for SMI). They are stored on save so downstream code
-  // (grader, interpretCard, CSV, history) reads them by key exactly as before.
+  // M40: BMI derived from weight + height; ASM = 4 limb muscle values summed;
+  // SMI = ASM / (height/100)² — grounded against AWGS 2019 thresholds rendered
+  // on the summary card. This replaces the M39 formula (total muscleMass /
+  // height²) which was ungrounded and violated PRD L51 "never extrapolates".
+  // Stored via same keys interpretCard reads (values.bmi / values.smi), with
+  // values.asm added for CSV / history display.
   const derived = useMemo(() => {
     if (mod.id !== "tanita") return numeric;
     const out = { ...numeric };
     const h = numeric["height"];
     const w = numeric["weight"];
-    const mm = numeric["muscleMass"];
     if (h != null && w != null) {
       const m = h / 100;
       out["bmi"] = Math.round((w / (m * m)) * 10) / 10;
     }
-    if (h != null && mm != null) {
-      const m = h / 100;
-      out["smi"] = Math.round((mm / (m * m)) * 100) / 100;
+    const aL = numeric["muscleArmL"];
+    const aR = numeric["muscleArmR"];
+    const lL = numeric["muscleLegL"];
+    const lR = numeric["muscleLegR"];
+    if (aL != null && aR != null && lL != null && lR != null) {
+      const asm = Math.round((aL + aR + lL + lR) * 10) / 10;
+      out["asm"] = asm;
+      if (h != null) {
+        const m = h / 100;
+        out["smi"] = Math.round((asm / (m * m)) * 100) / 100;
+      }
     }
     return out;
   }, [numeric, mod.id]);

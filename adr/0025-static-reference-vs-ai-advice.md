@@ -80,6 +80,24 @@ Concretely:
 
 ## Source change history
 
+- **2026-09-29 (M40)** — SMI derivation grounded against AWGS 2019.
+  Fixes M39 which computed `smi = totalMuscleMass / height²` against
+  thresholds (男 <7.0 / 女 <5.7 kg/m²) that AWGS defines using
+  **appendicular skeletal muscle mass (ASM)** — arms + legs only,
+  excluding trunk. Total-muscle-based SMI runs ~1.7–2× higher than
+  AWGS SMI and systematically misclassifies users against the matrix
+  the same card renders — a violation of this ADR's principle that
+  the app must not extrapolate beyond the reference source. User
+  provided a TANITA MC-780MA segmental-muscle screen photo confirming
+  the raw limb data is on the device. M40 re-adds 4 limb muscle
+  fields (`muscleArmL`, `muscleArmR`, `muscleLegL`, `muscleLegR`;
+  trunk excluded) — reversing part of M32's segmental drop with new
+  evidence — inserts a new 「四肢肌肉量」 screen with photo extraction
+  targeting the L ARM / R ARM / L LEG / R LEG readings, and rewrites
+  `useRecordState.derived`: `asm = sum of 4 limbs`, `smi = asm / (height/100)²`.
+  Summary card's M39 caveat removed; replaced with an AWGS 2019
+  source line. Old entries preserved by key.
+
 - **2026-09-29 (M39)** — SMI and BMI move from raw stored inputs to
   derived values computed in `useRecordState.derived` from a new `height`
   raw field on save. Rationale: user's TANITA displays neither SMI nor

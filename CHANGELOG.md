@@ -4,6 +4,31 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-29 HKT — M40 delivered: ASM inputs re-introduced for AWGS-grounded SMI (fixes M39)
+
+- Root cause of the fix: user challenged whether M39's SMI derivation was grounded. Honest answer was no — `smi = totalMuscleMass / (height/100)²` used total muscle whereas AWGS 2019 thresholds (男 <7.0 / 女 <5.7 kg/m² rendered on the summary matrix) are defined against **appendicular skeletal muscle mass (ASM)** — limbs only, excluding trunk. Total-muscle-based SMI runs ~1.7–2× higher than AWGS SMI, systematically misclassifying users against the visible thresholds and violating PRD L51 「never extrapolates」. User provided a photo of the TANITA MC-780MA segmental-muscle screen (TRUNK 19.8 / L ARM 1.5 / R ARM 1.5 / L LEG 7.5 / R LEG 7.5 kg → ASM 18.0 kg) proving the raw data is on the device. This reverses part of M32's segmental-muscle drop with grounded evidence.
+- `src/lib/health/modules.ts`:
+  - Re-added 4 raw fields between `muscleRatio` and `bodyWaterPct`: `muscleArmL` (左臂肌肉量, 公斤, 0.1-15), `muscleArmR`, `muscleLegL` (0.5-30), `muscleLegR`. Trunk NOT re-added (AWGS ASM excludes trunk).
+  - New screen inserted between `muscle` and `water`: `{ id: "asm", label: "四肢肌肉量", fields: ["muscleArmL", "muscleArmR", "muscleLegL", "muscleLegR", "weight"], description: "四肢骨骼肌質量（ASM）＝雙臂＋雙腿。用於推算肌少症指數（SMI）＝ ASM ÷ 身高平方，對應 AWGS 2019 標準。" }`. Default supportsPhoto (true).
+  - Net field count 11 → 15; screen count 6 → 7.
+- `src/lib/health/ai.functions.ts`:
+  - `TANITA_SCHEMA` regains 4 nullable keys.
+  - Whole-module `EXTRACTION_FIELDS.tanita` prompt lists the 4 limb keys with 繁中 hints.
+  - New `TANITA_SCREEN_PROMPTS.asm` entry uses TANITA's device labels (L ARM / R ARM / L LEG / R LEG) as photo-reading hints — Gemini reads the segmental-muscle screen cleanly.
+- `src/components/health/useRecordState.ts` — `derived` memo rewritten:
+  - BMI derivation unchanged (already correct).
+  - `asm = round(muscleArmL + muscleArmR + muscleLegL + muscleLegR, 1)` stored in `values.asm`.
+  - `smi = round(asm / (height/100)², 2)` stored in `values.smi` — **now grounded against the AWGS 2019 thresholds the summary matrix renders**.
+- `src/components/health/TanitaRecord.tsx` — new ASM-screen live preview block: 「四肢肌肉量合計（ASM）：X.X 公斤」 the moment all 4 limbs are present; 「推算肌少症指數（SMI）：X.XX kg/m²」 when ASM + height both present. BMI-screen preview from M39 preserved.
+- `src/routes/summary.tsx` — M39 caveat 「⋯與部分 TANITA 儀器所顯示的 SMI 讀數⋯可能略有差異」 replaced with grounded source line: 「SMI 由四肢骨骼肌質量（ASM＝雙臂＋雙腿肌肉量）÷ 身高平方推算，對應 AWGS 2019 標準」. M38 caption + matrix + ★ overlay preserved.
+- Worked example: user with muscleArmL=1.5, muscleArmR=1.5, muscleLegL=7.5, muscleLegR=7.5, height=170 → ASM = 18.0 kg; SMI = 18.0 / 1.7² = 6.23 kg/m². Below 男 <7.0 threshold → ★ lands in 男 「肌肉質量不足」 cell of the matrix, matching AWGS classification. (Pre-M40 with muscleMass=37.8 total: M39 would have computed 13.08 kg/m² — comfortably above 7.0 → wrongly classified as healthy.)
+- Storage: no envelope bump. Old pre-M39 entries with raw smi retained via key lookup on interpretCard. M39-window entries (short-lived, cache still stale on user's phone) retain wrong smi in storage; self-correct on re-record with the 4 limb inputs.
+- Untouched: grader logic, interpretCard, SELF_LOOKUP_CARD_NAMES wire sanitize, CARDS_WITH_SELF_LOOKUP, REFERENCE_LEAFLET, TIPS_REFERENCE, allowedNumbers, SENSITIVE_LABEL_PATTERN, other 5 Tanita screens' M31 descriptions, M30 nav, M33 try/catch, M34 timing logs, M35 grader fix, M36 toast + auto-scroll, M37 button states, M38 SMI caption, M39 height field + BMI derivation.
+- PRD alignment: L13/L47 anonymous ✓, L48 local-only (no bump) ✓, L50 wire byte-identical ✓, **L51 restored ✓** (SMI derivation uses the same ASM shape AWGS thresholds are based on; no more extrapolation), L52 grounded AI unchanged ✓, L55 繁中 ✓, L57 50+ friendly ✓.
+- `adr/0025-static-reference-vs-ai-advice.md`: one line added to Source change history — 「M40 (2026-09-29): SMI derivation grounded — 4 limb muscle fields (muscleArmL/R, muscleLegL/R) re-added; new 四肢肌肉量 screen with photo extraction; ASM = sum, SMI = ASM / height² matching AWGS 2019 thresholds. Replaces M39's ungrounded total-muscle formula which violated 'never extrapolates'.」
+- Verified: `bunx tsc --noEmit` clean, `bun run build` clean.
+- Full plan: `plan/43-m40-asm-grounded-smi.md`. Awaiting Cloud Run redeploy.
+
 ## 2026-09-29 HKT — M39 delivered: SMI 及 BMI 改為推算值，改而記錄身高
 
 - `src/lib/health/modules.ts`:

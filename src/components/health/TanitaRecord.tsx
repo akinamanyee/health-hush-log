@@ -143,6 +143,21 @@ export function TanitaRecord({ mod }: { mod: ModuleDef }) {
                   )}
                 </div>
               )}
+
+              {screen.id === "asm" && (
+                <div className="mt-4 space-y-2">
+                  {derived["asm"] != null && (
+                    <p className="text-base font-medium">
+                      四肢肌肉量合計（ASM）：<span className="text-lg">{derived["asm"]}</span> 公斤
+                    </p>
+                  )}
+                  {derived["smi"] != null && (
+                    <p className="text-base font-medium">
+                      推算肌少症指數（SMI）：<span className="text-lg">{derived["smi"]}</span> kg/m²
+                    </p>
+                  )}
+                </div>
+              )}
             </section>
           );
         })}

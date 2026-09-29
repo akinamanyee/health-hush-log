@@ -62,6 +62,10 @@ export const MODULES: ModuleDef[] = [
       { key: "fatMass", label: "體脂量", unit: "公斤", min: 0.1, max: 200, step: "0.1" },
       { key: "muscleMass", label: "肌肉量", unit: "公斤", min: 5, max: 120, step: "0.1" },
       { key: "muscleRatio", label: "肌肉比率", unit: "%", min: 1, max: 80, step: "0.1" },
+      { key: "muscleArmL", label: "左臂肌肉量", unit: "公斤", min: 0.1, max: 15, step: "0.1" },
+      { key: "muscleArmR", label: "右臂肌肉量", unit: "公斤", min: 0.1, max: 15, step: "0.1" },
+      { key: "muscleLegL", label: "左腿肌肉量", unit: "公斤", min: 0.5, max: 30, step: "0.1" },
+      { key: "muscleLegR", label: "右腿肌肉量", unit: "公斤", min: 0.5, max: 30, step: "0.1" },
       { key: "bodyWaterPct", label: "身體水分率", unit: "%", min: 10, max: 80, step: "0.1" },
       { key: "bodyWaterKg", label: "身體水分量", unit: "公斤", min: 5, max: 200, step: "0.1" },
       { key: "visceralFat", label: "內臟脂肪等級", unit: "", min: 1, max: 59, step: "1" },
@@ -72,6 +76,7 @@ export const MODULES: ModuleDef[] = [
     screens: [
       { id: "bodyFat", label: "體脂率", fields: ["bodyFat", "fatMass", "weight"], description: "脂肪佔體重的百分比。適度脂肪能保護身體，但過高會增加心血管疾病、糖尿病等風險。" },
       { id: "muscle", label: "肌肉量", fields: ["muscleMass", "muscleRatio", "weight"] },
+      { id: "asm", label: "四肢肌肉量", fields: ["muscleArmL", "muscleArmR", "muscleLegL", "muscleLegR", "weight"], description: "四肢骨骼肌質量（ASM）＝雙臂＋雙腿。用於推算肌少症指數（SMI）＝ ASM ÷ 身高平方，對應 AWGS 2019 標準。" },
       { id: "water", label: "身體水分", fields: ["bodyWaterPct", "bodyWaterKg", "weight"], description: "水分佔體重的百分比，與體脂肪呈反比。受日常作息影響波動，需長期觀察以維持機能正常運作。" },
       { id: "visceral", label: "內臟脂肪", fields: ["visceralFat", "weight"], description: "腹腔器官周圍的脂肪，隨年齡易堆積。保持健康數值能有效降低心血管疾病與糖尿病風險。" },
       { id: "bmr", label: "基礎代謝率（BMR）", fields: ["bmrKcal", "bmrKj", "weight"], description: "維持靜息狀態生理運作（如心跳、呼吸）的最低熱量。肌肉量越高，BMR 越高，越易消耗熱量。" },

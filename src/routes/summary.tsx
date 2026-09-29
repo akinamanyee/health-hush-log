@@ -423,7 +423,7 @@ function SmiStandardTable({ userValue }: { userValue: number | undefined }) {
         <p>女（肌少症指數 &lt;5.7 kg/m²）為肌肉質量不足</p>
       </div>
       <p className="mt-2 text-xs text-muted-foreground">
-        註：本應用程式以總肌肉量 ÷ 身高平方（kg/m²）推算 SMI，與部分 TANITA 儀器所顯示的 SMI 讀數（以四肢肌肉量計算）可能略有差異。
+        SMI 由四肢骨骼肌質量（ASM＝雙臂＋雙腿肌肉量）÷ 身高平方推算，對應 AWGS 2019 標準。
       </p>
       <SmiMatrixTable title="男性 肌少症指數" data={SMI_MALE} userValue={userValue} />
       <SmiMatrixTable title="女性 肌少症指數" data={SMI_FEMALE} userValue={userValue} />
