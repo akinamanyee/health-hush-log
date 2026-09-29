@@ -290,6 +290,32 @@ Value: 50+ readers see where to go next at the exact scroll position
 they've reached after recording, without hunting.
 Traces: NORTHSTAR (trustworthy — the app guides its user) · USER JOURNEY 5 (「can return directly to 「健康紀錄簿」 without replaying the cover」) · USER JOURNEY 7 (path to health summary explicit) · HARD CONSTRAINTS (50+ friendly touch targets, Traditional Chinese, disclaimer footer preserved).
 
+## M41 — 動態卡片名單: end the stale-whitelist grounding failure
+Fixes the 「摘要未通過內容核對（卡片解讀未對應項目名稱），已停止顯示」
+red banner on `/summary`. Root cause: the base prompt's card-name
+whitelist at `ai.functions.ts:270` was a hardcoded 6-name list from
+the M21 era (「血壓」、「BMI」、「體脂率」、「內臟脂肪」、「手握力」、「坐地前伸」六者其一)
+— but M27/M28/M29 added 3 more Tanita cards (基礎代謝率, 體內水分,
+肌少症指數) to `interpretCard`'s output without updating this
+sentence. When a user records a full Tanita session that populates
+all 6 Tanita cards (now unblocked by M40's grounded SMI derivation),
+the AI obeys the whitelist and refuses to emit `name` for the 3
+non-listed cards → `parseOutput` filters them → `output.cards.length
+< expectedCardCount` → grounding-failure toast. M41 rebuilds the
+whitelist from `Array.from(validCardNames)` (the same Set
+`parseOutput` filters on, already computed one line earlier at line
+265), so the prompt sentence stays perpetually in sync with whatever
+`data.cards` actually contains. 「照抄以下之一：⋯」 replaces the
+stale 「六者其一」 count word so no future card addition can ossify
+it again. Both retries (parse-retry, grounding-retry) inherit via
+basePrompt interpolation. Zero storage / wire / JSON-shape /
+grounding-check-logic / PRD change.
+Full plan: [plan/44-m41-dynamic-card-name-whitelist.md](plan/44-m41-dynamic-card-name-whitelist.md).
+Value: PRD L52's 「grounded AI」 promise now holds for the full-record
+summary path M40 unblocked; users with complete Tanita records get
+their interpretation cards instead of a red banner.
+Traces: NORTHSTAR (trustworthy — the promise of a working summary honoured) · HARD CONSTRAINTS L52 grounded AI (restored for multi-card path) · caught via user testing 2026-09-29 immediately after M40 deploy.
+
 ## M40 — Re-introduce ASM inputs for AWGS-grounded SMI
 Fixes M39's SMI formula which violated PRD L51 「never extrapolates」.
 M39 computed `smi = totalMuscleMass / height²`, but the AWGS 2019

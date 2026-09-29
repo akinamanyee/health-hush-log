@@ -264,10 +264,18 @@ export const generateRichSummary = createServerFn({ method: "POST" })
     const validTopics = new Set(relevantTips.map((t) => t.topic));
     const validCardNames = new Set(data.cards.map((c) => c.name));
 
+    // M41: dynamic card-name whitelist derived from the actual data.cards.
+    // Fixes a stale hardcoded 「六者其一」 list that omitted 基礎代謝率 /
+    // 體內水分 / 肌少症指數 (added since M27), causing the AI to drop those
+    // cards and trip the parseOutput length check when a full Tanita record
+    // was summarised. Same Set the parseOutput filter uses at line ~301, so
+    // prompt authority and filter authority stay in sync forever.
+    const cardNameList = Array.from(validCardNames).map((n) => `「${n}」`).join("、");
+
     const basePrompt = `你是一位健康紀錄的摘要助手，為50歲以上的繁體中文讀者撰寫易讀的健康報告。請用JSON格式回覆。
 
 第一部分：逐項解讀
-根據以下各項檢查結果，用溫和易懂的語言解釋每項數據代表甚麼意思、落在甚麼範圍、以及建議的跟進行動。每項約50至80字。每項解讀的 name 欄位必須與所示項目名稱完全一致（照抄「血壓」、「BMI」、「體脂率」、「內臟脂肪」、「手握力」、「坐地前伸」六者其一），不可加減字元、不可加描述。
+根據以下各項檢查結果，用溫和易懂的語言解釋每項數據代表甚麼意思、落在甚麼範圍、以及建議的跟進行動。每項約50至80字。每項解讀的 name 欄位必須與所示項目名稱完全一致（照抄以下之一：${cardNameList}），不可加減字元、不可加描述。
 
 ${cardsText}
 

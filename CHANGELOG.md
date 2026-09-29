@@ -4,6 +4,18 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-29 HKT — M41 delivered: dynamic card-name whitelist ends stale-prompt grounding failure
+
+- `src/lib/health/ai.functions.ts`:
+  - Build `cardNameList = Array.from(validCardNames).map((n) => \`「${n}」\`).join("、")` immediately after the `validCardNames` Set is constructed (line ~265). Reuses the same Set `parseOutput` filters on at line ~301 — prompt authority and filter authority now share one source.
+  - Base prompt line 270 changed from `照抄「血壓」、「BMI」、「體脂率」、「內臟脂肪」、「手握力」、「坐地前伸」六者其一` to `照抄以下之一：${cardNameList}`. 「照抄以下之一：」 has no count word (no more 「六者其一」 to ossify).
+- Rationale: user tested `/summary` after M40 with a full Tanita entry (all 6 Tanita cards populated because M40's grounded SMI derivation from 4 limb inputs finally makes the 肌少症指數 card produce a value) + BP = 7 cards. Red banner 「摘要未通過內容核對（卡片解讀未對應項目名稱），已停止顯示」 fired every attempt. Root cause: the M21-era prompt hardcoded a whitelist that omitted 基礎代謝率, 體內水分, 肌少症指數 — the 3 cards M27 added. Gemini obeyed the whitelist, `parseOutput` filtered the 3 unnamed cards, `output.cards.length` (4) < `expectedCardCount` (7), grounding-failure toast. Bug had been latent since M27; only surfaced now that M40 makes the full-Tanita path viable end-to-end. **This was not caused by M40 — the whitelist was stale from M27 forward; M40 removed the last obstacle to reaching the buggy path.**
+- Design: reuse existing `validCardNames` Set (no new state); `Array.from(Set)` preserves insertion order from `data.cards.map`; prefix 「照抄以下之一：」 works for any list length (1 name for BP-only, up to 9 for full multi-module records). Both retries (parse-retry line ~296, grounding-retry line ~322) inherit via `basePrompt` interpolation — no separate change needed.
+- Untouched: `richGroundingFailure` logic (the check itself was correct), `SELF_LOOKUP_CARD_NAMES` wire sanitize, `REFERENCE_LEAFLET`, `TIPS_REFERENCE`, `allowedNumbers`, `SENSITIVE_LABEL_PATTERN`, `RichSummaryInput` cap, JSON response shape, grader logic, interpretCard, storage envelope, all other files.
+- PRD alignment: L13/L47 anonymous ✓ (prompt content only), L48 local-only ✓, L50 wire byte-identical ✓, **L52 grounded AI directly served ✓** (grounding check now achievable for all `data.cards` shapes), L55 繁中 ✓, L57 ✓.
+- Verified: `bunx tsc --noEmit` clean, `bun run build` clean.
+- Full plan: `plan/44-m41-dynamic-card-name-whitelist.md`. Awaiting Cloud Run redeploy.
+
 ## 2026-09-29 18:25 HKT — Living-docs sync after M39 / M40 (with PRD-deviation note)
 
 - `ARCHITECTURE.md` — two targeted updates reconciling code with docs:
