@@ -290,6 +290,39 @@ Value: 50+ readers see where to go next at the exact scroll position
 they've reached after recording, without hunting.
 Traces: NORTHSTAR (trustworthy — the app guides its user) · USER JOURNEY 5 (「can return directly to 「健康紀錄簿」 without replaying the cover」) · USER JOURNEY 7 (path to health summary explicit) · HARD CONSTRAINTS (50+ friendly touch targets, Traditional Chinese, disclaimer footer preserved).
 
+## M39 — SMI 及 BMI 改為推算值，改而記錄身高
+TANITA displays neither SMI nor BMI on a dedicated screen on the user's
+model. Both were previously required raw fields users had to record
+(and photo-extract), which was fiction — SMI is a downstream
+interpretation and BMI is a straight calculation. M39 removes both
+from `mod.fields`, adds `height` (身高, 厘米, min 120, max 230, step 1)
+as the single new raw input, and derives BMI = weight / (height/100)²
+and SMI = muscleMass / (height/100)² inside a `derived` memo in
+`useRecordState`. `submit()` stores the derived values in the same
+`values.bmi` and `values.smi` keys old raw entries used, so all
+downstream consumers (grader, interpretCard, CSV, history) read by
+key without change. `ScreenDef` gains optional `supportsPhoto?:
+boolean`; the renamed 「身高與 BMI」 screen sets it false — no
+camera button since height and derived BMI aren't on any Tanita
+display. Below the height input a small explanatory block reads
+「身高一次輸入即可，下次記錄會自動填入。BMI 會由體重及身高自動計算。」
+and a live 「推算 BMI：<value>」 preview shows the calculation the
+moment both raw inputs are present. Height pre-fills from the most-
+recent entry via a useEffect so returning users don't re-type. Muscle
+screen fields drop `smi`; muscle-screen photo prompt drops SMI;
+Zod `TANITA_SCHEMA` drops both keys (Zod `.strip` default silently
+drops stale AI-echoed values). SMI summary card gains a caveat note
+disclosing that our derived SMI uses total muscle whereas TANITA's
+own SMI uses appendicular muscle — small differences may result.
+Net field count: 12 → 11 (drop bmi + smi, add height). Zero storage
+envelope bump — new entries carry derived bmi + smi in the same keys
+old entries carried raw values.
+Full plan: [plan/42-m39-smi-bmi-derived.md](plan/42-m39-smi-bmi-derived.md).
+Value: 50+ users no longer face TANITA-photo fields for values that
+aren't on their TANITA display. Height typed once, everything else
+computed honestly.
+Traces: NORTHSTAR (trustworthy — no lie about what's on the device) · USER JOURNEY 3 (record path) · HARD CONSTRAINTS L13/L47 (no age/gender; height is a body measurement, not either) · L48 (local-only, no bump) · L50 (height never leaves the device — not on the summary card list) · L51 Exception (SMI card preserved) · ADR 0025 (Source change history: M39).
+
 ## M38 — SMI 解說移至健康摘要
 The Tanita record-page 「2. 肌肉量」 screen loses its M31 generic
 description (too general to bind SMI into the reader's mental model;

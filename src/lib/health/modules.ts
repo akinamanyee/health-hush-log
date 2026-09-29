@@ -19,6 +19,10 @@ export interface ScreenDef {
   // record UI so users know what the screen measures (M31). UI-only — never
   // enters AI grounding (`REFERENCE_LEAFLET` / `TIPS_REFERENCE`) per ADR 0025.
   description?: string;
+  // M39: opt-out for screens whose values aren't on a physical device display
+  // (currently the 身高與 BMI screen — height is typed, BMI is derived).
+  // TanitaRecord hides <ImageDrop> when false. Defaults true when absent.
+  supportsPhoto?: boolean;
 }
 
 export interface InfoPoint {
@@ -58,21 +62,20 @@ export const MODULES: ModuleDef[] = [
       { key: "fatMass", label: "體脂量", unit: "公斤", min: 0.1, max: 200, step: "0.1" },
       { key: "muscleMass", label: "肌肉量", unit: "公斤", min: 5, max: 120, step: "0.1" },
       { key: "muscleRatio", label: "肌肉比率", unit: "%", min: 1, max: 80, step: "0.1" },
-      { key: "smi", label: "肌少症指數（SMI）", unit: "kg/m²", min: 3, max: 12, step: "0.01" },
       { key: "bodyWaterPct", label: "身體水分率", unit: "%", min: 10, max: 80, step: "0.1" },
       { key: "bodyWaterKg", label: "身體水分量", unit: "公斤", min: 5, max: 200, step: "0.1" },
       { key: "visceralFat", label: "內臟脂肪等級", unit: "", min: 1, max: 59, step: "1" },
       { key: "bmrKcal", label: "基礎代謝率", unit: "kcal", min: 500, max: 5000, step: "1" },
       { key: "bmrKj", label: "基礎代謝率", unit: "kJ", min: 2000, max: 21000, step: "1" },
-      { key: "bmi", label: "BMI", unit: "", min: 10, max: 60, step: "0.1" },
+      { key: "height", label: "身高", unit: "厘米", min: 120, max: 230, step: "1" },
     ],
     screens: [
       { id: "bodyFat", label: "體脂率", fields: ["bodyFat", "fatMass", "weight"], description: "脂肪佔體重的百分比。適度脂肪能保護身體，但過高會增加心血管疾病、糖尿病等風險。" },
-      { id: "muscle", label: "肌肉量", fields: ["muscleMass", "muscleRatio", "smi", "weight"] },
+      { id: "muscle", label: "肌肉量", fields: ["muscleMass", "muscleRatio", "weight"] },
       { id: "water", label: "身體水分", fields: ["bodyWaterPct", "bodyWaterKg", "weight"], description: "水分佔體重的百分比，與體脂肪呈反比。受日常作息影響波動，需長期觀察以維持機能正常運作。" },
       { id: "visceral", label: "內臟脂肪", fields: ["visceralFat", "weight"], description: "腹腔器官周圍的脂肪，隨年齡易堆積。保持健康數值能有效降低心血管疾病與糖尿病風險。" },
       { id: "bmr", label: "基礎代謝率（BMR）", fields: ["bmrKcal", "bmrKj", "weight"], description: "維持靜息狀態生理運作（如心跳、呼吸）的最低熱量。肌肉量越高，BMR 越高，越易消耗熱量。" },
-      { id: "bmi", label: "BMI", fields: ["bmi", "weight"], description: "身高與體重的標準化比例，是最常見的基礎健康評估指標。" },
+      { id: "bmi", label: "身高與 BMI", fields: ["height", "weight"], description: "身高與體重的標準化比例，是最常見的基礎健康評估指標。BMI 會由體重及身高自動計算。", supportsPhoto: false },
     ],
   },
   {

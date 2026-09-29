@@ -30,6 +30,7 @@ export function TanitaRecord({ mod }: { mod: ModuleDef }) {
     grades,
     ready,
     justSaved,
+    derived,
     onImage,
     submit,
     remove,
@@ -74,12 +75,14 @@ export function TanitaRecord({ mod }: { mod: ModuleDef }) {
                 </p>
               )}
 
-              <div className="mt-4">
-                <ImageDrop
-                  busy={busy}
-                  onImage={(dataUrl) => onImage(dataUrl, screen.id)}
-                />
-              </div>
+              {screen.supportsPhoto !== false && (
+                <div className="mt-4">
+                  <ImageDrop
+                    busy={busy}
+                    onImage={(dataUrl) => onImage(dataUrl, screen.id)}
+                  />
+                </div>
+              )}
 
               <div className="mt-4 grid gap-4 sm:grid-cols-2">
                 {screenFields.map((f) => {
@@ -127,6 +130,19 @@ export function TanitaRecord({ mod }: { mod: ModuleDef }) {
                   );
                 })}
               </div>
+
+              {screen.id === "bmi" && (
+                <div className="mt-4 space-y-2">
+                  <p className="text-sm text-muted-foreground">
+                    身高一次輸入即可，下次記錄會自動填入。BMI 會由體重及身高自動計算。
+                  </p>
+                  {derived["bmi"] != null && (
+                    <p className="text-base font-medium">
+                      推算 BMI：<span className="text-lg">{derived["bmi"]}</span>
+                    </p>
+                  )}
+                </div>
+              )}
             </section>
           );
         })}

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import type { ModuleDef } from "@/lib/health/modules";
@@ -26,6 +26,17 @@ export function useRecordState(mod: ModuleDef) {
   const [busy, setBusy] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  // M39: pre-fill 身高 from the most-recent tanita entry that has it, so
+  // returning users don't re-type. Height is stable enough per session that
+  // this is safe; user can still overwrite before saving.
+  useEffect(() => {
+    if (mod.id !== "tanita" || !hydrated) return;
+    if (values["height"]) return;
+    const last = entries.find((e) => e.values["height"] != null);
+    if (last) setValues((v) => (v["height"] ? v : { ...v, height: String(last.values["height"]) }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mod.id, hydrated, entries.length]);
+
   // M37: ephemeral "just-saved" flag drives the ~1.6s post-tap button state
   // (teal 「✓ 已儲存」). Fixes the M36 misread where the pre-tap teal ✓ read
   // as "saved" and users didn't tap. Now ✓ appears only after the save
@@ -42,7 +53,27 @@ export function useRecordState(mod: ModuleDef) {
     return out;
   }, [values, mod]);
 
-  const grades = gradeEntry(mod, numeric);
+  // M39: BMI and SMI are derived from raw inputs (weight + height for BMI,
+  // muscleMass + height for SMI). They are stored on save so downstream code
+  // (grader, interpretCard, CSV, history) reads them by key exactly as before.
+  const derived = useMemo(() => {
+    if (mod.id !== "tanita") return numeric;
+    const out = { ...numeric };
+    const h = numeric["height"];
+    const w = numeric["weight"];
+    const mm = numeric["muscleMass"];
+    if (h != null && w != null) {
+      const m = h / 100;
+      out["bmi"] = Math.round((w / (m * m)) * 10) / 10;
+    }
+    if (h != null && mm != null) {
+      const m = h / 100;
+      out["smi"] = Math.round((mm / (m * m)) * 100) / 100;
+    }
+    return out;
+  }, [numeric, mod.id]);
+
+  const grades = gradeEntry(mod, derived);
 
   // M36: ready = every required field carries a non-empty raw that parses
   // inside [min, max]. Drives the teal-when-ready button state in both
@@ -132,7 +163,7 @@ export function useRecordState(mod: ModuleDef) {
       });
       return;
     }
-    const entry = makeEntry(numeric, date);
+    const entry = makeEntry(derived, date);
     save((prev) => sortEntries([entry, ...prev]));
     setValues({});
     setSelectedId(entry.id);
@@ -182,6 +213,7 @@ export function useRecordState(mod: ModuleDef) {
     busy,
     errors,
     numeric,
+    derived,
     grades,
     ready,
     justSaved,

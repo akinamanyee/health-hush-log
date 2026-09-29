@@ -80,6 +80,25 @@ Concretely:
 
 ## Source change history
 
+- **2026-09-29 (M39)** — SMI and BMI move from raw stored inputs to
+  derived values computed in `useRecordState.derived` from a new `height`
+  raw field on save. Rationale: user's TANITA displays neither SMI nor
+  BMI on a dedicated screen; requiring users to record them as raw
+  values was fiction. Height (身高, 厘米) is the single new raw input;
+  `bmi = weight / (height/100)²` and `smi = muscleMass / (height/100)²`
+  are stored in the same `values.bmi` / `values.smi` keys old raw
+  entries used, so `interpretCard`, grader, CSV and history read by
+  key without change. `ScreenDef` gains optional `supportsPhoto?:
+  boolean`; the renamed 「身高與 BMI」 screen sets it false so no
+  camera button. SMI summary card gains a caveat note disclosing the
+  appendicular-vs-total-muscle difference from TANITA's own SMI
+  reading (our derivation uses total muscleMass; TANITA scales use
+  appendicular skeletal muscle). Muscle-screen extraction prompt and
+  Zod schema drop `smi` and `bmi` keys; `.strip` default handles
+  stale AI-echoed values safely. Old localStorage entries retain
+  their raw bmi/smi values (displayed on `/summary` via key lookup);
+  no envelope bump.
+
 - **2026-09-29 (M38)** — SMI caption with gender thresholds added to the
   summary card's reference disclosure (「男（肌少症指數 <7.0 kg/m²）為
   肌肉質量不足；女（肌少症指數 <5.7 kg/m²）為肌肉質量不足」), moved from

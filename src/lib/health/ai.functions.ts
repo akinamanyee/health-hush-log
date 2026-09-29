@@ -17,13 +17,11 @@ const TANITA_SCHEMA = z.object({
   fatMass: z.number().nullable(),
   muscleMass: z.number().nullable(),
   muscleRatio: z.number().nullable(),
-  smi: z.number().nullable(),
   bodyWaterPct: z.number().nullable(),
   bodyWaterKg: z.number().nullable(),
   visceralFat: z.number().nullable(),
   bmrKcal: z.number().nullable(),
   bmrKj: z.number().nullable(),
-  bmi: z.number().nullable(),
 });
 
 const BP_SCHEMA = z.object({
@@ -36,7 +34,7 @@ const GRIP_SCHEMA = z.object({ grip: z.number().nullable() });
 const SIT_REACH_SCHEMA = z.object({ distance: z.number().nullable() });
 
 const EXTRACTION_FIELDS = {
-  tanita: "weight（體重 kg）、bodyFat（體脂率 %）、fatMass（體脂量 kg）、muscleMass（肌肉量 kg）、muscleRatio（肌肉比率 %）、smi（肌少症指數 kg/m²）、bodyWaterPct（身體水分率 %）、bodyWaterKg（身體水分量 kg）、visceralFat（內臟脂肪等級）、bmrKcal（基礎代謝率 kcal）、bmrKj（基礎代謝率 kJ）、bmi（BMI）",
+  tanita: "weight（體重 kg）、bodyFat（體脂率 %）、fatMass（體脂量 kg）、muscleMass（肌肉量 kg）、muscleRatio（肌肉比率 %）、bodyWaterPct（身體水分率 %）、bodyWaterKg（身體水分量 kg）、visceralFat（內臟脂肪等級）、bmrKcal（基礎代謝率 kcal）、bmrKj（基礎代謝率 kJ）",
   bp: "systolic（收縮壓 mmHg）、diastolic（舒張壓 mmHg）、pulse（脈搏）",
   grip: "grip（手握力 kg，左右手合計數值）",
   sitreach: "distance（坐地前伸距離 cm，可為負數）",
@@ -52,11 +50,11 @@ const EXTRACTION_SCHEMAS = {
 const TANITA_SCREENS = MODULE_BY_ID.tanita.screens!;
 const TANITA_SCREEN_PROMPTS: Record<string, string> = {
   bodyFat: "weight（體重 kg）、bodyFat（體脂率 %）、fatMass（體脂量 kg）",
-  muscle: "weight（體重 kg）、muscleMass（肌肉量 kg）、muscleRatio（肌肉比率 %）、smi（肌少症指數 kg/m²）",
+  muscle: "weight（體重 kg）、muscleMass（肌肉量 kg）、muscleRatio（肌肉比率 %）",
   water: "weight（體重 kg）、bodyWaterPct（身體水分率 %）、bodyWaterKg（身體水分量 kg）",
   visceral: "weight（體重 kg）、visceralFat（內臟脂肪等級）",
   bmr: "weight（體重 kg）、bmrKcal（基礎代謝率 kcal）、bmrKj（基礎代謝率 kJ）",
-  bmi: "weight（體重 kg）、bmi（BMI）",
+  // bmi screen removed (M39): height is typed, BMI is derived; no camera path.
 };
 
 function extractJson(text: string): unknown {

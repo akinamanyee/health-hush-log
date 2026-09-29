@@ -4,6 +4,39 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-29 HKT — M39 delivered: SMI 及 BMI 改為推算值，改而記錄身高
+
+- `src/lib/health/modules.ts`:
+  - `ScreenDef` gains optional `supportsPhoto?: boolean` (defaults true when absent). Screens whose values aren't on a physical device display (currently 身高與 BMI only) set it false so `TanitaRecord` skips the `<ImageDrop>`.
+  - Tanita `fields` rewritten: 12 → 11 entries. Removed `smi` and `bmi`; added `height` (身高, 厘米, min 120, max 230, step 1). Field order groups by screen.
+  - Muscle screen fields: `["muscleMass", "muscleRatio", "weight"]` (smi dropped).
+  - BMI screen renamed to 「身高與 BMI」, fields `["height", "weight"]`, `supportsPhoto: false`, description extended to name the auto-calculation.
+- `src/lib/health/ai.functions.ts`:
+  - `TANITA_SCHEMA` Zod object trimmed to 10 nullable keys (smi + bmi dropped). Zod default `.strip` silently drops any stale AI-echoed values.
+  - Whole-module `EXTRACTION_FIELDS.tanita` prompt trimmed to 10 keys.
+  - `TANITA_SCREEN_PROMPTS.muscle` drops SMI.
+  - `TANITA_SCREEN_PROMPTS.bmi` entry removed entirely (screen no longer supports camera).
+- `src/components/health/useRecordState.ts`:
+  - New `derived` memo. For tanita, augments `numeric` with computed `bmi = weight / (height/100)²` (1 decimal) and `smi = muscleMass / (height/100)²` (2 decimals) when both raw inputs are present. Non-tanita modules pass numeric through unchanged.
+  - `gradeEntry(mod, derived)` — the live grades section on `/tanita` reflects derived BMI immediately.
+  - `submit()` calls `makeEntry(derived, date)` so stored entries carry `values.bmi` and `values.smi` in the same keys old raw entries used. Downstream code (grader, interpretCard, CSV, history) reads by key without change.
+  - New height pre-fill `useEffect`: on mount for tanita, if hydrated and `values.height` is empty, seeds it from the most-recent entry that has `height`. Returning users don't re-type.
+  - `derived` exposed in the hook return.
+- `src/components/health/TanitaRecord.tsx`:
+  - Consume `derived` alongside `ready` / `justSaved`.
+  - `<ImageDrop>` render guarded by `screen.supportsPhoto !== false`.
+  - Below the field grid on the bmi screen: two lines — 「身高一次輸入即可，下次記錄會自動填入。BMI 會由體重及身高自動計算。」 and a live 「推算 BMI：<value>」 (from `derived["bmi"]` when both raw inputs are present).
+- `src/routes/summary.tsx`:
+  - Inside `SmiStandardTable`, after the M38 caption block: 「註：本應用程式以總肌肉量 ÷ 身高平方（kg/m²）推算 SMI，與部分 TANITA 儀器所顯示的 SMI 讀數（以四肢肌肉量計算）可能略有差異。」 — honest disclosure that our derived value differs from TANITA's own appendicular-based SMI.
+- Rationale: user's TANITA does NOT display SMI or BMI on dedicated screens; the muscle-screen photo can't extract SMI and there's no BMI-only screen to photograph. Requiring users to type these values was asking for numbers they may not have. M39 stops the fiction — height is the single new raw input, BMI and SMI are honestly computed from what the app knows.
+- Storage: no envelope bump. Old entries retain their raw `bmi` and `smi` values (displayed on `/summary` via `interpretCard`'s key lookup, but not in `/tanita` history row summary line since bmi/smi keys are no longer in `mod.fields`). New entries carry derived bmi + smi in the same keys. Coexistence is safe.
+- Wire payload byte-identical: `interpretCard` builds summary cards by explicit key (`values.bmi`, `values.smi`); height itself never enters the card list, so nothing new leaves the device. Zero AI grounding surface change; `REFERENCE_LEAFLET` / `TIPS_REFERENCE` / `allowedNumbers` untouched.
+- Untouched: grader logic, `interpretCard`, `SELF_LOOKUP_CARD_NAMES` wire sanitize, `CARDS_WITH_SELF_LOOKUP`, all reference tables (M27/M28/M29), M31 descriptions on other 5 screens, M32 required-field ready check (walks new 11 fields), M33 try/catch, M34 timing logs, M35 grader fix, M36 toast + auto-scroll, M37 three-state button, M38 SMI caption (still there, caveat added after it), other 3 modules, PRD.
+- PRD alignment: L13/L47 anonymous ✓ (height is a body measurement, not age or gender), L48 local-only ✓ (no bump), L50 wire byte-identical ✓, L51 Exception SMI card preserved ✓, L52 grounded AI unchanged ✓, L55 繁中 ✓, L57 50+ friendly ✓.
+- `adr/0025-static-reference-vs-ai-advice.md`: one line added to Source change history — 「M39 (2026-09-29): SMI and BMI move from raw stored inputs to derived values computed from a new `height` raw field on save. SMI card gains a caveat note disclosing the appendicular-vs-total-muscle difference from TANITA's own SMI reading.」
+- Verified: `bunx tsc --noEmit` clean, `bun run build` clean.
+- Full plan: `plan/42-m39-smi-bmi-derived.md`. Awaiting Cloud Run redeploy.
+
 ## 2026-09-29 16:17 HKT — Living-docs sync after M36 / M37 / M38
 
 - `ARCHITECTURE.md` — two targeted updates reconciling code with docs:
