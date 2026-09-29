@@ -4,6 +4,17 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-29 16:17 HKT — Living-docs sync after M36 / M37 / M38
+
+- `ARCHITECTURE.md` — two targeted updates reconciling code with docs:
+  1. **New paragraph after the M30 bottom-nav paragraph** describing the M36 + M37 three-state save button behaviour driven by `useRecordState`'s `ready` memo and `justSaved` state: navy 「儲存紀錄」 / teal 「💾 一按儲存」 / teal 「✓ 已儲存」, plus the M36 incomplete-tap flow (toast + queueMicrotask scroll to first `[aria-invalid="true"]`). Names the shared consumption in both `RecordModule.tsx` and `TanitaRecord.tsx` so all 4 record pages inherit the same behaviour.
+  2. **Static-reference-tables paragraph** gets a sentence about the M38 SMI caption inside the SMI disclosure (3-line prose above the matrices, numbers re-used from `SMI_MALE` / `SMI_FEMALE` matrix data — already in `allowedNumbers`, zero AI grounding surface change). Adds M38 to the milestone chain closing the paragraph so the SMI relocation is traceable in-place.
+- `Product_Roadmap.md` — already carries M36, M37, M38 entries from delivery turns. No update needed.
+- `CHANGELOG.md` — this entry plus prior M36/M37/M38 delivery entries at top. Still well under 100 entries; no archive migration needed.
+- `DECISIONS.md` / `adr/` — no new ADR this session. M36 (button UX), M37 (button UX polish), and M38 (SMI caption relocation) are UX / copy moves within existing principles. M38 amended `adr/0025-static-reference-vs-ai-advice.md`'s Source change history with one bullet at delivery time. DECISIONS.md index unchanged.
+- `PRD.md` — no deviation this session. M36 serves L57 (50+ friendly), L23 NORTHSTAR (readable). M37 serves L23 NORTHSTAR (trustworthy button state matches truth). M38 serves L51 Exception (SMI in the 6-card self-lookup list). None require a log-of-deviation entry.
+- Timestamp source: container's NTP-synced system clock via `TZ=Asia/Hong_Kong date -Iseconds` → `2026-09-29T16:17:21+08:00`.
+
 ## 2026-09-29 HKT — M38 delivered: SMI 解說移至健康摘要
 
 - `src/lib/health/modules.ts` — remove the `description` key from the `muscle` `ScreenDef` entry. Fields unchanged (`["muscleMass", "muscleRatio", "smi", "weight"]`); other 5 screen descriptions (bodyFat, water, visceral, bmr, bmi) preserved from M31.
