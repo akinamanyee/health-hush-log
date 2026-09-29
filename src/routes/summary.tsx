@@ -412,6 +412,16 @@ function SmiStandardTable({ userValue }: { userValue: number | undefined }) {
       <summary className="cursor-pointer font-medium text-foreground">
         查看肌少症指數（SMI）參考表（TANITA）
       </summary>
+      {/* M38: SMI-specific caption moved here from the M31 muscle-screen description.
+          Numbers 7.0 and 5.7 already appear in SMI_MALE / SMI_FEMALE matrix data and
+          are already in allowedNumbers; this caption re-uses them as prose. UI-only
+          per ADR 0025 — AI wire-sanitize still rewrites the SMI grade to
+          「請自行對照下方對照表」. */}
+      <div className="mt-3 space-y-1 text-base leading-relaxed">
+        <p>肌少症指數（SMI）反映骨骼肌相對身高的比例。</p>
+        <p>男（肌少症指數 &lt;7.0 kg/m²）為肌肉質量不足</p>
+        <p>女（肌少症指數 &lt;5.7 kg/m²）為肌肉質量不足</p>
+      </div>
       <SmiMatrixTable title="男性 肌少症指數" data={SMI_MALE} userValue={userValue} />
       <SmiMatrixTable title="女性 肌少症指數" data={SMI_FEMALE} userValue={userValue} />
       {userValue !== undefined && (

@@ -68,7 +68,7 @@ export const MODULES: ModuleDef[] = [
     ],
     screens: [
       { id: "bodyFat", label: "體脂率", fields: ["bodyFat", "fatMass", "weight"], description: "脂肪佔體重的百分比。適度脂肪能保護身體，但過高會增加心血管疾病、糖尿病等風險。" },
-      { id: "muscle", label: "肌肉量", fields: ["muscleMass", "muscleRatio", "smi", "weight"], description: "包含全身肌肉及其中水分。增加肌肉能提升基礎代謝率，增加熱量消耗並幫助減脂。" },
+      { id: "muscle", label: "肌肉量", fields: ["muscleMass", "muscleRatio", "smi", "weight"] },
       { id: "water", label: "身體水分", fields: ["bodyWaterPct", "bodyWaterKg", "weight"], description: "水分佔體重的百分比，與體脂肪呈反比。受日常作息影響波動，需長期觀察以維持機能正常運作。" },
       { id: "visceral", label: "內臟脂肪", fields: ["visceralFat", "weight"], description: "腹腔器官周圍的脂肪，隨年齡易堆積。保持健康數值能有效降低心血管疾病與糖尿病風險。" },
       { id: "bmr", label: "基礎代謝率（BMR）", fields: ["bmrKcal", "bmrKj", "weight"], description: "維持靜息狀態生理運作（如心跳、呼吸）的最低熱量。肌肉量越高，BMR 越高，越易消耗熱量。" },

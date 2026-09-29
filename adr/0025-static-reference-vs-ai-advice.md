@@ -80,6 +80,20 @@ Concretely:
 
 ## Source change history
 
+- **2026-09-29 (M38)** — SMI caption with gender thresholds added to the
+  summary card's reference disclosure (「男（肌少症指數 <7.0 kg/m²）為
+  肌肉質量不足；女（肌少症指數 <5.7 kg/m²）為肌肉質量不足」), moved from
+  the M31 muscle-screen description on `/tanita` (dropped in the same
+  milestone as too general to bind SMI into the reader's mental model).
+  Numbers 7.0 and 5.7 already live in `SMI_MALE` and `SMI_FEMALE`
+  matrix arrays and are already in `allowedNumbers`; the caption
+  re-uses them as prose. UI-only per this ADR's principle — AI
+  wire-sanitize (`SELF_LOOKUP_CARD_NAMES`) still rewrites the SMI card's
+  grade to 「請自行對照下方對照表」 before Gemini sees it. Rationale:
+  the explanation belongs where the user first meets the SMI number,
+  on the summary card next to the matrix, not upstream on the record
+  screen where it read as generic muscle-mass copy.
+
 - **2026-09-27 (M35)** — 體脂率 grader stops synthesising 「無適用參考標準」
   across record / logbook / CSV surfaces. `gradeEntry` no longer pushes
   a fake grade for `bodyFat`, mirroring the M28a (grip) and M29 (sit-reach)

@@ -4,6 +4,19 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-29 HKT — M38 delivered: SMI 解說移至健康摘要
+
+- `src/lib/health/modules.ts` — remove the `description` key from the `muscle` `ScreenDef` entry. Fields unchanged (`["muscleMass", "muscleRatio", "smi", "weight"]`); other 5 screen descriptions (bodyFat, water, visceral, bmr, bmi) preserved from M31.
+- `src/routes/summary.tsx` — inside `SmiStandardTable` (the `<details>` disclosure for the SMI card), between the `<summary>` heading 「查看肌少症指數（SMI）參考表（TANITA）」 and the first `<SmiMatrixTable>`, insert a 3-line caption block: 「肌少症指數（SMI）反映骨骼肌相對身高的比例。」 / 「男（肌少症指數 <7.0 kg/m²）為肌肉質量不足」 / 「女（肌少症指數 <5.7 kg/m²）為肌肉質量不足」. Renders as `<div className="mt-3 space-y-1 text-base leading-relaxed">` wrapping three `<p>` elements — matches the disclosure's existing text idiom.
+- Rationale: user reported the M31 muscle-screen description was too general to explain what the SMI field on that screen measured, and the record page felt 「about 肌少症」 without saying so. The explanation belongs where the user first meets the SMI number — on the summary card next to the matrix, not upstream on the record screen. User provided the verbatim 繁中 wording from their TANITA reference material.
+- Numbers 7.0 and 5.7 already live in `SMI_MALE` and `SMI_FEMALE` matrix arrays (rendered in the matrix tables below the caption) and are already in `allowedNumbers`. Zero AI grounding surface change; the caption re-uses the same numbers in a new visual form.
+- Wire-payload behaviour unchanged: `SELF_LOOKUP_CARD_NAMES` in `ai.functions.ts` still includes 「肌少症指數」, so the SMI card's grade is still rewritten to 「請自行對照下方對照表」 before Gemini sees it.
+- Untouched: SMI matrix data, `SmiMatrixTable` layout, ★ overlay logic, disclosure footer 「資料來源：TANITA〈身體組成數據參考指標〉…」, all other Tanita screen descriptions (bodyFat / water / visceral / bmr / bmi), all other summary cards, `REFERENCE_LEAFLET`, `TIPS_REFERENCE`, `allowedNumbers`, `SENSITIVE_LABEL_PATTERN`, `grade.ts`, `interpretCard`, storage envelope v1, M37 button states, M35 grader fix, PRD.
+- PRD alignment: L13/L47 anonymous ✓, L48 local-only ✓, L50 wire byte-identical ✓, L51 Exception (SMI in the 6-card Exception list) ✓, L52 grounded AI unchanged ✓, L55 繁中 ✓, L57 50+ friendly (`text-base leading-relaxed`) ✓. **ADR 0025 directly served** — gender-structured thresholds may appear in UI (matrix and now caption); AI-side wire sanitize preserved.
+- `adr/0025-static-reference-vs-ai-advice.md`: one line added to Source change history — 「M38 (2026-09-29): SMI caption with gender thresholds added to the summary card's reference disclosure, moved from the M31 muscle screen description. Numbers already in allowedNumbers via matrix data; UI-only per this ADR's principle.」
+- Verified: `bunx tsc --noEmit` clean, `bun run build` clean.
+- Full plan: `plan/41-m38-smi-explanation-relocated.md`. Awaiting Cloud Run redeploy.
+
 ## 2026-09-27 22:45 HKT — M37 delivered: 儲存動作明確化 (「tap to save」 before, 「saved」 after)
 
 - `src/components/health/useRecordState.ts`:

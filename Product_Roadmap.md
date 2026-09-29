@@ -290,6 +290,28 @@ Value: 50+ readers see where to go next at the exact scroll position
 they've reached after recording, without hunting.
 Traces: NORTHSTAR (trustworthy — the app guides its user) · USER JOURNEY 5 (「can return directly to 「健康紀錄簿」 without replaying the cover」) · USER JOURNEY 7 (path to health summary explicit) · HARD CONSTRAINTS (50+ friendly touch targets, Traditional Chinese, disclaimer footer preserved).
 
+## M38 — SMI 解說移至健康摘要
+The Tanita record-page 「2. 肌肉量」 screen loses its M31 generic
+description (too general to bind SMI into the reader's mental model;
+user reported the screen felt 「about 肌少症」 without the description
+saying so). The SMI-specific explanation with gender thresholds
+— 「肌少症指數（SMI）反映骨骼肌相對身高的比例。 男（肌少症指數 <7.0
+kg/m²）為肌肉質量不足；女（肌少症指數 <5.7 kg/m²）為肌肉質量不足」
+— moves to the 肌少症指數 card on `/summary`, rendered as a 3-line
+caption inside the SMI reference disclosure, above the male / female
+matrix tables. Numbers 7.0 and 5.7 already live in `SMI_MALE` /
+`SMI_FEMALE` matrix arrays in `summary.tsx` and are already in
+`allowedNumbers`; the prose caption re-uses those values in a new
+visual form, adding zero new grounding surface. UI-only per ADR 0025;
+AI wire-sanitize (`SELF_LOOKUP_CARD_NAMES` including 肌少症指數) still
+rewrites the SMI grade to 「請自行對照下方對照表」 before Gemini sees
+it. Zero storage / wire / grader / AI / grading logic change.
+Full plan: [plan/41-m38-smi-explanation-relocated.md](plan/41-m38-smi-explanation-relocated.md).
+Value: SMI explanation lives where the user first meets its number —
+on the summary card next to the matrix — instead of as a general
+screen description upstream that didn't tell the user what to look for.
+Traces: NORTHSTAR (readable — plain-language SMI thresholds beside the visual matrix) · USER JOURNEY 4 & 7 · HARD CONSTRAINTS L55 繁中 · L57 50+ friendly · ADR 0025 Source change history (M38 extension).
+
 ## M37 — 儲存動作明確化: 「tap to save」 before, 「saved」 after
 Follow-up on M36's ready-state button. Phone-test feedback: the M36
 teal button with a ✓ tick reads as 「saved」 rather than 「ready to
