@@ -89,6 +89,16 @@ latest readings + grades ──▶ generateRichSummary (server fn, leaflet-groun
                                 ──▶ structured JSON (per-card interpretation, tips tagged by topic, agencies list, disclaimer)
 ```
 
+`generateRichSummary`'s base prompt derives its card-name whitelist
+sentence from `Array.from(validCardNames)` (M41), the same Set
+`parseOutput` filters on. Prompt authority and filter authority share
+one source, so a card added to `interpretCard` in the future can never
+silently fall outside the prompt's allowed names — the whitelist grows
+automatically. **Never re-introduce a hardcoded card-name list in this
+prompt** (regressed once between M27 and M41, tripping the grounding
+check whenever a full Tanita record produced more than the four M21-era
+cards).
+
 Between the review form and the grader / save path, `useRecordState.derived`
 (M39 + M40) augments `numeric` with values computed from raw inputs for
 tanita only — none for other modules. **BMI** = `weight / (height/100)²` when

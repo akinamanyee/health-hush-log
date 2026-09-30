@@ -4,6 +4,15 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-30 09:26 HKT — Living-docs sync after M41
+
+- `ARCHITECTURE.md` — one targeted addition after the summary data-flow diagram: describes M41's dynamic card-name whitelist mechanism (prompt derives names from `Array.from(validCardNames)`, the same Set `parseOutput` filters on, so prompt and filter share one source and future card additions can never silently fall outside the prompt). Includes an explicit 「Never re-introduce a hardcoded card-name list in this prompt」 guardrail so future contributors see how the M27-through-M41 ossification happened.
+- `Product_Roadmap.md` — already carries M41 entry from delivery turn. No update needed.
+- `CHANGELOG.md` — this entry plus prior M41 delivery entry at top. Well under 100 entries; no archive migration needed.
+- `DECISIONS.md` / `adr/` — no new ADR this session. M41 is a prompt-authority alignment fix within an existing pattern (leaflet-grounded AI, ADR 0025), not a new principle. DECISIONS.md index unchanged.
+- `PRD.md` — no deviation this session. M41 restored PRD L52 「grounded AI」 for the multi-card summary path that M40 unblocked; the underlying L52 violation window was already logged in the previous docs-sync entry (2026-09-29 18:25 HKT) so no additional deviation record is needed.
+- Timestamp source: container's NTP-synced system clock via `TZ=Asia/Hong_Kong date -Iseconds` → `2026-09-30T09:26:16+08:00`.
+
 ## 2026-09-29 HKT — M41 delivered: dynamic card-name whitelist ends stale-prompt grounding failure
 
 - `src/lib/health/ai.functions.ts`:
