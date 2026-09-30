@@ -150,4 +150,37 @@ export const TIPS_REFERENCE: TipBlock[] = [
       { title: "我的體重是否在健康範圍內呢？", url: "https://www3.ha.org.hk/dic/gn_06_04.html", agency: "醫管局" },
     ],
   },
+  {
+    topic: "中等強度運動定義",
+    tips: `中等強度運動是指身體活動時心跳加快、呼吸稍急、仍能對話但難以唱歌的程度。實例：快步行（每分鐘約100步）、社交舞、太極、慢速游泳、踏單車遊覽、掃地拖地、上落樓梯。世衞及衞生署建議：每星期最少150分鐘中等強度帶氧運動（或75分鐘劇烈運動），並於每星期最少兩天做肌肉強化活動（提舉重物、掌上壓）。可分段進行，每段最少10分鐘。`,
+    sources: [
+      { title: "體能活動", url: "https://www.change4health.gov.hk/tc/physical_activity/facts/health_benefits/index.html", agency: "衞生署" },
+      { title: "運動處方", url: "https://www.chp.gov.hk/tc/static/101307.html", agency: "衞生防護中心" },
+    ],
+  },
+  {
+    topic: "蔬果攝取量",
+    tips: `衞生署建議成人每日最少吃2份水果加3份蔬菜。1份水果的份量：1個中型水果（如1個蘋果、1個橙）；或半碗切粒水果；或3/4杯純果汁。1份蔬菜的份量：半碗煮熟蔬菜；或1碗未經烹煮的沙律菜。實例：早餐加1隻香蕉、午餐加1碗灼菜、下午加1個橙、晚餐再加半碗炒菜心，即已達標。不同顏色蔬果輪流吃，攝取多樣營養素。`,
+    sources: [
+      { title: "均衡飲食FAQ", url: "https://www.change4health.gov.hk/tc/healthy_diet/faq/", agency: "衞生署" },
+      { title: "預防肥胖與飲食建議", url: "https://www.change4health.gov.hk/tc/healthy_diet/preventive_diet/", agency: "衞生署" },
+    ],
+  },
+  {
+    topic: "減鹽減糖減油定義",
+    tips: `衞生署及世衞建議成人每日：鹽少於5克（約1平茶匙，含約2000毫克鈉）；游離糖少於25克（約5平茶匙）；食油約5至6茶匙。實用做法：(1) 少用醬油、蠔油、魚露、雞粉、豆瓣醬，改用薑蔥蒜、檸檬汁、香草調味。(2) 少喝含糖飲品：1罐汽水已約含35克糖，超出全日建議。(3) 選蒸、燉、炆、烚代替煎炸。(4) 揀低鈉低糖版本罐頭及調味料。(5) 減少加工食品：香腸、火腿、罐頭湯鹽份極高。`,
+    sources: [
+      { title: "預防肥胖與飲食建議", url: "https://www.change4health.gov.hk/tc/healthy_diet/preventive_diet/", agency: "衞生署" },
+      { title: "均衡飲食FAQ", url: "https://www.change4health.gov.hk/tc/healthy_diet/faq/", agency: "衞生署" },
+    ],
+  },
+  {
+    topic: "腰圍與中央肥胖",
+    tips: `腰圍是中央肥胖的關鍵指標。中央肥胖標準：男性腰圍90厘米或以上、女性腰圍80厘米或以上。中央肥胖比整體超重對心血管疾病及糖尿病風險更高。量度方法：於肋骨最低處與盆骨最高處之間的中線，呼氣時量度，皮尺水平緊貼但不勒緊皮膚。目標：保持男性腰圍少於90厘米、女性少於80厘米。腰圍每增加10厘米，全因死亡風險升約11%、高血壓風險升約27%。`,
+    sources: [
+      { title: "腰圍、體型及健康", url: "https://www.change4health.gov.hk/tc/healthy_weight/waist/", agency: "衞生署" },
+      { title: "保持健康腰圍", url: "https://www.change4health.gov.hk/tc/healthy_weight/keep_healthy_waist/", agency: "衞生署" },
+      { title: "高血壓", url: "https://www.chp.gov.hk/tc/healthtopics/content/25/35390.html", agency: "衞生防護中心" },
+    ],
+  },
 ];

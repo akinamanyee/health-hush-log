@@ -164,28 +164,57 @@ function selectRelevantTips(cards: z.infer<typeof RichSummaryInput>["cards"]): T
       topics.add("心腦血管病、中風及預防");
       topics.add("高血壓及預防");
       topics.add("健康飲食（針對過重及高血壓）");
+      topics.add("減鹽減糖減油定義");
+      topics.add("腰圍與中央肥胖");
+      topics.add("中等強度運動定義");
     }
     if (n === "BMI" && (g === "偏高" || g === "過高" || g === "過輕")) {
       topics.add("BMI（體重管理）");
       topics.add("健康飲食（針對過重及高血壓）");
       topics.add("日常運動（針對預防過重）");
+      topics.add("蔬果攝取量");
+      topics.add("減鹽減糖減油定義");
+      topics.add("中等強度運動定義");
+      topics.add("腰圍與中央肥胖");
     }
     if (n === "內臟脂肪" && g !== "正常") {
       topics.add("內臟脂肪問題與預防");
       topics.add("心腦血管病、中風及預防");
+      topics.add("腰圍與中央肥胖");
+      topics.add("蔬果攝取量");
+      topics.add("中等強度運動定義");
     }
     if (n === "體脂率") {
       topics.add("體脂率參考標準");
     }
     if (n === "手握力" || n === "坐地前伸") {
       topics.add("日常運動（針對預防過重）");
+      topics.add("中等強度運動定義");
     }
   }
   if (topics.size === 0) {
     topics.add("健康飲食（針對過重及高血壓）");
     topics.add("日常運動（針對預防過重）");
+    topics.add("蔬果攝取量");
+    topics.add("中等強度運動定義");
   }
   return TIPS_REFERENCE.filter((t) => topics.has(t.topic));
+}
+
+// M42: posture bucket for Part 2 tips. Only 血壓/BMI/內臟脂肪 count — the
+// self-lookup cards (體脂率/基礎代謝率/體內水分/肌少症指數/手握力/坐地前伸)
+// are opaque to the AI by design (PRD L51 Exception, ADR 0025). Crisis grade
+// on any counted card jumps straight to many-or-crisis.
+type GradeBucket = "normal" | "few-off" | "many-or-crisis";
+function bucketByGrade(cards: z.infer<typeof RichSummaryInput>["cards"]): GradeBucket {
+  const graded = cards.filter((c) => c.name === "血壓" || c.name === "BMI" || c.name === "內臟脂肪");
+  const offGrades = new Set(["正常偏高", "高血壓（第一期）", "高血壓（第二期）", "嚴重偏高", "偏高", "過高", "過輕"]);
+  const crisisGrades = new Set(["嚴重偏高", "高血壓（第二期）", "過高"]);
+  const off = graded.filter((c) => offGrades.has(c.grade));
+  const crisis = graded.some((c) => crisisGrades.has(c.grade));
+  if (off.length === 0) return "normal";
+  if (crisis || off.length >= 3) return "many-or-crisis";
+  return "few-off";
 }
 
 type RawSummary = z.infer<typeof RichSummaryOutput>;
@@ -272,6 +301,18 @@ export const generateRichSummary = createServerFn({ method: "POST" })
     // prompt authority and filter authority stay in sync forever.
     const cardNameList = Array.from(validCardNames).map((n) => `「${n}」`).join("、");
 
+    // M42: posture-conditional Part 2 guidance. Buckets are derived from
+    // 血壓/BMI/內臟脂肪 only; self-lookup cards stay opaque per PRD L51.
+    // Chinese numerals used for the count words so they don't collide with
+    // allowedNumbers grounding.
+    const bucket = bucketByGrade(data.cards);
+    const bucketBlock =
+      bucket === "normal"
+        ? `整體情況：三項可評級指標（血壓、BMI、內臟脂肪）全部落在正常範圍。第二部分請只給一至兩條輕鬆的鼓勵語句，肯定用家目前的狀態，並提出邊際上可以再做好一點的方向（例如豐富運動類型、加多一份蔬果）。切勿製造焦慮，切勿列出風險。`
+        : bucket === "few-off"
+        ? `整體情況：三項可評級指標之中，有一至兩項未達正常。第二部分請給三至四條具體可行的建議，語氣中性務實，先針對未達標的項目，再帶出配合的生活習慣。可以順帶提一句正面肯定達標的項目。`
+        : `整體情況：三項可評級指標之中，有三項未達標，或其中一項屬嚴重偏高／過高。第二部分請給四至五條具體可行的建議，語氣要堅定，開首一句清楚說明持續處於此情況會帶來的健康風險（例如中風、心血管疾病、糖尿病），然後鼓勵用家認真跟進，並列出可立即實行的做法。仍須提醒不能取代醫生診斷。`;
+
     const basePrompt = `你是一位健康紀錄的摘要助手，為50歲以上的繁體中文讀者撰寫易讀的健康報告。請用JSON格式回覆。
 
 第一部分：逐項解讀
@@ -280,7 +321,17 @@ export const generateRichSummary = createServerFn({ method: "POST" })
 ${cardsText}
 
 第二部分：健康貼士
-根據以上結果的整體情況，從以下參考資料中挑選最相關的3至5個具體可行的健康建議。每個建議須：(1) 具體到可以明天就做，(2) 用一句話說完，(3) 於 topic 欄位填上對應的主題名稱（【】內的字串）。不可加入參考資料以外的建議。撰寫時請使用中性字詞，避免「男士、女士、長者、學生」等特定群體用語。
+
+${bucketBlock}
+
+從以下參考資料中挑選最相關的建議，數量按上述整體情況指引。每個建議必須：(1) 具體、可執行、有數字或明確做法（例如「每日食兩份水果加三份蔬菜」而非「多食蔬果」；「快步行三十分鐘」而非「保持運動」；「男性腰圍保持少於九十厘米」而非「注意腰圍」）。(2) 用一至兩句寫完。(3) 於 topic 欄位填上對應的主題名稱（【】內的字串，完整照抄）。
+
+嚴禁事項：
+- 嚴禁用「明天就做」「明天可以」等字眼——每次都出現會令用家煩厭；請用「今日起」「日常」「每星期」或直接列出頻率。
+- 嚴禁叫用家「參考對照表」「查看對照表」「見下方對照表」——用家已看過。若原文提及對照表，請只保留當中的具體建議，改寫時繞開對照表字眼。
+- 嚴禁模糊字詞：「少油少糖」「適量運動」「注意飲食」「中等強度運動」單獨出現，必須附上參考資料內的定義（例如「鹽每日少於五克」「快步行、太極、社交舞等中等強度活動每星期最少一百五十分鐘」）。
+- 嚴禁加入參考資料以外的建議或數字。
+- 撰寫時使用中性字詞，避免「男士、女士、長者、學生」等群體用語（但描述腰圍標準時可寫「男性腰圍」「女性腰圍」，因為這是量度標準而非群體標籤）。
 
 ${tipsText}
 

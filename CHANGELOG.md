@@ -4,6 +4,27 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-30 10:42 HKT — M42 delivered: 貼士質素優化 (具體 · 分級語氣 · 去除口頭禪)
+
+- `src/lib/health/charts.ts`:
+  - Appended 4 new `TIPS_REFERENCE` topics after 體脂率參考標準:
+    - 【中等強度運動定義】 — 快步行/太極/社交舞/踏單車/上落樓梯; 世衞+衞生署 ≥150 min/週 中等強度 + ≥2 天 肌肉強化; 分段最少 10 min. Sources: 衞生署 change4health/physical_activity + 衞生防護中心 101307.
+    - 【蔬果攝取量】 — 每日 2 份水果 + 3 份蔬菜; 份量定義 (1 中型水果 / 半碗煮熟菜 / 1 碗生菜); 全日餐單實例 (香蕉+灼菜+橙+炒菜心). Sources: 衞生署 change4health/healthy_diet/faq + preventive_diet.
+    - 【減鹽減糖減油定義】 — 鹽 <5g/日 (≈2000mg 鈉 / ≈1 平茶匙), 糖 <25g/日 (≈5 平茶匙), 油 5–6 茶匙/日; 具體做法 (薑蔥蒜替醬料 / 少喝汽水 / 蒸燉炆烚). Sources: 衞生署 preventive_diet + faq.
+    - 【腰圍與中央肥胖】 — 男 <90cm / 女 <80cm; 量度方法 (肋骨最低與盆骨最高之中線, 呼氣時, 皮尺水平); +10cm→全因死亡 +11% / 高血壓 +27%. Sources: 衞生署 waist + keep_healthy_waist + 衞生防護中心 高血壓.
+  - Agencies capped to existing `Agency` type (衞生防護中心 / 衞生署 / 職業安全健康局 / 醫管局); no WHO addition needed because 衞生署 already carries the WHO-derived thresholds.
+- `src/lib/health/ai.functions.ts`:
+  - `selectRelevantTips` extended: 血壓 非正常 also adds 減鹽減糖減油定義 / 腰圍與中央肥胖 / 中等強度運動定義; BMI 偏高/過高/過輕 adds 蔬果攝取量 / 減鹽減糖減油定義 / 中等強度運動定義 / 腰圍與中央肥胖; 內臟脂肪 非正常 adds 腰圍與中央肥胖 / 蔬果攝取量 / 中等強度運動定義; 手握力/坐地前伸 adds 中等強度運動定義; empty-set fallback adds 蔬果攝取量 / 中等強度運動定義.
+  - New `bucketByGrade(cards): "normal" | "few-off" | "many-or-crisis"` — filters to 血壓/BMI/內臟脂肪 (three graded cards only; self-lookup cards opaque per PRD L51 Exception), counts off-grades (正常偏高 起計) and crisis (嚴重偏高 / 高血壓（第二期）/ 過高). Crisis or ≥3 off → many-or-crisis; 0 off → normal; else few-off.
+  - Part 2 prompt rewrite: bucket-conditional 整體情況 opening paragraph specifying tone + suggestion count (normal 1–2 gentle; few-off 3–4 neutral concrete; many-or-crisis 4–5 firm with health risks named). Chinese numerals (一/兩/三/四/五) so no `allowedNumbers` collision. Explicit 嚴禁事項 block bans: 「明天就做/明天可以」, 「參考對照表/查看對照表/見下方對照表」, 模糊字詞 (少油少糖/適量運動/中等強度運動) 單獨出現而無定義, 參考資料以外的建議或數字. Explicit allowance: 男性/女性 for 腰圍量度標準 (SENSITIVE_LABEL_PATTERN blocks 男士/女士/長者/學生 only, not 男/女 or 男性/女性).
+- Rationale (user report): tester feedback identified four specific defects — repeated 「明天可以怎樣」, vague adjectives (少油少糖 / 中等強度運動 / 保持腰圍) never quantified, 參考對照表 nagging when the user is already reading the table, and tone-blind volume of advice for both normal and abnormal records. Design goal: advice should feel written for the specific reading, actionable within the day, and scale volume/tone to severity.
+- Design decisions: (1) bucket only on the three genuinely graded cards — pulling self-lookup cards into bucket logic would smuggle age/gender-based grading in violation of PRD L13. (2) all new topic bodies carry digits (5, 25, 90, 80, 150, 2000, 10, 11, 27) that flow into `allowedNumbers` via `tipsText` extraction — AI can safely quote them. (3) posture text uses Chinese numerals for structural counts so 「三至四條」 doesn't require a matching digit in leaflet/tips. (4) no new grounding gate — 對照表 nagging is a soft constraint at prompt layer; if it persists we can add a regex filter in a follow-up milestone.
+- Untouched: storage envelope, wire shape (`RichSummaryInput` cap of 12 preserved), JSON response shape (`RichSummaryOutput`), `richGroundingFailure` structure, `SELF_LOOKUP_CARD_NAMES` sanitize, `CARDS_WITH_SELF_LOOKUP` badge-omission gate, grader logic, interpretCard, all UI files, PRD, ADRs.
+- PRD alignment: L13/L47 ✓ (prompt content only, no gender/age collection); L23 NORTHSTAR ✓ (specific-to-reading advice); L48 local-only ✓; L50 wire byte-identical ✓; L51 grading deterministic + Exception ✓ (bucket ignores self-lookup cards); **L52 grounded AI directly served ✓** (all 4 new topics named-source; buckets computed server-side; grounding gates unchanged); L55 繁中 ✓; L57 minimal ✓.
+- Verified: `bunx tsc --noEmit` clean, `bun run build` clean.
+- Plan: `plan/45-m42-tips-quality-optimization.md`.
+- Timestamp source: container's NTP-synced system clock via `TZ=Asia/Hong_Kong date -Iseconds` → `2026-09-30T10:42:52+08:00`.
+
 ## 2026-09-30 09:26 HKT — Living-docs sync after M41
 
 - `ARCHITECTURE.md` — one targeted addition after the summary data-flow diagram: describes M41's dynamic card-name whitelist mechanism (prompt derives names from `Array.from(validCardNames)`, the same Set `parseOutput` filters on, so prompt and filter share one source and future card additions can never silently fall outside the prompt). Includes an explicit 「Never re-introduce a hardcoded card-name list in this prompt」 guardrail so future contributors see how the M27-through-M41 ossification happened.

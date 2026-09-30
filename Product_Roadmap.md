@@ -290,6 +290,42 @@ Value: 50+ readers see where to go next at the exact scroll position
 they've reached after recording, without hunting.
 Traces: NORTHSTAR (trustworthy — the app guides its user) · USER JOURNEY 5 (「can return directly to 「健康紀錄簿」 without replaying the cover」) · USER JOURNEY 7 (path to health summary explicit) · HARD CONSTRAINTS (50+ friendly touch targets, Traditional Chinese, disclaimer footer preserved).
 
+## M42 — 貼士質素優化: 具體 · 分級語氣 · 去除口頭禪
+Optimizes the `/summary` Part 2「健康貼士」 output that testers reported
+as (a) 「明天就做」 repeated to the point of annoyance, (b) 「少油少糖」
+「中等強度運動」「保持腰圍健康」 vague adjectives never quantified,
+(c) 「參考對照表」 nagging when the user is already looking at the table,
+and (d) tone-blind: same volume of advice for a fully-normal record as for
+a hypertensive-crisis one. Three coordinated edits: **charts.ts** adds 4
+new TIPS_REFERENCE topics — 【中等強度運動定義】 (快步行/太極/社交舞;
+每星期 ≥150 分鐘中等 + ≥2 次肌肉強化), 【蔬果攝取量】 (每日 2 份水果 +
+3 份蔬菜, with 份量定義 and a full day's 餐單實例), 【減鹽減糖減油定義】
+(鹽 <5g/日, 糖 <25g/日, 油 5-6 茶匙/日, plus 醬料替代做法),
+【腰圍與中央肥胖】 (男 <90cm / 女 <80cm, 量度方法, +10cm→全因死亡 +11%,
++高血壓 +27%) — all with named 衞生署 / 衞生防護中心 sources.
+**selectRelevantTips** extends the card→topics map so 血壓/BMI/內臟脂肪
+非正常 also pulls the new definition topics. **ai.functions.ts** adds a
+`bucketByGrade` helper deriving a 3-way posture from 血壓/BMI/內臟脂肪
+grades only (self-lookup cards remain opaque per PRD L51 Exception): full
+normal → 1–2 gentle encouragement lines, no risk framing; 1–2 off →
+3–4 concrete neutral suggestions; ≥3 off or any 嚴重偏高/過高 → 4–5
+firm suggestions opening with the concrete health risks (中風, 心血管,
+糖尿病). Part 2 prompt rewrites its rules block: bans 「明天就做/明天可以」
+「參考對照表」 nagging, requires 中等強度運動 to always carry its
+definition, requires 少油少糖 to always cite the 5g/25g threshold, requires
+腰圍 to name the 90/80cm target. Chinese numerals (一、兩、三、四、五)
+throughout the bucket text so structural counts don't collide with
+`allowedNumbers` grounding. All 4 new topic bodies have digits (5g / 25g /
+90cm / 80cm / 150 分鐘) that flow into `allowedNumbers` via `tipsText`
+extraction, so the AI can safely quote them. Retries inherit via
+basePrompt. Zero storage / wire / JSON-shape / grounding-check-logic /
+UI / PRD change.
+Full plan: [plan/45-m42-tips-quality-optimization.md](plan/45-m42-tips-quality-optimization.md).
+Value: the summary reads like a specific-to-your-numbers report from a
+health worker rather than a canned brochure; the tone finally matches
+the severity so encouragement doesn't scold and warnings actually warn.
+Traces: NORTHSTAR (trustworthy — advice specific to the reading) · USER (50+ readers deserve actionable numbers, not adjectives) · HARD CONSTRAINTS L52 grounded AI (all new topics named-source; buckets computed server-side) · L51 Exception (self-lookup cards excluded from bucket derivation).
+
 ## M41 — 動態卡片名單: end the stale-whitelist grounding failure
 Fixes the 「摘要未通過內容核對（卡片解讀未對應項目名稱），已停止顯示」
 red banner on `/summary`. Root cause: the base prompt's card-name
