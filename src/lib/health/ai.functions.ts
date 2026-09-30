@@ -205,9 +205,16 @@ function selectRelevantTips(cards: z.infer<typeof RichSummaryInput>["cards"]): T
 // self-lookup cards (體脂率/基礎代謝率/體內水分/肌少症指數/手握力/坐地前伸)
 // are opaque to the AI by design (PRD L51 Exception, ADR 0025). Crisis grade
 // on any counted card jumps straight to many-or-crisis.
-type GradeBucket = "normal" | "few-off" | "many-or-crisis";
+type GradeBucket = "no-graded" | "normal" | "few-off" | "many-or-crisis";
 function bucketByGrade(cards: z.infer<typeof RichSummaryInput>["cards"]): GradeBucket {
   const graded = cards.filter((c) => c.name === "血壓" || c.name === "BMI" || c.name === "內臟脂肪");
+  // M42a: honest framing when none of the three grading anchors were measured
+  // (grip-only, sit-reach-only, or self-lookup-only Tanita sessions). Must
+  // precede the off-count check because graded.length === 0 also has
+  // off.length === 0 and would otherwise fall into "normal" and let the AI
+  // claim 「三項可評級指標全部落在正常範圍」 — a fabrication that violates
+  // PRD L23 (trustworthy) and L52 (grounded).
+  if (graded.length === 0) return "no-graded";
   const offGrades = new Set(["正常偏高", "高血壓（第一期）", "高血壓（第二期）", "嚴重偏高", "偏高", "過高", "過輕"]);
   const crisisGrades = new Set(["嚴重偏高", "高血壓（第二期）", "過高"]);
   const off = graded.filter((c) => offGrades.has(c.grade));
@@ -307,7 +314,9 @@ export const generateRichSummary = createServerFn({ method: "POST" })
     // allowedNumbers grounding.
     const bucket = bucketByGrade(data.cards);
     const bucketBlock =
-      bucket === "normal"
+      bucket === "no-graded"
+        ? `整體情況：今次紀錄未包含血壓、BMI 或內臟脂肪等可評級指標，只有自查對照的項目。第二部分請就用家實際錄入的項目給一至兩條中性的日常提醒（例如維持運動、均衡飲食、充足水分），語氣輕鬆。切勿對用家未量度的指標（例如血壓、BMI、內臟脂肪）作出任何判斷，切勿使用「全部正常」「全部達標」「有健康風險」等結論式字眼。`
+        : bucket === "normal"
         ? `整體情況：三項可評級指標（血壓、BMI、內臟脂肪）全部落在正常範圍。第二部分請只給一至兩條輕鬆的鼓勵語句，肯定用家目前的狀態，並提出邊際上可以再做好一點的方向（例如豐富運動類型、加多一份蔬果）。切勿製造焦慮，切勿列出風險。`
         : bucket === "few-off"
         ? `整體情況：三項可評級指標之中，有一至兩項未達正常。第二部分請給三至四條具體可行的建議，語氣中性務實，先針對未達標的項目，再帶出配合的生活習慣。可以順帶提一句正面肯定達標的項目。`

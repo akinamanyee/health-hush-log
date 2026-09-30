@@ -4,6 +4,21 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-30 17:06 HKT — M42a delivered: no-graded bucket ends fabricated 「全部正常」 claim
+
+- `src/lib/health/ai.functions.ts`:
+  - `GradeBucket` union widened to `"no-graded" | "normal" | "few-off" | "many-or-crisis"`.
+  - `bucketByGrade` short-circuits with `if (graded.length === 0) return "no-graded";` BEFORE the `off.length === 0` check. Ordering rationale in code comment: without the early return, the empty case has `off.length === 0` too and would fall into `"normal"`, letting the prompt claim 「三項可評級指標全部落在正常範圍」 for indicators that were never measured.
+  - `bucketBlock` ternary chain gains a new first branch: 「整體情況：今次紀錄未包含血壓、BMI 或內臟脂肪等可評級指標，只有自查對照的項目。第二部分請就用家實際錄入的項目給一至兩條中性的日常提醒（例如維持運動、均衡飲食、充足水分），語氣輕鬆。切勿對用家未量度的指標（例如血壓、BMI、內臟脂肪）作出任何判斷，切勿使用「全部正常」「全部達標」「有健康風險」等結論式字眼。」
+- Rationale: M42 peer review Finding #1 in this session. `bucketByGrade` returned `"normal"` for two semantically different states: (a) 血壓/BMI/內臟脂肪 all measured and all in-range, and (b) none of the three measured (grip-only, sit-reach-only, self-lookup-only Tanita sessions). In state (b) the AI received a factual claim about indicators the user never measured — violation of PRD L23 NORTHSTAR (trustworthy) and L52 (grounded AI: real error, no invented advice).
+- Design decisions: (1) 「no-graded」 first in BOTH the helper's early return AND the ternary chain — both places must agree, verified by simulation. (2) Explicit ban on conclusion words in branch text: belt-and-braces so the AI cannot echo the fabricated framing even if it drifts. (3) No hard grounding gate for this; enforced at prompt layer, same class as M42's ban on 「明天就做」 and 「參考對照表」. Hard-gating would need per-session module-recorded state the wire doesn't carry.
+- Standalone simulation (8 scenarios): empty→no-graded ✓, grip-only→no-graded ✓, self-lookup-only→no-graded ✓, BP normal→normal ✓, BP stage1→few-off ✓, BP crisis→many-or-crisis ✓, all-three-normal→normal ✓, all-three-off→many-or-crisis ✓.
+- Untouched: `selectRelevantTips` (empty-set fallback + 手握力/坐地前伸 branch already give no-graded sessions a non-empty topic pool, so `expectTips` gate stays satisfied), `richGroundingFailure` (existing gates cover the new branch), storage envelope, wire shape, JSON response shape, `SELF_LOOKUP_CARD_NAMES` sanitize, grader, interpretCard, all UI files, PRD, ADRs. M42 normal/few-off/many-or-crisis branches byte-identical.
+- PRD alignment: L13/L47 ✓ (prompt content only); **L23 NORTHSTAR ✓ directly served** (no more fabricated 「全部正常」); L48 ✓; L50 wire byte-identical ✓; L51 + Exception ✓ (self-lookup cards still opaque to bucket); **L52 grounded AI ✓ directly served**; L55 ✓; L57 ✓.
+- Verified: `bunx tsc --noEmit` clean, `bun run build` clean.
+- Plan: `plan/46-m42a-no-graded-bucket-hotfix.md`.
+- Timestamp source: container's NTP-synced system clock via `TZ=Asia/Hong_Kong date -Iseconds` → `2026-09-30T17:06:05+08:00`.
+
 ## 2026-09-30 10:42 HKT — M42 delivered: 貼士質素優化 (具體 · 分級語氣 · 去除口頭禪)
 
 - `src/lib/health/charts.ts`:

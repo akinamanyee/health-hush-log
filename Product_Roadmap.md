@@ -290,6 +290,32 @@ Value: 50+ readers see where to go next at the exact scroll position
 they've reached after recording, without hunting.
 Traces: NORTHSTAR (trustworthy — the app guides its user) · USER JOURNEY 5 (「can return directly to 「健康紀錄簿」 without replaying the cover」) · USER JOURNEY 7 (path to health summary explicit) · HARD CONSTRAINTS (50+ friendly touch targets, Traditional Chinese, disclaimer footer preserved).
 
+## M42a — Hotfix: no-graded bucket ends fabricated 「全部正常」 claim
+Follow-up to M42 catching a peer-review Finding: `bucketByGrade`
+returned `"normal"` for both (a) 血壓/BMI/內臟脂肪 all measured and
+all in-range, and (b) **none of the three measured at all** (grip-only,
+sit-reach-only, self-lookup-only Tanita sessions). In state (b), the
+AI received 「整體情況：三項可評級指標（血壓、BMI、內臟脂肪）全部落
+在正常範圍」 in its prompt as a factual claim — a fabrication about
+indicators that were never measured. M42a widens `GradeBucket` with a
+`"no-graded"` variant and short-circuits when `graded.length === 0`
+before the off-count check, then adds a matching prompt branch:
+「今次紀錄未包含血壓、BMI 或內臟脂肪等可評級指標，只有自查對照的
+項目。第二部分請就用家實際錄入的項目給一至兩條中性的日常提醒」,
+with an explicit ban on conclusion words (「全部正常」/「全部達標」/
+「有健康風險」). Ordering matters: `no-graded` must precede the
+`off.length === 0` check because empty-graded also has zero offs and
+would otherwise fall into normal. 8-case standalone simulation covers
+empty, grip-only, self-lookup-only, BP-only-normal/stage1/crisis, and
+full-record all-normal/all-off. Zero storage / wire / JSON-shape /
+grounding-check-logic / UI / PRD change.
+Full plan: [plan/46-m42a-no-graded-bucket-hotfix.md](plan/46-m42a-no-graded-bucket-hotfix.md).
+Value: PRD L23 NORTHSTAR (trustworthy) and L52 (grounded AI) restored
+for the grip-only / sit-reach-only / self-lookup-only session paths;
+the app no longer tells users their blood pressure is normal when they
+didn't measure it.
+Traces: NORTHSTAR (trustworthy — the app never invents facts about what wasn't measured) · HARD CONSTRAINTS L52 grounded AI (bucket prose now describes only what data actually contains) · caught via M42 peer review 2026-09-30.
+
 ## M42 — 貼士質素優化: 具體 · 分級語氣 · 去除口頭禪
 Optimizes the `/summary` Part 2「健康貼士」 output that testers reported
 as (a) 「明天就做」 repeated to the point of annoyance, (b) 「少油少糖」
