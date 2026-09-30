@@ -30,3 +30,4 @@ in the linked ADR file under `adr/`. This index never holds the argument itself.
 | 2026-09-23 | [0023](adr/0023-gender-neutral-tips-and-leaflet.md) | Remove gender-specific content from health tips and reference leaflet; partially overrides ADR 0019 append-only rule |
 | 2026-09-23 | [0024](adr/0024-agency-only-attribution-and-sensitive-word-check.md) | Display agency only (not article titles/URLs); AI prompt no longer sees titles; grounding check rejects 男士/女士/長者/學生 |
 | 2026-09-24 | [0025](adr/0025-static-reference-vs-ai-advice.md) | Static reference material from an authoritative source may be gender/age structured; AI-generated content may not |
+| 2026-09-30 | [0026](adr/0026-posture-conditional-prompt-shaping.md) | Summary prompt carries a server-computed posture block (no-graded / normal / few-off / many-or-crisis) that scales tone and suggestion count to what the reading actually shows |

@@ -4,6 +4,16 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-09-30 20:15 HKT — Living-docs sync after M42 + M42a
+
+- `ARCHITECTURE.md` — one targeted paragraph appended after the M41 whitelist block: describes the M42 + M42a **posture block** in `generateRichSummary`'s Part 2 prompt. Names the four postures (`no-graded` / `normal` / `few-off` / `many-or-crisis`), the three-card filter (血壓 / BMI / 內臟脂肪), the L51 Exception preserving self-lookup-card opacity, the Chinese-numeral discipline to avoid `allowedNumbers` collision, the ban on 「全部正常」 / 「全部達標」 / 「有健康風險」 in the no-graded branch, and the four new named-source `TIPS_REFERENCE` topics (中等強度運動定義 / 蔬果攝取量 / 減鹽減糖減油定義 / 腰圍與中央肥胖) whose numeric contents enter `allowedNumbers` via `tipsText`. Points to ADR 0026.
+- `DECISIONS.md` — one new index row for 2026-09-30 / ADR 0026.
+- `adr/0026-posture-conditional-prompt-shaping.md` — new ADR covering the principle M42 introduced and M42a refined: **the summary prompt carries a server-computed posture block that scales tone and suggestion count to what the reading actually shows — never AI-guessed, never client-controlled**. Extends ADR 0019 / 0025 / 0017. Records 7 rejected alternatives (AI self-classification, client-side posture, self-lookup cards in bucket, `normal` for empty-graded, hard-gating the ban wording, finer bucketing). Consequences list flags the duplicated grade-string SSOT wart (`BP_TIERS.label` and `BandGrade` strings hardcoded in `bucketByGrade`) as latent, not blocking. Source change history bullets for M42 (three-bucket design + 4 new topics) and M42a (no-graded posture + explicit ban).
+- `Product_Roadmap.md` — already carries M42 and M42a entries from their delivery turns. No update needed.
+- `CHANGELOG.md` — this entry plus prior M42 (10:42) and M42a (17:06) delivery entries. Well under 100 entries; no archive migration needed.
+- `PRD.md` — no deviation this session. M42 served PRD L23 NORTHSTAR (trustworthy specific-to-reading advice) and L52 grounded AI (all 4 new topics named-source; bucket computed server-side); M42a restored L23 + L52 on the previously-buggy grip-only / sit-reach-only / self-lookup-only session paths. Both within PRD intent.
+- Timestamp source: container's NTP-synced system clock via `TZ=Asia/Hong_Kong date -Iseconds` → `2026-09-30T20:15:17+08:00`.
+
 ## 2026-09-30 17:06 HKT — M42a delivered: no-graded bucket ends fabricated 「全部正常」 claim
 
 - `src/lib/health/ai.functions.ts`:

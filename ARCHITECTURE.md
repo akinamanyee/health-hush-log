@@ -99,6 +99,28 @@ prompt** (regressed once between M27 and M41, tripping the grounding
 check whenever a full Tanita record produced more than the four M21-era
 cards).
 
+Part 2 of the summary prompt (「健康貼士」) carries a **posture block**
+whose text is chosen server-side by `bucketByGrade(data.cards)` before
+the prompt is assembled (M42 + M42a). The bucket looks only at
+`血壓 / BMI / 內臟脂肪` — the three cards the app grades deterministically
+without gender/age — and returns one of four postures: `no-graded`
+(none of the three measured; grip-only / sit-reach-only / self-lookup-only
+sessions), `normal` (all measured cards in range), `few-off` (1–2 off,
+no crisis), `many-or-crisis` (≥3 off or any 嚴重偏高 / 高血壓（第二期）/
+過高 crisis grade). Each posture selects a specific opening line and a
+suggestion count (1–2 gentle / 3–4 neutral / 4–5 firm with named health
+risks); the `no-graded` branch adds an explicit ban on conclusion words
+(「全部正常」/「全部達標」/「有健康風險」) so the AI cannot echo any
+claim about indicators the user never measured. Self-lookup cards
+(體脂率 / 基礎代謝率 / 體內水分 / 肌少症指數 / 手握力 / 坐地前伸) stay
+opaque to bucketing per PRD L51 Exception. Chinese numerals throughout
+the bucket text so structural counts never collide with `allowedNumbers`
+grounding. The four new named-source topics added alongside
+(【中等強度運動定義】/【蔬果攝取量】/【減鹽減糖減油定義】/【腰圍與中央肥胖】,
+all 衞生署 or 衞生防護中心) supply concrete numbers the AI can quote
+(150 分鐘, 5 克, 25 克, 90 / 80 cm) via `tipsText.match(/\d+/g)`. See
+ADR 0026.
+
 Between the review form and the grader / save path, `useRecordState.derived`
 (M39 + M40) augments `numeric` with values computed from raw inputs for
 tanita only — none for other modules. **BMI** = `weight / (height/100)²` when
