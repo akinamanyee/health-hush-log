@@ -4,6 +4,15 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-10-01 23:32 HKT — Living-docs sync after M44
+
+- `ARCHITECTURE.md` — Data-flow diagram's multi-photo-merge note extended with M44's weight guard: on Tanita, `weight` is accepted only from the first screen (`mod.screens[0].id`, currently 體脂率); OCR on screens 2–7 strips the `weight` key before merging so per-screen scale drift can't overwrite the user's authoritative weight. Non-tanita modules short-circuit the guard.
+- `DECISIONS.md` — no new index row. M44 is a merge-rule tightening within existing patterns (M19 Tanita screens, M27 wire sanitize), not a new principle. No ADR warranted.
+- `Product_Roadmap.md` — already carries M44 entry from the delivery turn. No update needed.
+- `CHANGELOG.md` — this entry plus the M44 delivery entry at 18:40. Well under 100 entries; no archive migration needed.
+- `PRD.md` — no deviation this session. M44 served PRD L23 NORTHSTAR (trustworthy — the number the user recorded stays recorded) and PRD L51 deterministic grading (derived values BMI/ASM/SMI now read a stable weight input). Both strengthen existing PRD intent.
+- Timestamp source: container's NTP-synced system clock via `TZ=Asia/Hong_Kong date -Iseconds` → `2026-10-01T23:32:34+08:00`.
+
 ## 2026-10-01 18:40 HKT — M44 delivered: 體重 locked to primary Tanita screen
 
 - `src/components/health/useRecordState.ts`:

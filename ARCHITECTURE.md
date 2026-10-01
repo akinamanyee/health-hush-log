@@ -80,6 +80,12 @@ type  ──▶ ─┴ review form (RecordModule / TanitaRecord) ── user con
                      │  Multi-photo merge: each photo overwrites only non-null
                      │  AI values, preserving earlier reads. A progress counter
                      │  and context-aware toast guide the user through the flow.
+                     │  M44: on Tanita, `weight` is accepted ONLY from the first
+                     │  screen (`mod.screens[0].id`, currently 體脂率) — OCR on
+                     │  screens 2–7 strips the `weight` key before merging so
+                     │  per-screen scale drift (±0.1-0.5 kg) can't overwrite the
+                     │  user's authoritative weight. Non-tanita modules
+                     │  short-circuit the guard.
                      │
                      ├─▶ gradeEntry()  ── deterministic tables ──▶ badges
                      ├─▶ recheckDate() ──▶ .ics / Google Calendar link
