@@ -4,6 +4,19 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-10-01 18:40 HKT — M44 delivered: 體重 locked to primary Tanita screen
+
+- `src/components/health/useRecordState.ts`:
+  - `onImage` merge loop (lines 109-124) gains a 3-line guard. Before entering the field-merge loop, computes `isPrimaryWeightScreen = mod.id !== "tanita" || !screenId || screenId === mod.screens![0]!.id`. Inside the loop, `if (k === "weight" && !isPrimaryWeightScreen) continue;` skips the OCR'd weight on non-primary Tanita screens. Everything else (muscle, limbs, water, visceral, bmr, height) merges exactly as before.
+- Rationale: user-reported bug 2026-10-01. On `/tanita`, every one of the 7 screens lists `weight` in its fields. TANITA displays weight at the top of each screen, so OCR on screens 2–7 returns a weight that then overwrote the user's screen-1 weight with ±0.1-0.5 kg of scale drift. User's rule: screen 1 (體脂率) is the sole weight authority; non-primary OCR must not touch it; manual revise on screen 1 (the only editable site, by design) is the sole override.
+- Design decisions: (1) rule reads `mod.screens[0].id` dynamically rather than literal `"bodyFat"` so a future screen reorder in `modules.ts` moves authority with the array. (2) `mod.id !== "tanita"` short-circuits to primary so BP / grip / sitreach modules (which call `onImage` with no `screenId` and have no `weight` field) are untouched. (3) strict rule — screen-2+ OCR never writes weight, even when screen 1 is empty. The M36 `ready` check at save already auto-scrolls to the first `aria-invalid="true"` input (screen 1's weight) if the user tries to save without visiting screen 1. (4) no UI change: the disabled-display pattern for weight on screens 2–7 (TanitaRecord.tsx:92-107) continues to mirror `values["weight"]` so the user still sees screen 1's weight populate the other 6 cards.
+- Standalone 6-case simulation (2026-10-01): screen=muscle+weight-set → weight preserved ✓; screen=bodyFat → weight overwritten (primary authority) ✓; screen=water+weight-empty → weight NOT written (strict rule) ✓; BP module no screenId → all merged ✓; screen=asm → 4 limbs merged, weight preserved ✓; screen=bmi → height merged, weight preserved ✓.
+- Untouched: `onVoice` (voice removed from Tanita per ADR 0022; path untouched anyway), `derived` memo (BMI/ASM/SMI still read `values["weight"]`), `ready` memo, `submit`, `makeEntry`, storage envelope, wire shape, JSON response shape, grader, grounding gates, M42 bucket helper, M43 BMR reader guide, every other UI file.
+- PRD alignment: L47/L48 ✓ (in-memory state only); L50 wire byte-identical ✓ (strip happens client-side after server response); **L23 NORTHSTAR ✓ directly served** (the number the user actually recorded stays recorded); L51 + Exception ✓ (grader untouched; derived values now read a stable weight); L52 grounded AI ✓ (AI layer untouched); L55 繁中 ✓; L57 50+ friendly ✓.
+- Verified: `bunx tsc --noEmit` clean, `bun run build` clean.
+- Plan: `plan/48-m44-weight-locked-to-primary-screen.md`.
+- Timestamp source: container's NTP-synced system clock via `TZ=Asia/Hong_Kong date -Iseconds` → `2026-10-01T18:40:28+08:00`.
+
 ## 2026-10-01 18:30 HKT — Living-docs sync after M43
 
 - `ARCHITECTURE.md` — one targeted sentence extended on the body-composition grading bullet: names the five self-lookup cards whose matrices carry built-in tier labels (消瘦/適當/正常/優-差) and explains BMR as the exception whose source publishes point values rather than tiers, so `BmrStandardTable` renders deltas + the M43 reader guide to carry interpretation. Points to ADR 0025.

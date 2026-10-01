@@ -111,8 +111,17 @@ export function useRecordState(mod: ModuleDef) {
         data: { image: dataUrl, module: mod.id, screen: screenId },
       });
       const filled: Record<string, string> = { ...values };
+      // M44: screen 1 (體脂率) is the sole weight authority for Tanita.
+      // TANITA shows weight at the top of every screen, so OCR on screens
+      // 2–7 would otherwise overwrite the user's screen-1 weight with
+      // ±0.1-0.5 kg scale drift. `mod.screens[0].id` ties the invariant to
+      // "the first screen defined" so a future reorder moves authority with it.
+      const isPrimaryWeightScreen =
+        mod.id !== "tanita" || !screenId || screenId === mod.screens![0]!.id;
       for (const [k, v] of Object.entries(res.values)) {
-        if (v != null) filled[k] = String(v);
+        if (v == null) continue;
+        if (k === "weight" && !isPrimaryWeightScreen) continue;
+        filled[k] = String(v);
       }
       setValues(filled);
       bumpAiUsage();

@@ -290,6 +290,32 @@ Value: 50+ readers see where to go next at the exact scroll position
 they've reached after recording, without hunting.
 Traces: NORTHSTAR (trustworthy — the app guides its user) · USER JOURNEY 5 (「can return directly to 「健康紀錄簿」 without replaying the cover」) · USER JOURNEY 7 (path to health summary explicit) · HARD CONSTRAINTS (50+ friendly touch targets, Traditional Chinese, disclaimer footer preserved).
 
+## M44 — 體重 鎖定於主畫面；其他 Tanita 畫面的 OCR 不得覆寫
+Fixes a user-reported bug on `/tanita`: all 7 Tanita screens list
+`weight` in their fields, TANITA shows weight at the top of each
+screen, and `onImage`'s merge loop was overwriting the user's screen-1
+weight with each subsequent screen's OCR'd weight — producing ±0.1-0.5
+kg of visible scale drift. M44 adds a 3-line guard inside the merge
+loop so that OCR on any non-primary Tanita screen (muscle / asm /
+water / visceral / bmr / bmi) strips the `weight` key from the response
+before merging. Screen 1 (體脂率) remains the sole weight authority:
+either the user's manual input there, or screen 1's own OCR, can set
+`values["weight"]`. Rule reads `mod.screens[0].id` dynamically so a
+future screen reorder moves authority with it; `mod.id !== "tanita"`
+short-circuit keeps BP / grip / sitreach modules unaffected. 6-case
+standalone simulation verified: screen-2+ OCR with weight already set
+preserves screen 1's; primary-screen OCR still overwrites;
+non-tanita module `onImage` is a no-op for the guard. No UI change —
+the existing disabled-display pattern on screens 2–7 still mirrors
+`values["weight"]`. Zero storage / wire / grader / AI-prompt / CSV /
+calendar change.
+Full plan: [plan/48-m44-weight-locked-to-primary-screen.md](plan/48-m44-weight-locked-to-primary-screen.md).
+Value: PRD L23 NORTHSTAR (trustworthy) directly served — the weight
+the user actually recorded on screen 1 stays recorded; derived values
+(BMI = w/h², ASM, SMI) read a stable `weight` instead of whichever
+screen was photographed last.
+Traces: NORTHSTAR (trustworthy — the number the user recorded stays recorded) · USER JOURNEY 3-4 (photo entry still works end-to-end; only unintended weight drift stops) · HARD CONSTRAINT L51 deterministic grading (derived values now read a stable weight input).
+
 ## M43 — BMR 卡片加入「如何理解你的差距」解讀指引
 Addresses user feedback on `/summary`: the 基礎代謝率 self-lookup card
 rendered deltas (「你的-380」/「你的+60」) with no way for the reader to
