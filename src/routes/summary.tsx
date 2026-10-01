@@ -242,11 +242,18 @@ function BmrReferenceTable({
             {BMR_AGE_BUCKETS.map((age) => (
               <td key={age} className="p-2 text-muted-foreground">
                 <div className="font-medium text-foreground">{data[age].toLocaleString()} kcal</div>
-                {userValue !== undefined && (
-                  <div className="mt-1 text-xs">
-                    你的{userValue > data[age] ? `+${Math.round(userValue - data[age])}` : Math.round(userValue - data[age])}
-                  </div>
-                )}
+                {userValue !== undefined && (() => {
+                  const delta = Math.round(userValue - data[age]);
+                  return (
+                    <div className="mt-1 text-xs">
+                      {delta === 0
+                        ? "你的 持平"
+                        : delta > 0
+                          ? `你的 ↑ ${delta} kcal`
+                          : `你的 ↓ ${Math.abs(delta)} kcal`}
+                    </div>
+                  );
+                })()}
               </td>
             ))}
           </tr>
@@ -269,8 +276,36 @@ function BmrStandardTable({ userValue }: { userValue: number | undefined }) {
           你的 {userValue.toLocaleString()} kcal 與參考值的差距顯示於各欄下方。請找你性別及年齡對應的欄自行對照。
         </p>
       )}
+      {/* M43: reader guide for the BMR card. BMR is the only self-lookup card
+          whose source (TANITA) publishes point values rather than tier bands,
+          so unlike 體脂率 / 體內水分 / 肌少症指數 / 手握力 / 坐地前伸 the
+          cells carry no built-in interpretive label. This block tells the user
+          how to read their delta without the app itself classifying them —
+          qualitative direction only, no invented kcal threshold. 男性/女性
+          wording below is a metric label on static reference material from a
+          named source (TANITA + 衞生署); permitted by ADR 0025 and NOT
+          caught by SENSITIVE_LABEL_PATTERN (which matches 男士/女士/長者/學生). */}
+      {userValue !== undefined && (
+        <div className="mt-3 rounded-xl border border-border/60 bg-background p-3">
+          <p className="text-sm font-medium text-foreground">【如何理解你的差距】</p>
+          <p className="mt-2 text-xs text-foreground">
+            基礎代謝率反映身體在完全靜止時維持生命所需的最低熱量，主要與<strong>肌肉量</strong>相關。
+          </p>
+          <ul className="mt-2 space-y-1.5 text-xs text-foreground">
+            <li>
+              <strong>讀數接近或略高於</strong>同性別年齡參考值 → 一般反映肌肉量充足；維持現有運動及飲食習慣即可。
+            </li>
+            <li>
+              <strong>讀數明顯低於</strong>參考值 → 一般反映肌肉量偏低。可配合阻力運動（例如掌上壓、提舉重物、行樓梯）及均衡蛋白質攝取（例如魚、蛋、豆類）逐步改善。
+            </li>
+            <li>
+              基礎代謝率本身<strong>沒有「越高越好」</strong>，應配合體脂率、肌肉量及腰圍整體評估。
+            </li>
+          </ul>
+        </div>
+      )}
       <p className="mt-3 text-xs text-muted-foreground">
-        資料來源：TANITA〈身體組成數據參考指標〉。基礎代謝率因性別及年齡而異，本應用程式因不收集性別及年齡而不進行分級，用家可對照上表自行參考。
+        資料來源：TANITA〈身體組成數據參考指標〉的參考值；上述方向性解讀整合 TANITA 基礎代謝率解讀原則與衞生署〈能量代謝與肌肉量〉的常識性說明。基礎代謝率因性別及年齡而異，本應用程式因不收集性別及年齡而不進行分級，用家可對照上表自行判斷。
       </p>
     </details>
   );

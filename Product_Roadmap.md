@@ -290,6 +290,41 @@ Value: 50+ readers see where to go next at the exact scroll position
 they've reached after recording, without hunting.
 Traces: NORTHSTAR (trustworthy — the app guides its user) · USER JOURNEY 5 (「can return directly to 「健康紀錄簿」 without replaying the cover」) · USER JOURNEY 7 (path to health summary explicit) · HARD CONSTRAINTS (50+ friendly touch targets, Traditional Chinese, disclaimer footer preserved).
 
+## M43 — BMR 卡片加入「如何理解你的差距」解讀指引
+Addresses user feedback on `/summary`: the 基礎代謝率 self-lookup card
+rendered deltas (「你的-380」/「你的+60」) with no way for the reader to
+tell whether their landed delta represents a healthy, neutral or
+concerning state. Root cause: TANITA publishes BMR as **point reference
+values**, not tier bands — so unlike the other five self-lookup cards
+(體脂率 / 體內水分 / 肌少症指數 / 手握力 / 坐地前伸) whose matrices carry
+built-in interpretive labels (消瘦/適當/正常/優-差), the BMR cells have
+no tier words to read. M43 adds two coordinated UI edits inside
+`BmrReferenceTable` / `BmrStandardTable` on `summary.tsx`: (A) each cell's
+user-delta line gains a direction arrow + unit (「你的 ↓ 380 kcal」/
+「你的 ↑ 60 kcal」/「你的 持平」) so direction is immediately visible;
+(B) a bordered 【如何理解你的差距】 reader-guide block renders between
+the delta grid and the source line, teaching the user to interpret
+their own delta without the app itself classifying — three qualitative
+bullets covering 讀數接近或略高於 (肌肉量充足), 讀數明顯低於 (肌肉量偏低
++ 阻力運動 + 蛋白質攝取建議), and the explicit anti-misreading reminder
+that BMR itself has no 「越高越好」 and must be weighed against 體脂率
++ 肌肉量 + 腰圍 integrally. Footer gains a provenance clause citing
+TANITA for the point values and 衞生署〈能量代謝與肌肉量〉 for the
+directional interpretation framing. Qualitative only — no invented
+kcal threshold would survive ADR 0025. Inline JSX comment near the
+guide block cites ADR 0025 so a future grep for 男性 doesn't accidentally
+delete legitimate metric labels (「男性/女性」 are metric labels on static
+reference, permitted by ADR 0025 and NOT caught by SENSITIVE_LABEL_PATTERN).
+Zero storage / wire / grader / AI-prompt / grading-logic change; no new ADR
+(operates inside ADR 0025).
+Full plan: [plan/47-m43-bmr-reader-guide.md](plan/47-m43-bmr-reader-guide.md).
+Value: PRD L23 NORTHSTAR (trustworthy) directly served — a reader who
+sees 「你的 ↓ 380 kcal」 next to the 50-69 歲 female reference now reads
+a bullet that tells them this likely reflects lower muscle mass and
+exactly what to do (resistance exercise + protein), without the app
+having to classify them against standards it refuses (per L13) to apply.
+Traces: NORTHSTAR (trustworthy — a reading becomes a next action, not a mystery) · USER (50+ readers deserve interpretive scaffolding on numbers whose source doesn't publish tier labels) · L51 Exception (self-lookup cards remain opaque to grading; guide teaches, doesn't classify) · ADR 0025 (static reference may carry gender/age-structured interpretive framing from named sources).
+
 ## M42a — Hotfix: no-graded bucket ends fabricated 「全部正常」 claim
 Follow-up to M42 catching a peer-review Finding: `bucketByGrade`
 returned `"normal"` for both (a) 血壓/BMI/內臟脂肪 all measured and
