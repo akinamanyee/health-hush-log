@@ -80,6 +80,30 @@ Concretely:
 
 ## Source change history
 
+- **2026-10-01 (M43)** — BMR self-lookup card gains interpretive
+  scaffolding. BMR is the only self-lookup card whose source (TANITA)
+  publishes point reference values rather than tier bands, so unlike
+  the other five self-lookup cards the cells carry no built-in
+  interpretive label — the reader could see 「你的-380」 and have no
+  sense of what the delta meant for them. `BmrStandardTable` on
+  `/summary` gains two additions: per-cell delta rendering with
+  direction arrow + unit (「你的 ↑ 60 kcal」/「你的 ↓ 330 kcal」/
+  「你的 持平」) and a 【如何理解你的差距】 reader-guide block (three
+  qualitative bullets: 接近參考值 → 肌肉量充足; 明顯低於 → 肌肉量偏低
+  + 阻力運動 + 均衡蛋白質; BMR 本身沒有「越高越好」). Qualitative
+  framing only — no invented kcal threshold. Source footer amended
+  with provenance for the directional interpretation (衞生署〈能量
+  代謝與肌肉量〉) alongside the pre-existing TANITA citation for the
+  point values. Operates squarely within this ADR's principle: static
+  reference material from a named authoritative source may carry
+  gender/age-structured interpretive framing; the app itself still
+  does not classify. Inline JSX comment near the new block cites
+  this ADR so a future grep for 男性 / 女性 doesn't accidentally
+  delete legitimate metric labels (`SENSITIVE_LABEL_PATTERN` catches
+  only 男士/女士/長者/學生). No new ADR needed; no change to
+  `interpretCard`, grader, wire sanitize, badge omission, or
+  grounding gates.
+
 - **2026-09-29 (M40)** — SMI derivation grounded against AWGS 2019.
   Fixes M39 which computed `smi = totalMuscleMass / height²` against
   thresholds (男 <7.0 / 女 <5.7 kg/m²) that AWGS defines using

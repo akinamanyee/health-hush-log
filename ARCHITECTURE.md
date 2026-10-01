@@ -194,7 +194,18 @@ The protection that matters is **what leaves the device**, enforced at the two c
   before Gemini sees it). No extrapolation, ever.
 - Body composition: Asian BMI cut-offs and visceral-fat bands still grade
   deterministically; the rest of the Tanita metrics (BMR / 體內水分 / SMI / 體脂率)
-  use the self-lookup pattern above.
+  use the self-lookup pattern above. Five of the six self-lookup cards (體脂率
+  / 體內水分 / 肌少症指數 / 手握力 / 坐地前伸) carry built-in tier labels
+  (消瘦/標準健康型/⋯, 適當/偏低, 正常/肌少症風險, 優/良/中/弱/差) so the
+  cells communicate position directly. **BMR is the exception**: TANITA
+  publishes BMR as point reference values, not tier bands, so `BmrStandardTable`
+  renders per-cell deltas (「你的 ↑ 60 kcal」/「你的 ↓ 330 kcal」/「你的 持平」,
+  M43) plus a 【如何理解你的差距】 reader guide that teaches qualitative
+  interpretation (接近參考值 → 肌肉量充足; 明顯低於 → 肌肉量偏低 + 阻力運動
+  + 蛋白質; BMR 本身沒有「越高越好」). The guide operates within ADR 0025 —
+  static reference material with gender/age-structured interpretive framing
+  from named sources (TANITA + 衞生署); the app itself still does not
+  classify. No numeric band is published or invented.
 - Re-check interval by tier: normal 2 years, elevated 1 year, hypertensive 6 months,
   crisis → 「即時就醫」 with no calendar entry.
 

@@ -4,6 +4,16 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-10-01 18:30 HKT — Living-docs sync after M43
+
+- `ARCHITECTURE.md` — one targeted sentence extended on the body-composition grading bullet: names the five self-lookup cards whose matrices carry built-in tier labels (消瘦/適當/正常/優-差) and explains BMR as the exception whose source publishes point values rather than tiers, so `BmrStandardTable` renders deltas + the M43 reader guide to carry interpretation. Points to ADR 0025.
+- `adr/0025-static-reference-vs-ai-advice.md` — new source-change-history bullet dated 2026-10-01 (M43) describing the BMR interpretive scaffolding, the per-cell delta rendering, the three-bullet reader guide, the TANITA + 衞生署 attribution split, and the inline-comment protection for 男性/女性 metric labels. Operates within this ADR's principle; no new ADR needed.
+- `DECISIONS.md` — no new index row (M43 is a source-change-history bullet on ADR 0025, not a new ADR).
+- `Product_Roadmap.md` — already carries M43 entry from the delivery turn. No update needed.
+- `CHANGELOG.md` — this entry plus the M43 delivery entry at 18:00. Well under 100 entries; no archive migration needed.
+- `PRD.md` — no deviation this session. M43 served PRD L23 NORTHSTAR (trustworthy — a reader can now interpret their BMR delta) within existing PRD L51 Exception (self-lookup cards + L13's no gender/age collection).
+- Timestamp source: container's NTP-synced system clock via `TZ=Asia/Hong_Kong date -Iseconds` → `2026-10-01T18:30:43+08:00`.
+
 ## 2026-10-01 18:00 HKT — M43 delivered: BMR card gains 「如何理解你的差距」 reader guide
 
 - `src/routes/summary.tsx`:
