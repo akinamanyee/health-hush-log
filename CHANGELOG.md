@@ -4,6 +4,15 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-10-02 16:23 HKT — Living-docs sync after M45
+
+- `ARCHITECTURE.md` — body-composition grading bullet extended with one targeted sentence: every gender-split reference table on `/summary` renders its 「男性 …」/「女性 …」 `<caption>` through the shared `GENDER_CAPTION` constant (M45) at 50+ friendly scale (16px / semibold / foreground contrast / underline). Includes a one-line guardrail telling future contributors to reuse the constant on any new gender-split matrix.
+- `DECISIONS.md` — no new index row. M45 is a 50+ friendly type promotion within existing PRD L57 + ADR 0025, not a new principle.
+- `Product_Roadmap.md` — already carries the M45 entry from the delivery turn. No update needed.
+- `CHANGELOG.md` — this entry plus the M45 delivery entry at 15:29. Well under 100 entries; no archive migration needed.
+- `PRD.md` — no deviation this session. M45 directly serves PRD L57 (Japanese-minimalist, 50+ friendly type / contrast / touch targets). Within PRD intent.
+- Timestamp source: container's NTP-synced system clock via `TZ=Asia/Hong_Kong date -Iseconds` → `2026-10-02T16:23:34+08:00`.
+
 ## 2026-10-02 15:29 HKT — M45 delivered: 自查對照表的 男性／女性 標題強化
 
 - `src/routes/summary.tsx`:

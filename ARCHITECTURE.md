@@ -211,7 +211,13 @@ The protection that matters is **what leaves the device**, enforced at the two c
   + 蛋白質; BMR 本身沒有「越高越好」). The guide operates within ADR 0025 —
   static reference material with gender/age-structured interpretive framing
   from named sources (TANITA + 衞生署); the app itself still does not
-  classify. No numeric band is published or invented.
+  classify. No numeric band is published or invented. Every gender-split
+  reference table on `/summary` renders its 「男性 …」 / 「女性 …」
+  `<caption>` through the shared `GENDER_CAPTION` constant (M45) so the
+  header reads prominently at 50+ friendly scale (16px, semibold,
+  foreground contrast, left-aligned, with an underline rule) and the
+  reader cannot mistake which gender's table they're reading. Any new
+  gender-split reference matrix added later must reuse this constant.
 - Re-check interval by tier: normal 2 years, elevated 1 year, hypertensive 6 months,
   crisis → 「即時就醫」 with no calendar entry.
 
