@@ -131,6 +131,13 @@ const parseKcalValue = parseLeadingNumber;
 const parseHandGripValue = parseLeadingNumber;
 const parseSitReachValue = parseLeadingNumber;
 
+// M45: shared caption style for every gender-split reference table on /summary.
+// Prominent enough that a 50+ reader scanning the disclosure cannot mistake
+// which gender's table they're reading. Add any future gender-split
+// matrix's <caption> with className={GENDER_CAPTION}.
+const GENDER_CAPTION =
+  "mb-3 pb-2 border-b border-border text-left text-base font-semibold text-foreground";
+
 function BodyFatMatrixTable({
   title,
   data,
@@ -143,7 +150,7 @@ function BodyFatMatrixTable({
   return (
     <div className="mt-3 overflow-x-auto">
       <table className="w-full border-collapse text-center">
-        <caption className="mb-2 text-xs text-muted-foreground">{title}</caption>
+        <caption className={GENDER_CAPTION}>{title}</caption>
         <thead>
           <tr className="border-b border-border">
             <th className="p-2 text-left font-medium text-foreground"></th>
@@ -229,7 +236,7 @@ function BmrReferenceTable({
   return (
     <div className="mt-3 overflow-x-auto">
       <table className="w-full border-collapse text-center">
-        <caption className="mb-2 text-xs text-muted-foreground">{title}</caption>
+        <caption className={GENDER_CAPTION}>{title}</caption>
         <thead>
           <tr className="border-b border-border">
             {BMR_AGE_BUCKETS.map((age) => (
@@ -337,7 +344,7 @@ function WaterMatrixTable({
   return (
     <div className="mt-3 overflow-x-auto">
       <table className="w-full border-collapse text-center">
-        <caption className="mb-2 text-xs text-muted-foreground">{title}</caption>
+        <caption className={GENDER_CAPTION}>{title}</caption>
         <thead>
           <tr className="border-b border-border">
             {WATER_TIERS.map((tier) => (
@@ -412,7 +419,7 @@ function SmiMatrixTable({
   return (
     <div className="mt-3 overflow-x-auto">
       <table className="w-full border-collapse text-center">
-        <caption className="mb-2 text-xs text-muted-foreground">{title}</caption>
+        <caption className={GENDER_CAPTION}>{title}</caption>
         <thead>
           <tr className="border-b border-border">
             {SMI_TIERS.map((tier) => (
@@ -512,7 +519,7 @@ function HandGripMatrixTable({
   return (
     <div className="mt-3 overflow-x-auto">
       <table className="w-full border-collapse text-center">
-        <caption className="mb-2 text-xs text-muted-foreground">{title}</caption>
+        <caption className={GENDER_CAPTION}>{title}</caption>
         <thead>
           <tr className="border-b border-border">
             <th className="p-2 text-left font-medium text-foreground"></th>
@@ -605,7 +612,7 @@ function SitReachMatrixTable({
   return (
     <div className="mt-3 overflow-x-auto">
       <table className="w-full border-collapse text-center">
-        <caption className="mb-2 text-xs text-muted-foreground">{title}</caption>
+        <caption className={GENDER_CAPTION}>{title}</caption>
         <thead>
           <tr className="border-b border-border">
             <th className="p-2 text-left font-medium text-foreground"></th>

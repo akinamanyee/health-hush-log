@@ -290,6 +290,38 @@ Value: 50+ readers see where to go next at the exact scroll position
 they've reached after recording, without hunting.
 Traces: NORTHSTAR (trustworthy — the app guides its user) · USER JOURNEY 5 (「can return directly to 「健康紀錄簿」 without replaying the cover」) · USER JOURNEY 7 (path to health summary explicit) · HARD CONSTRAINTS (50+ friendly touch targets, Traditional Chinese, disclaimer footer preserved).
 
+## M45 — 自查對照表的 男性／女性 標題強化，讓用家不會看錯表
+Addresses user-reported risk on `/summary` (iPhone Safari 2026-10-01):
+each of the six self-lookup card disclosures (體脂率, 基礎代謝率, 體內
+水分, 肌少症指數, 手握力, 坐地前伸) renders a 男性 table above a 女性
+table, both introduced by `<caption className="mb-2 text-xs
+text-muted-foreground">` — a 12px muted-grey centred label barely louder
+than a footnote. A 女性 user scanning for the ★-marker could glance at
+the first (male) table, see the ★ landing cell, and interpret the wrong
+row. M45 adds a shared `GENDER_CAPTION` module-level constant at the top
+of `summary.tsx` and swaps all six `<caption>` className strings to use
+it. Rendered effect per caption: size jumps from `text-xs` (12px) to
+`text-base` (16px), weight becomes `font-semibold`, colour moves from
+`text-muted-foreground` to `text-foreground`, alignment becomes
+`text-left`, a thin horizontal rule (`border-b border-border pb-2`)
+appears beneath the header to visually bound the table that follows,
+and margin below bumps from `mb-2` to `mb-3`. Caption content is
+unchanged (「男性 標準脂肪量（%）」 etc. — 繁中 preserved). Typographic-only
+by design — no icons (risk inconsistent rendering across iOS/Android font
+stacks), no colour accents (would pull navy/teal palette into a semantic
+role they don't carry elsewhere), no wrapper component (six inner matrix
+components have different cell renderers — ★ overlay / M43 delta / 2-tier
+/ 5-tier×age; the pattern we share is the caption so we share THAT via
+a string constant). Zero storage / wire / grader / AI-prompt / data /
+UI-flow / CSV / calendar change; no new ADR (operates within PRD L57
+50+ friendly type + ADR 0025 gender labels on static reference).
+Full plan: [plan/49-m45-prominent-gender-headers.md](plan/49-m45-prominent-gender-headers.md).
+Value: PRD L57 directly served — the 50+ reader can't miss which
+table applies to them; the summary's trustworthy-reference promise
+holds end-to-end instead of silently failing at the gender-header
+scanning step.
+Traces: NORTHSTAR (trustworthy — the reader lands on the right row) · USER (50+ readers deserve prominent section headers, not footnote-sized captions) · HARD CONSTRAINT L57 (Japanese-minimalist 50+ friendly type / contrast / touch targets) · ADR 0025 (static reference may carry gender labels; permitted).
+
 ## M44 — 體重 鎖定於主畫面；其他 Tanita 畫面的 OCR 不得覆寫
 Fixes a user-reported bug on `/tanita`: all 7 Tanita screens list
 `weight` in their fields, TANITA shows weight at the top of each
