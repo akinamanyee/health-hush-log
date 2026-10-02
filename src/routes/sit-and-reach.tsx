@@ -10,6 +10,7 @@ export const Route = createFileRoute("/sit-and-reach")({
       { property: "og:title", content: "坐地前伸測試 — 健康紀錄簿" },
       { property: "og:description", content: "記錄坐地前伸測試距離，資料只存在此裝置。" },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://heartcaring.fit/sit-and-reach" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),

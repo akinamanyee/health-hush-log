@@ -4,6 +4,28 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-10-02 17:31 HKT — M46 delivered: Open Graph share-link preview card
+
+- **New static asset:** `public/images/og-cover.jpg` — 護心 logo attached by user, 1254×1254 JPEG, 185KB. Dimensions and file size both inside WhatsApp's limits (≥300×300, ≤600KB) and Facebook's recommended minimums (≥200×200 for summary card). Served by Vite's static handler at `https://heartcaring.fit/images/og-cover.jpg`.
+- `src/routes/__root.tsx`: appended 9 new meta entries after the existing `og:type` entry:
+  - `og:url` → `https://heartcaring.fit/`
+  - `og:site_name` → `健康紀錄簿`
+  - `og:locale` → `zh_HK`
+  - `og:image` → fully qualified absolute URL to the logo
+  - `og:image:width` → `1254` ; `og:image:height` → `1254`
+  - `og:image:alt` → `護心 — 健康紀錄簿標誌`
+  - `twitter:image` → fully qualified absolute URL to the logo
+  - `twitter:image:alt` → `護心 — 健康紀錄簿標誌`
+  - Pre-existing `og:title` / `og:description` / `og:type` / `twitter:card="summary_large_image"` unchanged.
+- `src/routes/blood-pressure.tsx`, `src/routes/grip.tsx`, `src/routes/sit-and-reach.tsx`, `src/routes/tanita.tsx`: each gains one `og:url` entry pointing at its own canonical URL (`/blood-pressure`, `/grip`, `/sit-and-reach`, `/tanita`). Root's `og:image` / `og:site_name` / `og:locale` / `twitter:image` / `twitter:card` inherit automatically via TanStack Start's property-keyed meta merge; per-route `og:title` / `og:description` already override root.
+- Rationale: user asked for a WhatsApp / social media share preview card so a shared heartcaring.fit link shows up in group chats with the 護心 brand mark instead of as a bare link. Previously the root route carried og:title / og:description / og:type / twitter:card but **no og:image** — meaning preview scrapers found no thumbnail and most apps skipped the preview altogether.
+- Design decisions: (1) ship the user's logo as-is (1254×1254 square) rather than compose a 1200×630 branded card with text overlay — the user attached the logo, we honour that choice; richer composition can be M46a if desired later. (2) absolute URLs for every image reference — OG spec requires absolute; relative URLs break on half the scrapers. (3) `og:locale = zh_HK` to tag the Hong Kong Chinese variant correctly (Facebook accepts; others ignore unknown locales gracefully). (4) per-route og:url only for the four module routes that get shared; `/summary` and `/logbook` are per-user-data pages nobody shares externally, so falling back to the root canonical is coherent. (5) one-line description REUSES the existing root description (「本地優先的健康紀錄簿：記錄血壓、身體成份分析儀、手握力與坐地前伸測試讀數，資料只存在您的裝置上。」) — 繁中, under 100 characters, already carries the privacy half; no new copy needed.
+- Untouched: AI prompt layer, grader, SELF_LOOKUP_CARD_NAMES wire sanitize, CARDS_WITH_SELF_LOOKUP badge omission, interpretCard, storage envelope, wire shape, JSON response shape, grounding gates, M42 bucket helper, M43 BMR reader guide, M44 weight-lock, M45 gender captions, every record-page component, every summary-page component, CSV, calendar, favicon.
+- PRD alignment: L13/L47 ✓ (static metadata, no tracking); L48 ✓ (preview advertises app not user data); L50 wire byte-identical ✓ (no new server call; static asset); L51 + Exception ✓; L52 grounded AI ✓; L55 繁中 ✓ (including `og:locale = zh_HK`); L57 ✓ (user-supplied brand mark); OUT OF SCOPE ✓ (no analytics / tracking / sync introduced; OG is advertising, not observation).
+- Verified: `bunx tsc --noEmit` clean, `bun run build` clean. Asset present at `public/images/og-cover.jpg` 185KB.
+- Plan: `plan/50-m46-open-graph-preview-card.md`.
+- Timestamp source: container's NTP-synced system clock via `TZ=Asia/Hong_Kong date -Iseconds` → `2026-10-02T17:31:59+08:00`.
+
 ## 2026-10-02 16:23 HKT — Living-docs sync after M45
 
 - `ARCHITECTURE.md` — body-composition grading bullet extended with one targeted sentence: every gender-split reference table on `/summary` renders its 「男性 …」/「女性 …」 `<caption>` through the shared `GENDER_CAPTION` constant (M45) at 50+ friendly scale (16px / semibold / foreground contrast / underline). Includes a one-line guardrail telling future contributors to reuse the constant on any new gender-split matrix.

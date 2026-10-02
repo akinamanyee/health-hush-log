@@ -10,6 +10,7 @@ export const Route = createFileRoute("/tanita")({
       { property: "og:title", content: "身體成份分析儀 — 健康紀錄簿" },
       { property: "og:description", content: "記錄身體成份分析儀讀數，六屏分類照片讀取或手動輸入。" },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://heartcaring.fit/tanita" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),

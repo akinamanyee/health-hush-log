@@ -10,6 +10,7 @@ export const Route = createFileRoute("/blood-pressure")({
       { property: "og:title", content: "血壓紀錄 — 健康紀錄簿" },
       { property: "og:description", content: "記錄血壓，按參考標準評級並計算複查日期。" },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://heartcaring.fit/blood-pressure" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),

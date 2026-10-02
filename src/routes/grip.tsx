@@ -10,6 +10,7 @@ export const Route = createFileRoute("/grip")({
       { property: "og:title", content: "手握力紀錄 — 健康紀錄簿" },
       { property: "og:description", content: "記錄手握力讀數，資料只存在此裝置。" },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://heartcaring.fit/grip" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),

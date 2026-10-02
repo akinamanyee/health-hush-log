@@ -290,6 +290,32 @@ Value: 50+ readers see where to go next at the exact scroll position
 they've reached after recording, without hunting.
 Traces: NORTHSTAR (trustworthy — the app guides its user) · USER JOURNEY 5 (「can return directly to 「健康紀錄簿」 without replaying the cover」) · USER JOURNEY 7 (path to health summary explicit) · HARD CONSTRAINTS (50+ friendly touch targets, Traditional Chinese, disclaimer footer preserved).
 
+## M46 — Open Graph 分享預覽卡片
+When someone shares a `https://heartcaring.fit/...` link in WhatsApp,
+Facebook, Line, Twitter, iMessage or any OG-aware surface, the
+recipient previously saw a bare link with no preview card. M46 ships
+a static 護心 logo (1254×1254 JPEG, 185KB) at
+`/public/images/og-cover.jpg` and adds 9 new OG/Twitter meta entries
+to `src/routes/__root.tsx` (og:url, og:site_name, og:locale=zh_HK,
+og:image + width/height/alt, twitter:image + alt), plus one `og:url`
+override per module route (`/blood-pressure`, `/grip`,
+`/sit-and-reach`, `/tanita`). Root's og:image / og:site_name /
+og:locale / twitter:card / twitter:image inherit automatically on
+every page via TanStack Start's property-keyed meta merge; per-route
+og:title / og:description already override the root defaults. The
+one-liner reuses the existing root description — 繁中, under 100
+characters, already carries the privacy half 「資料只存在您的裝置
+上」. Zero storage / wire / grader / AI-prompt / UI change; no new
+ADR (OG tags are static HTML meta, not a new principle); no
+analytics or tracking pixels (OG is advertising, not observation).
+Full plan: [plan/50-m46-open-graph-preview-card.md](plan/50-m46-open-graph-preview-card.md).
+Value: a shared heartcaring.fit link now shows up in group chats
+with the 護心 brand mark + 繁中 title + plain-language tagline,
+communicating "trustworthy, local-only health logbook" in two
+seconds. Promotion unlocked without touching anything the recipient
+would see in-app.
+Traces: PROMOTION (share-link preview is upstream of USER JOURNEY) · HARD CONSTRAINTS L55 (繁中 preview; og:locale=zh_HK) · OUT OF SCOPE preserved (no tracking introduced).
+
 ## M45 — 自查對照表的 男性／女性 標題強化，讓用家不會看錯表
 Addresses user-reported risk on `/summary` (iPhone Safari 2026-10-01):
 each of the six self-lookup card disclosures (體脂率, 基礎代謝率, 體內
