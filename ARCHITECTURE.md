@@ -186,6 +186,19 @@ The protection that matters is **what leaves the device**, enforced at the two c
   「圖片讀取暫時未能連線」), preserving PRD L52's failed-generation real-error promise.
 - The AI credential is read inside the handler from the server environment; the browser
   never receives it.
+- **Share-link preview (M46).** `src/routes/__root.tsx` carries Open Graph and Twitter
+  Card meta tags (og:title, og:description, og:type, og:url, og:site_name, og:locale=zh_HK,
+  og:image + width/height/alt, twitter:card=summary_large_image, twitter:image + alt) so
+  WhatsApp / Facebook / Line / Twitter / iMessage render a rich preview card when a
+  heartcaring.fit link is shared. The preview image is `public/images/og-cover.jpg` —
+  a 1254×1254 護心 logo served as a static asset at `/images/og-cover.jpg`. Four module
+  routes (`/blood-pressure`, `/grip`, `/sit-and-reach`, `/tanita`) override og:title /
+  og:description / og:url for per-page accuracy; root's og:image / og:site_name /
+  og:locale / twitter:card / twitter:image inherit via TanStack Start's property-keyed
+  meta merge. **OG tags carry no per-user data, no tracking pixels, no analytics
+  beacons** — the preview advertises the app, not any user. The scraper fetches static
+  HTML + a static image; the Cloud Run server logs the preview-scrape request the same
+  way it logs any page view, which carries nothing about who later taps the link.
 
 ## Grading rules encoded in `charts.ts` / `grade.ts`
 

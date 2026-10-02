@@ -4,6 +4,15 @@ What changed, when, and why. Newest first. Times are Hong Kong Time (UTC+8).
 Once this file passes ~100 entries, the older half moves to `changelog-archive.md`
 (append-only). Entries here are written when the change is made, not reconstructed later.
 
+## 2026-10-02 17:41 HKT — Living-docs sync after M46
+
+- `ARCHITECTURE.md` — Access-and-privacy-model section gains a new bullet describing M46's share-link preview: names the 10 OG + Twitter Card tags, the static asset path (`public/images/og-cover.jpg`), the four module-route og:url overrides, the inheritance model via TanStack Start's property-keyed meta merge, and the explicit **「OG tags carry no per-user data, no tracking pixels, no analytics beacons」** promise so a future contributor doesn't accidentally add analytics via a share-preview tag.
+- `DECISIONS.md` — no new index row. M46 is static HTML meta + a static image asset; no new app principle warranting an ADR.
+- `Product_Roadmap.md` — already carries M46 entry from the delivery turn. No update needed.
+- `CHANGELOG.md` — this entry plus the M46 delivery entry at 17:31. Well under 100 entries; no archive migration needed.
+- `PRD.md` — no deviation this session. M46 serves the (previously-unaddressed) share-promotion surface without introducing anything the PRD lists as OUT OF SCOPE (no accounts / no tracking / no sync). The `og:locale = zh_HK` + 繁中 preview copy strengthen PRD L55 Traditional Chinese throughout.
+- Timestamp source: container's NTP-synced system clock via `TZ=Asia/Hong_Kong date -Iseconds` → `2026-10-02T17:41:10+08:00`.
+
 ## 2026-10-02 17:31 HKT — M46 delivered: Open Graph share-link preview card
 
 - **New static asset:** `public/images/og-cover.jpg` — 護心 logo attached by user, 1254×1254 JPEG, 185KB. Dimensions and file size both inside WhatsApp's limits (≥300×300, ≤600KB) and Facebook's recommended minimums (≥200×200 for summary card). Served by Vite's static handler at `https://heartcaring.fit/images/og-cover.jpg`.
